@@ -123,7 +123,7 @@ module List :
 	 [Invalid_index] is the index is outside of [l] bounds. *)
 
 	val sort : ?cmp:('a -> 'a -> int) -> 'a list -> 'a list
-	(** 
+	(** sort the list using optional comparator (by default [compare]). *)
 
 	(** The following functions have been improved so all of them are
 	 tail-recursives. They have also been modified so they're no longer

@@ -103,7 +103,6 @@ let shuffle rl =
 	rl := List.shuffle !rl
 
 let copy_enum ~dst ~src = dst := List.of_enum src
-let append_enum rl e = rl := List.append_enum !rl e
 let enum rl = List.enum !rl
 let of_enum e = ref (List.of_enum e)
 

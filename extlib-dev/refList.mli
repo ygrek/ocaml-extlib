@@ -61,9 +61,6 @@ val of_enum : 'a Enum.t -> 'a t
 val enum : 'a t -> 'a Enum.t
 (** returns an enumeration of current elements in the ref list *)
 
-val append_enum : 'a t -> 'a Enum.t -> unit
-(** appends the contents of the enumeration to the end of the ref list *)
-
 val add : 'a t -> 'a -> unit
 (** adds an element at the end - O(n) *)
 
