@@ -3,6 +3,8 @@ exception Invalid_string
 module String :
   sig
 
+	val end_with : string -> string -> bool
+
 	(* split the given string among each part of the
 	   given separator.
 	   raise Invalid_string if the separator is not found *)
