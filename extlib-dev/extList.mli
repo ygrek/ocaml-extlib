@@ -1,5 +1,7 @@
-	
-module List : sig
+(** Extra functions over lists, plus the list functions from the OCaml Standard Library *)
+  
+module List :
+    sig
 
 	exception Empty_list
 	exception Invalid_index of int

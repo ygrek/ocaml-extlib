@@ -1,4 +1,4 @@
-exception ValNone
+exception NoValue
 
 let may f = function
 	| None -> ()
@@ -21,5 +21,5 @@ let is_none = function
 	| _ -> false
 
 let get = function
-	| None -> raise ValNone
+	| None -> raise NoValue
 	| Some v -> v

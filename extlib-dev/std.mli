@@ -1,3 +1,4 @@
+(** Basic functions similar to those in Pervasives in the standard library *)
 
 val unit : 'a -> unit
 

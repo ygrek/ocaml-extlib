@@ -17,9 +17,16 @@
  *
  *)
 
+(** A lazy implementation of abstracts enumerators *)
+
+(** {6 Types} *)
+
 type 'a t
+(** The type of enumerations *)
 
 exception No_more_elements
+
+(** {6 Eager operations} *)
 
 val make : next:(unit -> 'a) -> count:(unit -> int) -> clone:(unit -> 'a t) -> 'a t
 
@@ -43,8 +50,11 @@ val fold2 : ('a -> 'b -> 'c -> 'c) -> 'c -> 'a t -> 'b t -> 'c
 
 val fold2i : (int -> 'a -> 'b -> 'c -> 'c) -> 'c -> 'a t -> 'b t -> 'c
 
-(* find can be used several times since it consumes the enumeration *)
-val find : ('a -> bool) -> 'a t -> 'a (* raise Not_found *)
+val find : ('a -> bool) -> 'a t -> 'a
+(** [find f x] can be used several times since it consumes the enumeration.
+    Raises [Not_found] if the predicate [f] is not true for any value in
+    the enumeration.
+*)
 
 val force : 'a t -> unit
 
@@ -56,7 +66,11 @@ val peek : 'a t -> 'a option
 
 val get : 'a t -> 'a option
 
-(* Lazy operations, cost O(1) *)
+(** {6 Lazy operations}
+
+    All lazy operations run in O(1) time
+*)
+
 
 val map : ('a -> 'b) -> 'a t -> 'b t
 
@@ -74,14 +88,14 @@ val append : 'a t -> 'a t -> 'a t
 
 val concat : 'a t t -> 'a t
 
-(* Depending of the underlaying structure that is implementating the Enum
-   functions, the count operation can be costly, and sometimes will need
-   a intermediate list to be built and all operations applied. Use it with
-   care. *)
 val count : 'a t -> int
+(** Depending of the underlaying structure that is implementating the Enum
+    functions, the count operation can be costly, and sometimes will need
+    a intermediate list to be built and all operations applied. Use it with
+    care. *)
 
-(* For users worried about the speed of count, theses can call the fast_count
-   function that will give an hint about count implementation. Basicly, if
-   the enum has been created with [make] or [init] if [force] has been called
-   on it, then fast_count will return true. *)
 val fast_count : 'a t -> bool
+(** For users worried about the speed of count, theses can call the fast_count
+    function that will give an hint about count implementation. Basicly, if
+    the enum has been created with [make] or [init] if [force] has been called
+    on it, then fast_count will return true. *)
