@@ -73,6 +73,7 @@ let set t x =
 		let b = bcreate (pos+1) in
 		bblit t.data 0 b 0 size;
 		bfill b size (pos - size + 1) 0;
+		t.len <- pos + 1;
 		t.data <- b;
 	end;
 	bset t.data pos ((bget t.data pos) lor (1 lsl delta))
@@ -91,6 +92,7 @@ let toggle t x =
 		let b = bcreate (pos+1) in
 		bblit t.data 0 b 0 size;
 		bfill b size (pos - size + 1) 0;
+		t.len <- pos + 1;
 		t.data <- b;
 	end;
 	bset t.data pos ((bget t.data pos) lxor (1 lsl delta))
@@ -212,7 +214,8 @@ let unite t t' =
 	if size < size' then begin
 		let b = bcreate size' in
 		unite_loop (size'- 1);
-		t.data <- b
+		t.len <- size';
+		t.data <- b;
 	end else
 		unite_loop (size - 1)
 
@@ -230,6 +233,7 @@ let differentiate_sym t t' =
 	if size < size' then begin
 		let b = bcreate size' in
 		diff_sym_loop (size'- 1);
-		t.data <- b
+		t.len <- size';
+		t.data <- b;
 	end else
 		diff_sym_loop (size - 1)
