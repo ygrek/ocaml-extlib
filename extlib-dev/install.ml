@@ -31,6 +31,7 @@ let modules = [
 	"extString";
 	"global";
 	"option";
+	"pMap";
 	"refList";
 	"std";
 	"uChar";
@@ -78,54 +79,75 @@ let remove file =
 		_ -> prerr_endline ("Warning : failed to delete "^file)
 
 let install() =
-	printf "ExtLib installation program v1.0\n(c)2003 Nicolas Cannasse\n";
-	printf "Choose one of the following :\n1- Bytecode installation only\n2- Native installation only\n3- Both Native and Bytecode installation\n> ";
-	let byte, native = (match read_line() with
-		| "1" -> true, false
-		| "2" -> false, true
-		| "3" -> true, true
-		| _ -> failwith "Invalid choice, exit.")
-	in
-	printf "Choose installation directory :\n> ";
-	let dest = complete_path (read_line()) in
-	(try
-		close_out (open_out (dest^"test.file"));
-		Sys.remove (dest^"test.file");
-	with
-		_ -> failwith ("Directory "^dest^" does not exists or cannot be written."));
-	printf "Do you want to generate ocamldoc documentation (Y/N) ?\n> ";
-	let doc = (match read_line() with
-		| "y" | "Y" -> true
-		| "n" | "N" -> false
-		| _ -> failwith "Invalid choice, exit.");
-	in
-	if doc && not (Sys.file_exists "extlib-doc") then run (sprintf "mkdir %sextlib-doc" dest);
+	let autodir = ref None in
+	let autodoc = ref false in
+	let autobyte = ref false in
+	let autonative = ref false in
+	let usage = "ExtLib installation program v1.1\n(c)2003 Nicolas Cannasse" in
+	Arg.parse [
+		("-d", Arg.String (fun s -> autodir := Some s) , "<dir> : install in target directory");
+		("-b", Arg.Unit (fun () -> autobyte := true) , ": byte code installation");
+		("-n", Arg.Unit (fun () -> autonative := true) , ": native code installation");
+		("-doc", Arg.Unit (fun () -> autodoc := true) , ": documentation installation");
+	] (fun s -> raise (Arg.Bad s)) usage;
+	let install_dir = (
+		match !autodir with
+		| Some dir ->
+			if not !autobyte && not !autonative && not !autodoc then failwith "Nothing to do.";
+			complete_path dir
+		| None -> 
+			printf "Choose one of the following :\n1- Bytecode installation only\n2- Native installation only\n3- Both Native and Bytecode installation\n> ";
+			let byte, native = (match read_line() with
+				| "1" -> true, false
+				| "2" -> false, true
+				| "3" -> true, true
+				| _ -> failwith "Invalid choice, exit.")
+			in
+			printf "Choose installation directory :\n> ";
+			let dest = complete_path (read_line()) in
+			(try
+				close_out (open_out (dest^"test.file"));
+				Sys.remove (dest^"test.file");
+			with
+				_ -> failwith ("Directory "^dest^" does not exists or cannot be written."));
+			printf "Do you want to generate ocamldoc documentation (Y/N) ?\n> ";
+			let doc = (match read_line() with
+				| "y" | "Y" -> true
+				| "n" | "N" -> false
+				| _ -> failwith "Invalid choice, exit.") in
+			autodoc := doc;
+			autobyte := byte;
+			autonative := native;
+			dest
+	) in
+	let doc_dir = sprintf "%sextlib-doc" install_dir in
+	if !autodoc && not (Sys.file_exists doc_dir) then run (sprintf "mkdir %s" doc_dir);
 	run (sprintf "ocamlc -c %s" (m_list ".mli"));
-	if byte then begin
+	if !autobyte then begin
 		List.iter (fun m -> run (sprintf "ocamlc -c %s.ml" m)) modules;
 		run (sprintf "ocamlc -a -o extLib.cma %s extLib.ml" (m_list ".cmo"));
 		List.iter (fun m -> remove (m^".cmo")) modules;
 		remove "extLib.cmo";
 	end;
-	if native then begin
+	if !autonative then begin
 		List.iter (fun m -> run (sprintf "ocamlopt -c %s.ml" m)) modules;
 		run (sprintf "ocamlopt -a -o extLib.cmxa %s extLib.ml" (m_list ".cmx"));
 		List.iter (fun m -> remove (m^".cmx"); remove (m^obj_ext)) modules;
 		remove "extLib.cmx";
 		remove ("extLib"^obj_ext);
 	end;
-	if doc then begin 
-		run (sprintf "ocamldoc -html -d %sextlib-doc %s" dest (m_list ".mli"));
+	if !autodoc then begin 
+		run (sprintf "ocamldoc -html -d %s %s" doc_dir (m_list ".mli"));
 		run ((match path_type with
-				| PathDos -> sprintf "%s odoc_style.css %sextlib-doc\\style.css";
-				| PathUnix -> sprintf "%s odoc_style.css %sextlib-doc/style.css") cp_cmd dest);
+				| PathDos -> sprintf "%s odoc_style.css %s\\style.css";
+				| PathUnix -> sprintf "%s odoc_style.css %s/style.css") cp_cmd doc_dir);
 	end;
-	List.iter (fun m -> copy (m^".cmi") dest) modules;
-	copy "extLib.cmi" dest;
-	if byte then copy "extLib.cma" dest;
-	if native then begin
-		copy "extLib.cmxa" dest;
-		copy ("extLib"^lib_ext) dest;
+	List.iter (fun m -> copy (m^".cmi") install_dir) modules;
+	copy "extLib.cmi" install_dir;
+	if !autobyte then copy "extLib.cma" install_dir;
+	if !autonative then begin
+		copy "extLib.cmxa" install_dir;
+		copy ("extLib"^lib_ext) install_dir;
 	end
 
 ;;
