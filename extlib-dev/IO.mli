@@ -65,6 +65,7 @@ val output_channel : out_channel -> unit stdout
 val input_enum : 'a Enum.t -> ('a, 'a Enum.t) input
 val output_enum : unit -> ('a, 'a Enum.t, 'a Enum.t) output
 
+val pipe : unit -> ('a, 'a list) input * ('a, 'a list,'a list) output
 
 exception Overflow of string
 

@@ -219,6 +219,69 @@ let output_enum() =
 		out_pos = (fun () -> DynArray.length elts);
 	}
 
+type 'a queue = {
+	cur : 'a;
+	mutable next : 'a queue;
+}
+
+let pipe() =
+	let readed = ref 0 in
+	let written = ref 0 in
+	let n = ref 0 in
+	let empty = ((Obj.magic None) : 'a queue) in
+	let head = ref empty in
+	let tail = ref empty in
+	let get() =	
+		let q = !head in
+		head := q.next;
+		incr readed;		
+		q.cur
+	in
+	let rec nget n = 
+		if n = 0 then [] else (get()) :: nget (n-1)
+	in
+	let put x =
+		let q = { cur = x; next = empty } in
+		if !n = 0 then begin
+			head := q;
+			tail := q;
+		end else begin
+			(!tail).next <- q;
+			tail := q;
+		end;
+		incr n;
+		incr written;
+	in
+	let input = {
+		in_read = (fun () -> 
+			if !n = 0 then raise No_more_input;
+			n := !n - 1;
+			get()
+		);
+		in_nread = (fun nr ->
+			if !n < nr then raise No_more_input;
+			n := !n - nr;
+			nget nr
+		);
+		in_pos = (fun () -> !readed);
+		in_close = (fun () -> ());
+		in_available = (fun () -> Some !n);
+	} in
+	let output = {
+		out_write = (fun x -> put x);
+		out_nwrite = (fun xl -> List.iter put xl);
+		out_close = (fun () -> 
+			let ret = ((Obj.magic !head) : 'a list) in
+			head := empty;
+			tail := empty;
+			n := 0;
+			ret
+		);
+		out_flush = (fun () -> ());
+		out_pos = (fun () -> !written);
+	} in
+	input , output
+
 (* -------------------------------------------------------------- *)
 (* STDIO APIS *)
 
