@@ -36,7 +36,7 @@ let _duplicate = function
 			| [] -> dst
 			| h :: t -> 
 				let r = [ h ] in
-				Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
+				_setcdr dst r;
 				loop r t
 		in
         let r = [ h ] in
@@ -72,10 +72,10 @@ let append l1 l2 =
 	| [] -> l2
 	| h :: t ->
 		let rec loop accu = function
-		| [] -> Obj.set_field (Obj.repr accu) 1 (Obj.repr l2)
+		| [] -> _setcdr accu l2
 		| h :: t ->
 			let cell = [h] in
-			Obj.set_field (Obj.repr accu) 1 (Obj.repr cell);
+			_setcdr accu cell;
 			loop cell t
 		in
 		let r = [h] in
@@ -112,7 +112,7 @@ let map f = function
 		| [] -> ()
 		| h :: t ->
 			let r = [f h] in
-			Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
+			_setcdr dst r;
 			loop r t
 		in
 		let r = [f h] in
@@ -155,7 +155,7 @@ let map2 f l1 l2 =
 			| [], [] -> ()
 			| h1 :: t1, h2 :: t2 ->
 				let r = [ f h1 h2 ] in
-				Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
+				_setcdr dst r;
 				loop r t1 t2
 			| _ -> raise (Different_list_size "map2")
 		in
@@ -410,7 +410,7 @@ let rec init size f =
 		let rec loop dst n =
 			if n < size then
 				let r = [ f n ] in
-				Obj.magic (Obj.repr dst) 1 (Obj.repr r);
+				_setcdr dst r;
 				loop r (n+1)
 		in
 		let r = [ f 0 ] in
@@ -424,7 +424,7 @@ let mapi f = function
 			| [] -> ()
 			| h :: t -> 
 				let r = [ f n h ] in
-				Obj.magic (Obj.repr dst) 1 (Obj.repr h);
+				_setcdr dst r;
 				loop r (n+1) t
 		in	
         let r = [ f 0 h ] in
@@ -480,10 +480,11 @@ let remove l x =
 			let rec loop dst = function
 				| [] -> raise Not_found
 				| h :: t ->
-					if x = h then Obj.set_field (Obj.repr dst) 1 (Obj.repr t)
+					if x = h then 
+						_setcdr dst t
 					else
 						let r = [ h ] in
-						Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
+						_setcdr dst r;
 						loop r t
 			in
 			let r = [ h ] in
@@ -508,7 +509,7 @@ let rec remove_all l x =
 						loop dst t
 					else
 						let r = [ h ] in
-						Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
+						_setcdr dst r;
 						loop r t
 			in
 			let r = [ h ] in
@@ -546,7 +547,7 @@ let of_enum e =
 	let dum = [ Obj.magic () ] in
 	let _ = Enum.fold (fun x acc ->
 		let r = [ x ] in
-		Obj.set_field (Obj.repr acc) 1 (Obj.repr r);
+		_setcdr acc r;
 		r) dum e in
 	tl dum
 
