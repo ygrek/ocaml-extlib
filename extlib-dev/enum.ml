@@ -38,6 +38,8 @@ let count t =
 let has_more t =
 	t.count() > 0
 
+let next t = t.next()
+
 let iter f t =
 	let rec loop () =
 		f (t.next());
@@ -45,6 +47,16 @@ let iter f t =
 	in
 	try
 		loop();
+	with
+		No_more_elements -> ()
+
+let iteri f t =
+	let rec loop idx =
+		f idx (t.next());
+		loop (idx+1);
+	in
+	try
+		loop 0;
 	with
 		No_more_elements -> ()
 
@@ -72,6 +84,13 @@ let map f t =
 	{
 		count = t.count;
 		next = (fun () -> f (t.next()));
+	}
+
+let mapi f t =
+    let idx = ref 0 in
+	{
+		count = t.count;
+		next = (fun () -> let i = !idx in incr idx; f i (t.next()));
 	}
 
 let force t =
@@ -143,3 +162,4 @@ let concat t =
 	in
 	tc.next <- concat_next;
 	tc
+

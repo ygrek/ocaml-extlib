@@ -28,7 +28,11 @@ val count : 'a t -> int
 
 val has_more : 'a t -> bool
 
+val next : 'a t -> 'a
+
 val iter : ('a -> unit) -> 'a t -> unit
+
+val iteri : (int -> 'a -> unit) -> 'a t -> unit
 
 val fold : ('a -> 'b -> 'b) -> 'b -> 'a t -> 'b
 
@@ -39,6 +43,8 @@ val force : 'a t -> unit
 (* Lazy operations, cost O(1) *)
 
 val map : ('a -> 'b) -> 'a t -> 'b t
+
+val mapi : (int -> 'a -> 'b) -> 'a t -> 'b t
 
 val filter : ('a -> bool) -> 'a t -> 'a t
 
