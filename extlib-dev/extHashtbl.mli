@@ -4,6 +4,8 @@ module Hashtbl :
 
 	type ('a,'b) t = ('a,'b) Hashtbl.t
 
+	val exists : ('a,'b) t -> bool
+
 	(* return all the keys of an Hashtable
 	   if the key is several time in the Hashtable, the list will
 	   contain it that many times *)
