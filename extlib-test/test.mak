@@ -11,6 +11,8 @@ SOURCES:=\
 	test_ExtList.ml \
 	test_jh_ExtString.ml \
 	test_ExtString.ml \
+	test_js_DynArray_001.ml \
+	test_DynArray.ml \
 	test_main.ml \
 
 EXTLIB_DIR:=../extlib-dev

@@ -24,4 +24,5 @@ let main =
   Test_BitSet.test ();
   Test_ExtString.test ();
   Test_ExtList.test ();
+  Test_DynArray.test ();
   Util.log "\nAll tests completed."
