@@ -99,7 +99,7 @@ let install() =
 		| "n" | "N" -> false
 		| _ -> failwith "Invalid choice, exit.");
 	in
-	if doc && not (Sys.file_exists "doc") then run (sprintf "mkdir %sdoc" dest);
+	if doc && not (Sys.file_exists "extlib-doc") then run (sprintf "mkdir %sextlib-doc" dest);
 	run (sprintf "ocamlc -c %s" (m_list ".mli"));
 	if byte then begin
 		List.iter (fun m -> run (sprintf "ocamlc -c %s.ml" m)) modules;
@@ -115,10 +115,10 @@ let install() =
 		remove ("extLib"^obj_ext);
 	end;
 	if doc then begin 
-		run (sprintf "ocamldoc -html -d %sdoc %s" dest (m_list ".mli"));
+		run (sprintf "ocamldoc -html -d %sextlib-doc %s" dest (m_list ".mli"));
 		run ((match path_type with
-				| PathDos -> sprintf "%s odoc_style.css %sdoc\\style.css";
-				| PathUnix -> sprintf "%s odoc_style.css %sdoc/style.css") cp_cmd dest);
+				| PathDos -> sprintf "%s odoc_style.css %sextlib-doc\\style.css";
+				| PathUnix -> sprintf "%s odoc_style.css %sextlib-doc/style.css") cp_cmd dest);
 	end;
 	List.iter (fun m -> copy (m^".cmi") dest) modules;
 	copy "extLib.cmi" dest;
