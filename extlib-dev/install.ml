@@ -78,6 +78,17 @@ let remove file =
 	with
 		_ -> prerr_endline ("Warning : failed to delete "^file)
 
+(** Do we have findlib? *)
+let is_findlib () = 
+  printf "Looking for findlib...\n";
+  let findlib = Sys.command "ocamlfind printconf" = 0 in
+  printf "Done.\n";
+  if findlib then
+    printf "We have findlib.\n"
+  else
+    printf "We do not have findlib.\n";
+  findlib
+
 let install() =
 	let autodir = ref None in
 	let autodoc = ref false in
@@ -90,6 +101,7 @@ let install() =
 		("-n", Arg.Unit (fun () -> autonative := true) , ": native code installation");
 		("-doc", Arg.Unit (fun () -> autodoc := true) , ": documentation installation");
 	] (fun s -> raise (Arg.Bad s)) usage;
+	let findlib = is_findlib () in
 	let install_dir = (
 		match !autodir with
 		| Some dir ->
@@ -103,13 +115,17 @@ let install() =
 				| "3" -> true, true
 				| _ -> failwith "Invalid choice, exit.")
 			in
-			printf "Choose installation directory :\n> ";
-			let dest = complete_path (read_line()) in
-			(try
-				close_out (open_out (dest^"test.file"));
-				Sys.remove (dest^"test.file");
-			with
-				_ -> failwith ("Directory "^dest^" does not exists or cannot be written."));
+			let dest = 
+			  if not findlib then begin
+			    printf "Choose installation directory :\n> ";
+			    let dest = complete_path (read_line()) in
+			    (try
+			      close_out (open_out (dest^"test.file"));
+			      Sys.remove (dest^"test.file");
+			    with
+			      _ -> failwith ("Directory "^dest^" does not exists or cannot be written."));
+			    dest;
+			  end else "" in
 			printf "Do you want to generate ocamldoc documentation (Y/N) ?\n> ";
 			let doc = (match read_line() with
 				| "y" | "Y" -> true
@@ -142,14 +158,26 @@ let install() =
 				| PathDos -> sprintf "%s odoc_style.css %s\\style.css";
 				| PathUnix -> sprintf "%s odoc_style.css %s/style.css") cp_cmd doc_dir);
 	end;
-	List.iter (fun m -> copy (m^".cmi") install_dir) modules;
-	copy "extLib.cmi" install_dir;
-	if !autobyte then copy "extLib.cma" install_dir;
+	let install_files = Buffer.create 0 in
+	let install = 
+	  if findlib then 
+	    fun filename -> 
+	      Buffer.add_string install_files filename;
+	      Buffer.add_char install_files ' ';
+	  else
+	    fun filename -> copy filename install_dir in
+	List.iter (fun m -> install (m^".cmi")) modules;
+	install "extLib.cmi";
+	if !autobyte then install "extLib.cma";
 	if !autonative then begin
-		copy "extLib.cmxa" install_dir;
-		copy ("extLib"^lib_ext) install_dir;
+	  install "extLib.cmxa";
+	  install ("extLib"^lib_ext);
+	end;
+	if findlib then begin
+	  run (sprintf "%s META.txt META" cp_cmd);
+	  let install_files = Buffer.contents install_files in
+	  run (sprintf "ocamlfind install extlib %s META" install_files);
 	end
-
 ;;
 try 
 	install();
