@@ -37,4 +37,6 @@ module List = ExtList.List
 module String = ExtString.String
 module Hashtbl = ExtHashtbl.Hashtbl
 
+exception Invalid_string = ExtString.Invalid_string
+
 include Std

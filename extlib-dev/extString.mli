@@ -20,12 +20,12 @@
 
 (** Additional functions for string manipulations. *)
 
+exception Invalid_string
+
 module String :
   sig
 
 	(** {6 New Functions} *)
-
-	exception Invalid_string
 
 	val init : int -> (int -> char) -> string
 	(** [init l f] returns the string of length [l] with the chars
