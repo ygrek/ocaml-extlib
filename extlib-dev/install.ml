@@ -23,13 +23,14 @@ type path =
 	| PathDos
 
 let modules = [
-	"enum";
 	"bitSet";
 	"dynArray";
+	"enum";
 	"extHashtbl";
 	"extList";
 	"extString";
 	"global";
+	"IO";
 	"option";
 	"pMap";
 	"refList";
