@@ -1,4 +1,4 @@
-(* $Id: uTF8.mli,v 1.3 2003-07-02 03:00:26 yori Exp $ *)
+(* $Id: uTF8.mli,v 1.4 2003-07-02 03:19:44 yori Exp $ *)
 (* Copyright 2003 Yamagata Yoriyuki. *)
 
 open UChar
@@ -108,6 +108,6 @@ module Buf : sig
   (* Add a UTF-8 string to the buffer. *)
   val add_string : buf -> t -> unit
   (* add_buffer b1 b2 : adds the contents of [b2] to [b1].
-   * the contents of [b2] is not changed. *)
+   * The contents of [b2] is not changed. *)
   val add_buffer : buf -> buf -> unit
 end

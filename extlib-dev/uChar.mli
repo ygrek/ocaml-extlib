@@ -17,18 +17,18 @@ val of_char : char -> t
  * raise Out_of_range *)
 val code : t -> int
 
-(* code n : returns the Unicode character with the code number [n]
+(* code n : returns the Unicode character with the code number [n].
  * If n exceeded 31-bit value, raises invalid_arg *)
 val chr : int -> t
 
 (* uint_code u : returns the Unicode code number of [u].
  * The returned int is unsigned, that is, on 32-bits platforms,
- * the signed bit is used for storing the 31-th bit of the code number. *)
+ * the sign bit is used for storing the 31-th bit of the code number. *)
 val uint_code : t -> int
 
 (* chr_of_uint n : returns the Unicode character of the code number [n].
- * The [n] is interpreted as unsigned, that is, on 32-bits platforms,
- * the signed bit is treated as the 31-th bit of the code number. *)
+ * [n] is interpreted as unsigned, that is, on 32-bits platforms,
+ * the sign bit is treated as the 31-th bit of the code number. *)
 val chr_of_uint : int -> t
 
 (* Code point comparison. *)
