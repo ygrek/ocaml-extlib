@@ -35,6 +35,10 @@ val map : ('a -> 'b) -> 'a option -> 'b option
 val default : 'a -> 'a option -> 'a
 (** [default x (Some v)] returns [v] and [default x None] returns [x]. *)
 
+val map_default : ('a -> 'b) -> 'b -> 'a option -> 'b
+(** [map_default f x (Some v)] returns [f v] and [map_default f x None]
+	returns [x]. *)
+
 val is_none : 'a option -> bool
 (** [is_none None] returns [true] or [false] either. *)
 
