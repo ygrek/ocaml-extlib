@@ -23,6 +23,13 @@ exception Invalid_string
 
 include String
 
+let starts_with str p =
+	let len = length p in
+	if length str < len then 
+		false
+	else
+		sub str 0 len = p
+
 let ends_with s e =
 	let el = length e in
 	let sl = length s in

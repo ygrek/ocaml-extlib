@@ -64,6 +64,9 @@ module String :
 	val ends_with : string -> string -> bool
 	(** [ends_with s x] returns true if the string [s] is ending with [x]. *)
 
+	val starts_with : string -> string -> bool
+	(** [starts_with s x] return true if [s] is starting with [x]. *)
+
 	val enum : string -> char Enum.t
 	(** Returns an enumeration of the characters of a string.*)
 
