@@ -1,4 +1,6 @@
 
+val unit : 'a -> unit
+
 val input_lines : in_channel -> string Enum.t
 val input_chars : in_channel -> char Enum.t
 

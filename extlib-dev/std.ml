@@ -1,4 +1,6 @@
 
+let unit _ = ()
+
 let input_lines ch =
 	Enum.from (fun () -> try input_line ch with End_of_file -> raise Enum.No_more_elements)
 
