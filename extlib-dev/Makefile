@@ -5,7 +5,7 @@ opt:
 	ocamake -a -o ext-lib.cmxa -opt *.ml *.mli
 
 clean:
-	rm -rf dochtml
+	rm -rf dochtml ext-lib.odoc
 	ocamake -a -o ext-lib.cma *.ml *.mli -clean
 	ocamake -a -o ext-lib.cmxa -opt *.ml *.mli -clean
 
