@@ -189,16 +189,16 @@ let compile_tests build_type all_modules all_tests =
 
 
 
-let link_tests build_type all_modules all_tests =
+let link_tests ~exe_name build_type all_modules all_tests =
   let (obj_ext,lib_ext) = 
     match build_type with
       `CompileByte -> (".cmo",".cma")
     | `CompileNative -> (".cmx", ".cmxa") in
   (* Individual tests *)
   let linkstring =
-    P.sprintf "%s -I %s -I %s -I %s -o extlib_test extLib%s util%s"
+    P.sprintf "%s -I %s -I %s -I %s -o %s extLib%s util%s"
       (ocaml_cmd build_type) extlib_dev_dir build_dir 
-      (Filename.current_dir_name) lib_ext obj_ext in
+      (Filename.current_dir_name) exe_name lib_ext obj_ext in
   let test_o_files = 
     String.concat " " 
       (Hashtbl.fold (fun mname (auth,test) accu ->
@@ -221,6 +221,8 @@ let parse_options () =
   let options = 
     [(`OptArg, "author", "Use only tests made by the specified author");
      (`OptArg, "module", "Use only tests that test the specified module");
+     (`OptArg, "test",   "Only use the specified test");
+     (`OptArg, "output", "Set output file name");
      (`OptToggle, "opt", "Compile native code (default is bytecode)")] in
   let print_usage () = 
     P.fprintf stderr "Usage: %s [options]\n" (F.basename Sys.argv.(0));
@@ -276,10 +278,12 @@ let main =
       (fun n -> SSet.mem n set)
     with Not_found -> (fun _ -> true) in
   let include_author = make_inclusion_test "author"
-  and include_module = make_inclusion_test "module" in
+  and include_module = make_inclusion_test "module"
+  and include_test = make_inclusion_test "test" in
   let build_type = 
     if SMap.mem "opt" options then `CompileNative else `CompileByte in
-
+  let output_name = 
+    try SSet.choose (SMap.find "output" options) with Not_found -> "extlib_test" in
   mkdir build_dir;
 
   (* Filter tests by modules and authors: *)
@@ -290,7 +294,9 @@ let main =
     let h = Hashtbl.create 55 in
     List.iter
       (fun (mname,author,test) ->
-         if include_author author && include_module mname then
+         if include_author author && include_module mname &&
+           include_test (P.sprintf "%s_%s_%s" author mname test)
+         then
            Hashtbl.add h mname (author,test)) scanned_tests;
     h in
 
@@ -310,5 +316,5 @@ let main =
   copy_file "util.ml" (build_dir_name "util.ml");
   compile_file build_type (build_dir_name "util.ml");
   compile_tests build_type all_modules all_tests;
-  link_tests build_type all_modules all_tests;
-  print_endline "extlib_test generated"
+  link_tests ~exe_name:output_name build_type all_modules all_tests;
+  print_endline (output_name^" generated")
