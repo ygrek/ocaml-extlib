@@ -58,8 +58,9 @@ module Hashtbl :
 	    keys as [x], but with the function [f] applied to
 		all the values *)
 
-	val count : ('a,'b) t -> int
-	(** return the number of elements inserted into the Hashtbl *)
+	val length : ('a,'b) t -> int
+	(** return the number of elements inserted into the Hashtbl 
+		(including duplicates) *)
 	
 	(** {6 Older Functions} *)
 

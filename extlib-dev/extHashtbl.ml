@@ -108,7 +108,7 @@ module Hashtbl =
 		Enum.iter (fun (k,v) -> add h k v) e;
 		h
 	
-	let count h =
+	let length h =
 		(h_conv h).size
 
   end
