@@ -1,5 +1,6 @@
 
-val lines_enum : in_channel -> string Enum.t
+val input_enum : in_channel -> string Enum.t
+val input_char_enum : in_channel -> char Enum.t
 
 val input_lines : in_channel -> string list
 

@@ -1,13 +1,9 @@
 
-let lines_enum ch =
-    let dummy = ref None in
-    let e = Enum.make 
-        ~next:(fun () -> try input_line ch with End_of_file -> raise Enum.No_more_elements)
-        ~count:(fun () -> match !dummy with None -> assert false | Some e -> Enum.force e; Enum.count e)
-    in
-    dummy := Some e;
-    e
+let input_enum ch =
+	Enum.from (fun () -> try input_line ch with End_of_file -> raise Enum.No_more_elements)
 
+let input_char_enum ch =
+	Enum.from (fun () -> try input_char ch with End_of_file -> raise Enum.No_more_elements)
 
 let input_lines ch =
 	let rec loop dst =
@@ -23,8 +19,19 @@ let input_lines ch =
 		End_of_file -> []
 
 
+let buf_len = 8192
+let static_buf = String.create buf_len
+
 let input_all ch =
-	assert false (* TODO *)
+	let buf = Buffer.create 0 in
+	let rec loop() =
+		match input ch static_buf 0 buf_len with
+		| 0 -> Buffer.contents buf
+		| len ->
+			Buffer.add_substring buf static_buf 0 len;
+			loop()
+	in
+	loop()
 
 let print_bool = function
 	| true -> print_string "true"
