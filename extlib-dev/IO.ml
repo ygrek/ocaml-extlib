@@ -292,7 +292,7 @@ let pipe() =
 	input , output
 
 (* -------------------------------------------------------------- *)
-(* STDIO APIs *)
+(* BINARY APIs *)
 
 exception Overflow of string
 
@@ -422,6 +422,71 @@ let write_double ch f =
 	let i64 = Int64.bits_of_float f in
 	write_real_i32 ch (Int64.to_int32 (Int64.shift_right_logical i64 32));
 	write_real_i32 ch (Int64.to_int32 i64)
+
+(* Big Endians *)
+
+module BigEndian = struct
+
+let read_ui16 i =
+	let ch2 = read_byte i in
+	let ch1 = read_byte i in
+	ch1 lor (ch2 lsl 8)
+
+let read_i16 i =
+	let ch2 = read_byte i in
+	let ch1 = read_byte i in
+	let n = ch1 lor (ch2 lsl 8) in
+	if ch2 land 128 > 0 then
+		n - 65536
+	else
+		n
+
+let read_i32 ch =
+	let ch4 = read_byte ch in
+	let ch3 = read_byte ch in
+	let ch2 = read_byte ch in
+	let ch1 = read_byte ch in
+	if ch4 land 64 <> 0 then raise (Overflow "read_i32");
+	if ch4 land 128 <> 0 then
+		ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor (((ch4 land 63) lor 64) lsl 24)
+	else
+		ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor (ch4 lsl 24)
+
+let read_real_i32 ch =
+	let big = Int32.shift_left (Int32.of_int (read_byte ch)) 24 in
+	let ch3 = read_byte ch in
+	let ch2 = read_byte ch in
+	let ch1 = read_byte ch in
+	let base = Int32.of_int (ch1 lor (ch2 lsl 8) lor (ch3 lsl 16)) in
+	Int32.logor base big
+
+let write_ui16 ch n =
+	if n < 0 || n > 0xFFFF then raise (Overflow "write_ui16");
+	write_byte ch (n lsr 8);
+	write_byte ch n
+
+let write_i16 ch n =
+	if n < -0x7FFF || n > 0x7FFF then raise (Overflow "write_i16");
+	if n < 0 then 
+		write_ui16 ch (65536 + n)
+	else
+		write_ui16 ch n
+
+let write_i32 ch n =
+	write_byte ch (n asr 24);
+	write_byte ch (n lsr 16);
+	write_byte ch (n lsr 8);
+	write_byte ch n
+
+let write_real_i32 ch n =
+	let base = Int32.to_int n in
+	let big = Int32.to_int (Int32.shift_right_logical n 24) in
+	write_byte ch big;
+	write_byte ch (base lsr 16);
+	write_byte ch (base lsr 8);
+	write_byte ch base
+
+end
 
 (* Generic IO *)
 
