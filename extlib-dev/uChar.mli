@@ -41,7 +41,7 @@ val of_char : char -> t
 val code : t -> int
 
 (** [code n] returns the Unicode character with the code number [n]. 
-   If n exceeded 31-bit value, raises invalid_arg *)
+   If n >= 2^32 or n < 0, raises [invalid_arg] *)
 val chr : int -> t
 
 (** [uint_code u] returns the Unicode code number of [u].
@@ -51,8 +51,13 @@ val uint_code : t -> int
 
 (** [chr_of_uint n] returns the Unicode character of the code number [n].
    [n] is interpreted as unsigned, that is, on 32-bits platforms,
-   the sign bit is treated as the 31-th bit of the code number. *)
+   the sign bit is treated as the 31-th bit of the code number.
+   If n exceed 31-bits values, then raise [invalid_arg]. *)
 val chr_of_uint : int -> t
+
+(** Unsafe version of {!UChar.chr_of_uint}.
+   No check of its argument is performed. *)
+val unsafe_chr_of_uint : int -> t
 
 (** Equality by code point comparison *)
 val eq : t -> t -> bool

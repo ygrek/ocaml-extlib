@@ -33,6 +33,7 @@ let chr n =
 
 let uint_code c = c
 let chr_of_uint n = if n lsr 31 = 0 then n else invalid_arg "UChar.uint_chr"
+let unsafe_chr_of_uint n = n
   
 let eq (u1 : t) (u2 : t) = u1 = u2
 let compare u1 u2 =
