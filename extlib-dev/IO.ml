@@ -373,6 +373,19 @@ let read_i32 ch =
 	else
 		ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor (ch4 lsl 24)
 
+let read_real_i32 ch =
+	let ch1 = read_byte ch in
+	let ch2 = read_byte ch in
+	let ch3 = read_byte ch in
+	let base = Int32.of_int (ch1 lor (ch2 lsl 8) lor (ch3 lsl 16)) in
+	let big = Int32.shift_left (Int32.of_int (read_byte ch)) 24 in
+	Int32.logor base big
+
+let read_double ch =
+	let i1 = Int64.of_int32 (read_real_i32 ch) in
+	let i2 = Int64.of_int32 (read_real_i32 ch) in
+	Int64.float_of_bits (Int64.logor i1 (Int64.shift_left i2 32))
+
 let write_byte o n =
 	(* doesn't test bounds of n in order to keep semantics of Pervasives.output_byte *)
 	write o (Char.unsafe_chr (n land 0xFF))
@@ -402,6 +415,19 @@ let write_i32 ch n =
 	write_byte ch (n lsr 8);
 	write_byte ch (n lsr 16);
 	write_byte ch (n asr 24)
+
+let write_real_i32 ch n =
+	let base = Int32.to_int n in
+	let big = Int32.to_int (Int32.shift_right_logical n 24) in
+	write_byte ch base;
+	write_byte ch (base lsr 8);
+	write_byte ch (base lsr 16);
+	write_byte ch big
+
+let write_double ch f =
+	let i64 = Int64.bits_of_float f in
+	write_real_i32 ch (Int64.to_int32 i64);
+	write_real_i32 ch (Int64.to_int32 (Int64.shift_right i64 32))
 
 (* -------------------------------------------------------------- *)
 (* BITS APIS *)

@@ -170,6 +170,12 @@ val read_i32 : (char,'a) input -> int
 (** Read a signed 32-bit integer. Raise [Overflow] if the
   read integer cannot be represented as a Caml 31-bit integer. *)
 
+val read_real_i32 : (char,'a) input -> int32
+(** Read a signed 32-bit integer as an OCaml int32. *)
+
+val read_double : (char,'a) input -> float
+(** Read an IEEE double precision floating point value. *)
+
 val read_string : (char,'a) input -> string
 (** Read a null-terminated string. *)
 
@@ -187,6 +193,12 @@ val write_i16 : (char,'a,'b) output -> int -> unit
 
 val write_i32 : (char,'a,'b) output -> int -> unit
 (** Write a signed 32-bit integer. *) 
+
+val write_real_i32 : (char,'a,'b) output -> int32 -> unit
+(** Write an OCaml int32. *)
+
+val write_double : (char,'a,'b) output -> float -> unit
+(** Write an IEEE double precision floating point value. *)
 
 val write_string : 'a stdout -> string -> unit
 (** Write a string and append an null character. *)
