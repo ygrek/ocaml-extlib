@@ -8,6 +8,8 @@
    extlib-dev
 *)
 
+module P = Printf
+
 (* Step 1: find a list of all ExtLib modules *)
 
 let extlib_dev_dir = 
@@ -197,26 +199,23 @@ let compile_tests all_modules all_tests =
 
 
 let link_tests all_modules all_tests =
+  let obj_ext = ".cmo" in
+  let lib_ext = ".cma" in
   (* individual tests *)
-  let linkstring = ref (
-    "ocamlc" ^
-    " -I "^extlib_dev_dir ^
-    " -I "^build_dir ^
-    " -I "^Filename.current_dir_name ^
-    " -o extlib_test extLib.cma util.cmo " 
-  )
-  in 
+  let linkstring =
+    P.sprintf "ocamlc -I %s -I %s -I %s -o extlib_test extLib%s util%s"
+      extlib_dev_dir build_dir (Filename.current_dir_name) lib_ext obj_ext in
   let test_o_files = 
     String.concat " " 
       (Hashtbl.fold (fun mname (auth,test) accu ->
-                       itest_filename auth mname test ".cmo"::accu)
+                       itest_filename auth mname test obj_ext::accu)
          all_tests []) in
   let mid_o_files = 
     String.concat " " 
-      (List.map (fun s -> mtest_filename s ".cmo") all_modules) in
+      (List.map (fun s -> mtest_filename s obj_ext) all_modules) in
   (* Compile mainline *)
-  let link_cmd = !linkstring ^ " " ^ test_o_files ^ " " ^ mid_o_files ^ " " ^
-                 (Filename.concat build_dir "extlib_test.cmo") in
+  let link_cmd = linkstring ^ " " ^ test_o_files ^ " " ^ mid_o_files ^ " " ^
+                 (Filename.concat build_dir "extlib_test"^obj_ext) in
   print_endline link_cmd;
   xqt link_cmd "Linking extlib_test"
 
