@@ -21,6 +21,8 @@ let mtest_filename module_name ext = "mtest_"^module_name^ext
 
 let itest_filename auth mname test ext = "itest_"^auth^"_"^mname^"_"^test^ext
 
+let build_dir_name = Filename.concat build_dir
+
 (* PORTABILITY WARNING: this is the only place Unix module is used *)
 let mkdir f = 
   try Unix.mkdir f 0o777  with _ -> ()
@@ -67,7 +69,7 @@ let modules_of dirname =
 
 (* now make the top level test harness *)
 let mk_top all_modules =
-  let f = open_out (Filename.concat build_dir "extlib_test.ml") in
+  let f = open_out (build_dir_name "extlib_test.ml") in
 
   output_string f "let main() = \n";
   output_string f "  Util.log \"ExtLib tester started\";\n";
@@ -111,7 +113,7 @@ let tests_of dirname =
 
 
 let mtest all_tests mname =
-  let f = open_out (Filename.concat build_dir (mtest_filename mname ".ml")) in
+  let f = open_out (build_dir_name (mtest_filename mname ".ml")) in
   output_string f "let test() = \n";
 
   let tests = Hashtbl.find_all all_tests mname in
@@ -146,7 +148,7 @@ let copy_file fin fout =
 
 let patch_test mname author test =
   let input_filename = "test_" ^ author ^ "_" ^mname^"_"^test^".ml" in
-  let output_filename = Filename.concat build_dir (itest_filename author mname test ".ml") in
+  let output_filename = build_dir_name (itest_filename author mname test ".ml") in
   copy_file input_filename output_filename
 
   
@@ -179,7 +181,7 @@ let compile_tests all_modules all_tests =
   (* compile individual tests *)
   Hashtbl.iter
   (fun mname (author,test) ->
-    let filename = Filename.concat build_dir (itest_filename author mname test ".ml") in
+    let filename = build_dir_name (itest_filename author mname test ".ml") in
     compile_file filename
   )
   all_tests
@@ -187,13 +189,13 @@ let compile_tests all_modules all_tests =
   (* compile generated module level thunks *)
   List.iter
   (fun s ->
-    let filename = Filename.concat build_dir (mtest_filename s ".ml") in
+    let filename = build_dir_name (mtest_filename s ".ml") in
     compile_file filename
   )
   all_modules
   ;
   (* compile mainline *)
-  compile_file (Filename.concat build_dir "extlib_test.ml")
+  compile_file (build_dir_name "extlib_test.ml")
 
 
 
@@ -215,7 +217,7 @@ let link_tests all_modules all_tests =
       (List.map (fun s -> mtest_filename s obj_ext) all_modules) in
   (* Compile mainline *)
   let link_cmd = linkstring ^ " " ^ test_o_files ^ " " ^ mid_o_files ^ " " ^
-                 (Filename.concat build_dir "extlib_test"^obj_ext) in
+                 (build_dir_name "extlib_test"^obj_ext) in
   print_endline link_cmd;
   xqt link_cmd "Linking extlib_test"
 
@@ -257,10 +259,7 @@ let main() =
   in
 
   print_endline "Modules:";
-  List.iter
-  (fun s-> print_endline ("  " ^ s))
-  all_modules
-  ;
+  print_endline (String.concat "\n" (List.map (fun s -> "  " ^ s) all_modules));
   print_endline "";
 
   print_endline "Tests:";
@@ -276,8 +275,8 @@ let main() =
   mk_mtests all_modules all_tests;
   patch_tests all_tests;
 
-  copy_file "util.ml" (Filename.concat build_dir "util.ml");
-  compile_file (Filename.concat build_dir "util.ml");
+  copy_file "util.ml" (build_dir_name "util.ml");
+  compile_file (build_dir_name "util.ml");
 
   compile_tests all_modules all_tests;
   link_tests all_modules all_tests;
