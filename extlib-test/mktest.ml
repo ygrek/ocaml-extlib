@@ -83,7 +83,7 @@ let mk_top all_modules =
   close_out f
 
 
-(* now make the individual module tests *)
+(* Now make the individual module tests *)
 
 (* Regexp for finding test files *)
 let tst_re = "^test_.+_.+_.+\\.ml$"
@@ -154,7 +154,7 @@ let patch_tests all_tests =
   all_tests
 
 
-let xqt cmd msg =
+let exec cmd msg =
   let result = Sys.command cmd in
   if result != 0
   then 
@@ -172,7 +172,7 @@ let compile_file build_type filename =
     " -c " ^ filename 
   in
   print_endline cmd;
-  xqt cmd ("Compilation of " ^ filename)
+  exec cmd ("Compilation of " ^ filename)
 
 
 let compile_tests build_type all_modules all_tests =
@@ -220,35 +220,56 @@ let link_tests build_type all_modules all_tests =
   let link_cmd = linkstring ^ " " ^ test_o_files ^ " " ^ mid_o_files ^ " " ^
                  (build_dir_name "extlib_test"^obj_ext) in
   print_endline link_cmd;
-  xqt link_cmd "Linking extlib_test"
+  exec link_cmd "Linking extlib_test"
 
-
-(* Extract args of the form --xxxx=yyyy *)
+exception InvalidArg of string
+(* Extract args of the form --foobar or --foo=bar *)
 let parse_options () =
-  let usage = 
-    "Usage: " ^ (F.basename Sys.argv.(0)) ^ "[options]\n" ^
-    "  --author=<xy>       Use only tests made by <xy>\n" ^
-    "  --opt               Compile native code (default is bytecode)\n" in
+  let options = 
+    [(`OptArg, "author", "Use only tests made by the specified author");
+     (`OptToggle, "opt", "Compile native code (default is bytecode)")] in
+  let print_usage () = 
+    P.fprintf stderr "Usage: %s [options]\n" (F.basename Sys.argv.(0));
+    List.iter
+      (fun ((_,_,desc) as opt) ->
+         let opt_str = function
+             (`OptArg,opt_name,_) -> ("--"^opt_name^"=<value>")
+           | (`OptToggle,opt_name,desc) -> ("--"^opt_name) in
+         P.fprintf stderr "  %-22s      %s\n" (opt_str opt) desc) options in
   let args = ref [] in
   let assign_re = Str.regexp "^--\\([A-Za-z]+\\)=\\(.*\\)$" in
   let toggle_re = Str.regexp "^--\\([A-Za-z]+\\)$" in
+  let opt_exists opt = List.exists (function (_,f,_) -> f = opt) in
+  let toggles = List.filter (function (`OptToggle,_,_) -> true | _ -> false) options
+  and assigns = List.filter (function (`OptArg,_,_) -> true | _ -> false) options in
   for i = 1 to Array.length Sys.argv - 1 do
     let a = Sys.argv.(i) in
-    if Str.string_match assign_re a 0
-    then 
-      args := (Str.matched_group 1 a, Str.matched_group 2 a) :: !args
-    else if Str.string_match toggle_re a 0 then
-      args := (Str.matched_group 1 a, "") :: !args
-    else
-      begin
-        P.fprintf stderr "Invalid option '%s'\n" a;
-        P.fprintf stderr "%s" usage;
-        exit 1
-      end
+    try 
+      if Str.string_match assign_re a 0
+      then
+        begin
+          let opt_name = Str.matched_group 1 a in
+          if not (opt_exists opt_name assigns) then
+            raise (InvalidArg ("Unknown assignment option '"^opt_name^"'"));
+          args := (opt_name, Str.matched_group 2 a) :: !args
+        end
+      else if Str.string_match toggle_re a 0 then
+        begin
+          let opt_name = Str.matched_group 1 a in
+          if not (opt_exists opt_name toggles) then
+            raise (InvalidArg ("Unknown toggle option '"^opt_name^"'"));
+          args := (opt_name, "") :: !args;
+        end
+      else
+        raise (InvalidArg ("Invalid command line syntax in '"^a^"'"))
+    with InvalidArg s -> 
+      P.fprintf stderr "%s\n" s;
+      print_usage ();
+      exit 1
   done;
   !args
   
-let main() =
+let main =
   let option_list = parse_options () in
   let author_selection = List.mem_assoc "author" option_list in
   let build_type = 
@@ -259,28 +280,25 @@ let main() =
   let all_modules = (modules_of extlib_dev_dir) in
   let all_tests =
     let all_tests = (tests_of Filename.current_dir_name) in
-    if author_selection then begin
-      let selected_tests = Hashtbl.create 97 in
-      Hashtbl.iter
-      (fun mname (author,test) ->
-        if List.mem ("author",author) option_list
-        then Hashtbl.add selected_tests mname (author,test)) all_tests;
-      selected_tests
-    end
+    if author_selection then 
+      begin
+        let selected_tests = Hashtbl.create 97 in
+        Hashtbl.iter
+          (fun mname (author,test) ->
+             if List.mem ("author",author) option_list
+             then Hashtbl.add selected_tests mname (author,test)) all_tests;
+        selected_tests
+      end
     else all_tests
   in
 
   print_endline "Modules:";
-  print_endline (String.concat "\n" (List.map (fun s -> "  " ^ s) all_modules));
-  print_endline "";
+  print_endline (String.concat "\n" (List.map ((^) "  ") all_modules));
 
-  print_endline "Tests:";
+  print_endline "\nTests:";
   Hashtbl.iter
-  (fun mname (author,test) -> 
-    print_endline ("  test_" ^ author ^ "_" ^ mname ^ "_"^ test)
-  )
-  all_tests
-  ;
+    (fun mname (author,test) -> 
+       print_endline ("  test_"^author^"_"^mname^"_"^test)) all_tests;
   print_endline "";
 
   mk_top all_modules;
@@ -291,10 +309,4 @@ let main() =
   compile_file build_type (build_dir_name "util.ml");
   compile_tests build_type all_modules all_tests;
   link_tests build_type all_modules all_tests;
-
   print_endline "extlib_test generated"
-;;
-
-main ()
-;;
-
