@@ -26,6 +26,10 @@ module String :
 
 	exception Invalid_string
 
+	val init : int -> (int -> char) -> string
+	(** [init l f] returns the string of length [l] with the chars
+		f 0 , f 1 , f 2 ... f (l-1). *)
+
 	val find : string -> string -> int
 	(** [find s x] returns the starting index of the string [x]
 	    within the string [s] or raises [Invalid_string] if [x]

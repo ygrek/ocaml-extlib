@@ -23,6 +23,13 @@ exception Invalid_string
 
 include String
 
+let init len f =
+	let s = create len in
+	for i = 0 to len - 1 do
+		unsafe_set s i (f i)
+	done;
+	s
+
 let starts_with str p =
 	let len = length p in
 	if length str < len then 
@@ -48,7 +55,7 @@ let find str sub =
 		try
 			for i = 0 to len - sublen do
 				let j = ref 0 in
-				while str.[i + !j] = sub.[!j] do
+				while unsafe_get str (i + !j) = unsafe_get sub !j do
 					incr j;
 					if !j = sublen then begin found := i; raise Exit; end;
 				done;
@@ -64,10 +71,10 @@ let split str sep =
 	sub str 0 p, sub str (p + len) (slen - p - len)
 
 let lchop s =
-	sub s 1 ((String.length s)-1)
+	sub s 1 (length s - 1)
 
 let rchop s =
-	sub s 0 ((String.length s)-1)
+	sub s 0 (length s - 1)
 
 let of_int = string_of_int
 
@@ -97,7 +104,7 @@ let enum s =
 			else
 				let p = !i in
 				incr i;
-				s.[p]
+				unsafe_get s p
 			)
 		~count:(fun () -> l - !i)
 		~clone:(fun () -> make (ref !i))
@@ -108,14 +115,14 @@ let of_enum e =
 	let l = Enum.count e in
 	let s = create l in
 	let i = ref 0 in
-	Enum.iter (fun c -> s.[!i] <- c; incr i) e;
+	Enum.iter (fun c -> unsafe_set s !i c; incr i) e;
 	s
 
 let map f s =
-	let len = String.length s in
-	let sc = String.create len in
+	let len = length s in
+	let sc = create len in
 	for i = 0 to len - 1 do
-		String.unsafe_set sc i (f (String.unsafe_get s i))
+		unsafe_set sc i (f (unsafe_get s i))
 	done;
 	sc
 
