@@ -238,4 +238,4 @@ let test () =
   Util.run_test ~test_name:"jh_BitSet.test_exceptions" test_exceptions;
   Util.run_test ~test_name:"jh_BitSet.test_compare" test_compare;
   Util.run_test ~test_name:"jh_BitSet.test_compare_2" test_compare_2;
-  Util.run_test ~test_name:"jh_BitSet2.test_set_opers" test_set_opers
+  Util.run_test ~test_name:"jh_BitSet.test_set_opers" test_set_opers
