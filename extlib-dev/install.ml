@@ -48,13 +48,13 @@ let obj_ext , lib_ext , cp_cmd , path_type = match Sys.os_type with
 	| _ -> failwith "Unknown OS"		
 
 let run cmd =
-	prerr_endline cmd;
+	print_endline cmd;
 	let ecode = Sys.command cmd in
 	if ecode <> 0 then failwith (sprintf "Exit Code %d - Stopped" ecode)
 
 let copy file dest =
 	if dest <> "" && dest <> "." then begin
-		prerr_endline ("Installing "^file);
+		print_endline ("Installing "^file);
 		let path = dest ^ file in
 		(try Sys.remove path with _ -> ());
 		try
@@ -79,16 +79,13 @@ let remove file =
 	with
 		_ -> prerr_endline ("Warning : failed to delete "^file)
 
-(** Do we have findlib? *)
-let is_findlib () = 
-  print_endline "Looking for findlib...\n";
-  let findlib = Sys.command "ocamlfind printconf" = 0 in
-  print_endline "Done.\n";
-  if findlib then
-    print_endline "We have findlib.\n"
-  else
-    print_endline "We do not have findlib.\n";
-  findlib
+let is_findlib() = 
+	let findlib = Sys.command (if Sys.os_type = "Win32" then "ocamlfind printconf 2>NUL" else "ocamlfind printconf") = 0 in
+	if findlib then
+		print_endline "Findlib found."
+  	else
+		print_endline "Findlib not found.";
+	findlib
 
 type install_dir = Findlib | Dir of string
 
