@@ -5,7 +5,11 @@ Here's a list of things/idea that have been discussed on the extlib mailling
 list and should be added in a near future :
 
 - Documentation of existing modules
+- Watch the String2 module from CDK (others are OK - Nicolas)
+
 
 - Unit test + Benchmark module
 - Balanced Binary Search Tree
+- Base64 encode/decode/urlencode
+
 
