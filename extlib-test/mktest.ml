@@ -8,6 +8,7 @@
    extlib-dev
 *)
 
+module F = Filename
 module P = Printf
 
 (* Step 1: find a list of all ExtLib modules *)
@@ -17,24 +18,23 @@ let extlib_dev_dir =
 
 let build_dir = "build-tmp"
 
+let build_dir_name = Filename.concat build_dir
+
 let mtest_filename module_name ext = "mtest_"^module_name^ext
 
 let itest_filename auth mname test ext = "itest_"^auth^"_"^mname^"_"^test^ext
-
-let build_dir_name = Filename.concat build_dir
 
 (* PORTABILITY WARNING: this is the only place Unix module is used *)
 let mkdir f = 
   try Unix.mkdir f 0o777  with _ -> ()
 
 
-(* get all the files in a directory as a list, the names
-  do not include the directory pathname
-*)
+(* Get all the files in a directory as a list, the names do not
+   include the directory pathname *)
 let find_files dirname = 
   Array.to_list (Sys.readdir dirname)
 
-(* filter a list of strings with a regular expression *)
+(* Filter a list of strings with a regular expression *)
 let filter_files rexp files =
   let crexp = Str.regexp rexp in
   List.filter
@@ -42,32 +42,29 @@ let filter_files rexp files =
   files
 
 
-(* regexp for finding *.mli files *)
+(* Regexp for finding *.mli files *)
 let mli_re = "^.+\\.mli$"
 
 
-(* regexp for eliding .mli extension *)
+(* Regexp for eliding .mli extension *)
 let mli_rex = "^\\(.+\\)\\.mli$"
 
 
-(* find the modules in a directory, assuming
-each .mli file represents a module. The names
-are have leading character capitalised.
-*)
-
+(* Find the modules in a directory, assuming each .mli file represents
+   a module. The names are have leading character capitalised. *)
 let modules_of dirname =
   let crexp = Str.regexp mli_rex in
   List.map
-  (fun s-> 
-    ignore(Str.string_match crexp s 0); 
-    let s = Str.matched_group 1 s in
-    s.[0] <- Char.uppercase s.[0];
-    s
-  )
-  (filter_files mli_re (find_files dirname))
+    (fun s-> 
+       ignore(Str.string_match crexp s 0); 
+       let s = Str.matched_group 1 s in
+       s.[0] <- Char.uppercase s.[0];
+       s
+    )
+    (filter_files mli_re (find_files dirname))
 
 
-(* now make the top level test harness *)
+(* Now make the top level test harness *)
 let mk_top all_modules =
   let f = open_out (build_dir_name "extlib_test.ml") in
 
@@ -88,11 +85,11 @@ let mk_top all_modules =
 
 (* now make the individual module tests *)
 
-(* regexp for finding test files *)
+(* Regexp for finding test files *)
 let tst_re = "^test_.+_.+_.+\\.ml$"
 
 
-(* regexp for decoding test names *)
+(* Regexp for decoding test names *)
 let tst_rex = "^test_\\(.+\\)_\\(.+\\)_\\(.+\\)\\.ml$"
 
 
@@ -167,8 +164,12 @@ let xqt cmd msg =
     failwith ("FAILURE: msg=" ^ msg ^ ", cmd=" ^cmd)
 
 
-let compile_file filename =
-  let cmd = "ocamlc -I "^extlib_dev_dir^
+let ocaml_cmd = function
+    `CompileByte -> "ocamlc"
+  | `CompileNative -> "ocamlopt"
+
+let compile_file build_type filename =
+  let cmd = (ocaml_cmd build_type)^" -I "^extlib_dev_dir^
     " -I " ^ build_dir ^
     " -I " ^ Filename.current_dir_name ^
     " -c " ^ filename 
@@ -177,12 +178,12 @@ let compile_file filename =
   xqt cmd ("Compilation of " ^ filename)
 
 
-let compile_tests all_modules all_tests =
+let compile_tests build_type all_modules all_tests =
   (* compile individual tests *)
   Hashtbl.iter
   (fun mname (author,test) ->
     let filename = build_dir_name (itest_filename author mname test ".ml") in
-    compile_file filename
+    compile_file build_type filename
   )
   all_tests
   ;
@@ -190,23 +191,26 @@ let compile_tests all_modules all_tests =
   List.iter
   (fun s ->
     let filename = build_dir_name (mtest_filename s ".ml") in
-    compile_file filename
+    compile_file build_type filename
   )
   all_modules
   ;
   (* compile mainline *)
-  compile_file (build_dir_name "extlib_test.ml")
+  compile_file build_type (build_dir_name "extlib_test.ml")
 
 
 
 
-let link_tests all_modules all_tests =
-  let obj_ext = ".cmo" in
-  let lib_ext = ".cma" in
-  (* individual tests *)
+let link_tests build_type all_modules all_tests =
+  let (obj_ext,lib_ext) = 
+    match build_type with
+      `CompileByte -> (".cmo",".cma")
+    | `CompileNative -> (".cmx", ".cmxa") in
+  (* Individual tests *)
   let linkstring =
-    P.sprintf "ocamlc -I %s -I %s -I %s -o extlib_test extLib%s util%s"
-      extlib_dev_dir build_dir (Filename.current_dir_name) lib_ext obj_ext in
+    P.sprintf "%s -I %s -I %s -I %s -o extlib_test extLib%s util%s"
+      (ocaml_cmd build_type) extlib_dev_dir build_dir 
+      (Filename.current_dir_name) lib_ext obj_ext in
   let test_o_files = 
     String.concat " " 
       (Hashtbl.fold (fun mname (auth,test) accu ->
@@ -222,22 +226,36 @@ let link_tests all_modules all_tests =
   xqt link_cmd "Linking extlib_test"
 
 
-(* extract args of the form --xxxx=yyyy *)
+(* Extract args of the form --xxxx=yyyy *)
 let parse_options () =
+  let usage = 
+    "Usage: " ^ (F.basename Sys.argv.(0)) ^ "[options]\n" ^
+    "  --author=<xy>       Use only tests made by <xy>\n" ^
+    "  --opt               Compile native code (default is bytecode)\n" in
   let args = ref [] in
-  let re = Str.regexp "^--\\([A-Za-z]+\\)=\\(.*\\)$" in
+  let assign_re = Str.regexp "^--\\([A-Za-z]+\\)=\\(.*\\)$" in
+  let toggle_re = Str.regexp "^--\\([A-Za-z]+\\)$" in
   for i = 1 to Array.length Sys.argv - 1 do
     let a = Sys.argv.(i) in
-    if Str.string_match re a 0
+    if Str.string_match assign_re a 0
     then 
-      args := (Str.matched_group 1 a, Str.matched_group 2 a) :: ! args
-    else failwith ("Invalid option '"^a^"', use --author=initials")
+      args := (Str.matched_group 1 a, Str.matched_group 2 a) :: !args
+    else if Str.string_match toggle_re a 0 then
+      args := (Str.matched_group 1 a, "") :: !args
+    else
+      begin
+        P.fprintf stderr "Invalid option '%s'\n" a;
+        P.fprintf stderr "%s" usage;
+        exit 1
+      end
   done;
   !args
   
 let main() =
   let option_list = parse_options () in
   let author_selection = List.mem_assoc "author" option_list in
+  let build_type = 
+    if List.mem_assoc "opt" option_list then `CompileNative else `CompileByte in
 
   mkdir build_dir;
 
@@ -249,10 +267,7 @@ let main() =
       Hashtbl.iter
       (fun mname (author,test) ->
         if List.mem ("author",author) option_list
-        then Hashtbl.add selected_tests mname (author,test)
-        else ();
-      )
-      all_tests;
+        then Hashtbl.add selected_tests mname (author,test)) all_tests;
       selected_tests
     end
     else all_tests
@@ -276,10 +291,9 @@ let main() =
   patch_tests all_tests;
 
   copy_file "util.ml" (build_dir_name "util.ml");
-  compile_file (build_dir_name "util.ml");
-
-  compile_tests all_modules all_tests;
-  link_tests all_modules all_tests;
+  compile_file build_type (build_dir_name "util.ml");
+  compile_tests build_type all_modules all_tests;
+  link_tests build_type all_modules all_tests;
 
   print_endline "extlib_test generated"
 ;;
