@@ -264,22 +264,19 @@ module SSet = Set.Make (String)
 
 let main =
   let option_list = parse_options () in
-  (* Author mask.  If empty, include all authors. *)
-  let authors = 
+  let make_name_set opt = 
     List.fold_left (fun accu (_,a) -> SSet.add a accu) SSet.empty 
-      (List.filter (function ("author",_) -> true | _ -> false) option_list) in
+      (List.filter (function (o,_) when o = opt -> true | _ -> false) option_list) in
+  (* Author mask.  If empty, include all authors. *)
+  let authors = make_name_set "author" in
   (* Module mask.  If empty, include all modules. *)
-  let modules = 
-    List.fold_left (fun accu (_,m) -> SSet.add m accu) SSet.empty 
-      (List.filter (function ("module",_) -> true | _ -> false) option_list) in
-  let include_module = 
-    if not (SSet.is_empty modules) then
-      (fun mname -> SSet.mem mname modules)
+  let modules = make_name_set "module" in
+  let make_inclusion_test set =
+    if not (SSet.is_empty set) then
+      (fun name -> SSet.mem name set)
     else (fun _ -> true) in
-  let include_author =
-    if not (SSet.is_empty authors) then
-      (fun aname -> SSet.mem aname authors) 
-    else (fun _ -> true) in
+  let include_author = make_inclusion_test authors
+  and include_module = make_inclusion_test modules in
   let build_type = 
     if List.mem_assoc "opt" option_list then `CompileNative else `CompileByte in
 
