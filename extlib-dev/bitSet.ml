@@ -1,6 +1,6 @@
 (*
  * Bitset - Efficient bit sets
- * Copyright (C) 2003 Nicolas Cannasse (ncannasse@motion-twin.com)
+ * Copyright (C) 2003 Nicolas Cannasse
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -89,6 +89,10 @@ let toggle t x =
 		t := b;
 	end;
 	bset !t pos ((bget !t pos) lxor (1 lsl delta))
+
+let put t = function
+	| true -> set t
+	| false -> unset t
 
 let is_set t x =
 	let pos , delta = x lsr 3 , x land 7 in
