@@ -154,6 +154,9 @@ val read_i32 : input -> int
 val read_real_i32 : input -> int32
 (** Read a signed 32-bit integer as an OCaml int32. *)
 
+val read_i64 : input -> int64
+(** Read a signed 64-bit integer as an OCaml int64. *)
+
 val read_double : input -> float
 (** Read an IEEE double precision floating point value. *)
 
@@ -178,6 +181,9 @@ val write_i32 : 'a output -> int -> unit
 val write_real_i32 : 'a output -> int32 -> unit
 (** Write an OCaml int32. *)
 
+val write_i64 : 'a output -> int64 -> unit
+(** Write an OCaml int64. *)
+
 val write_double : 'a output -> float -> unit
 (** Write an IEEE double precision floating point value. *)
 
@@ -196,11 +202,15 @@ sig
 	val read_i16 : input -> int
 	val read_i32 : input -> int
 	val read_real_i32 : input -> int32
+	val read_i64 : input -> int64
+	val read_double : input -> float
 	
 	val write_ui16 : 'a output -> int -> unit
 	val write_i16 : 'a output -> int -> unit
 	val write_i32 : 'a output -> int -> unit
 	val write_real_i32 : 'a output -> int32 -> unit
+	val write_i64 : 'a output -> int64 -> unit
+	val write_double : 'a output -> float -> unit
 
 end
 

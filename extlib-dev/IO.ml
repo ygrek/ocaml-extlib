@@ -374,6 +374,16 @@ let read_real_i32 ch =
 	let big = Int32.shift_left (Int32.of_int (read_byte ch)) 24 in
 	Int32.logor base big
 
+let read_i64 ch =
+	let ch1 = read_byte ch in
+	let ch2 = read_byte ch in
+	let ch3 = read_byte ch in
+	let ch4 = read_byte ch in
+	let base = Int64.of_int (ch1 lor (ch2 lsl 8) lor (ch3 lsl 16)) in
+	let small = Int64.logor base (Int64.shift_left (Int64.of_int ch4) 24) in
+	let big = Int64.of_int32 (read_real_i32 ch) in
+	Int64.logor (Int64.shift_left big 32) small
+	
 let read_double ch =
 	let i1 = Int64.of_int32 (read_real_i32 ch) in
 	let i2 = Int64.of_int32 (read_real_i32 ch) in
@@ -423,6 +433,10 @@ let write_double ch f =
 	write_real_i32 ch (Int64.to_int32 (Int64.shift_right_logical i64 32));
 	write_real_i32 ch (Int64.to_int32 i64)
 
+let write_i64 ch n =
+	write_real_i32 ch (Int64.to_int32 n);
+	write_real_i32 ch (Int64.to_int32 (Int64.shift_right_logical n 32))
+
 (* Big Endians *)
 
 module BigEndian = struct
@@ -460,6 +474,22 @@ let read_real_i32 ch =
 	let base = Int32.of_int (ch1 lor (ch2 lsl 8) lor (ch3 lsl 16)) in
 	Int32.logor base big
 
+let read_i64 ch =
+	let big = Int64.of_int32 (read_real_i32 ch) in
+	let ch4 = read_byte ch in
+	let ch3 = read_byte ch in
+	let ch2 = read_byte ch in
+	let ch1 = read_byte ch in
+	let base = Int64.of_int (ch1 lor (ch2 lsl 8) lor (ch3 lsl 16)) in
+	let small = Int64.logor base (Int64.shift_left (Int64.of_int ch4) 24) in
+	Int64.logor (Int64.shift_left big 32) small
+
+let read_double ch =
+	let i1 = Int64.of_int32 (read_real_i32 ch) in
+	let i2 = Int64.of_int32 (read_real_i32 ch) in
+	let i2 = (if i2 < Int64.zero then Int64.add i2 (Int64.shift_left Int64.one 32) else i2) in
+	Int64.float_of_bits (Int64.logor i2 (Int64.shift_left i1 32))
+
 let write_ui16 ch n =
 	if n < 0 || n > 0xFFFF then raise (Overflow "write_ui16");
 	write_byte ch (n lsr 8);
@@ -485,6 +515,15 @@ let write_real_i32 ch n =
 	write_byte ch (base lsr 16);
 	write_byte ch (base lsr 8);
 	write_byte ch base
+
+let write_i64 ch n =
+	write_real_i32 ch (Int64.to_int32 (Int64.shift_right_logical n 32));
+	write_real_i32 ch (Int64.to_int32 n)
+
+let write_double ch f =
+	let i64 = Int64.bits_of_float f in
+	write_real_i32 ch (Int64.to_int32 (Int64.shift_right_logical i64 32));
+	write_real_i32 ch (Int64.to_int32 i64)
 
 end
 
