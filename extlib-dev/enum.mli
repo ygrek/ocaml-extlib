@@ -123,6 +123,13 @@ val get : 'a t -> 'a option
 (** [get e] returns [None] if [e] is empty or [Some x] where [x] is
   the next element of [e], in which case the element is removed from the enumeration. *)
 
+val junk : 'a t -> unit
+(** [junk e] removes the first element from the enumeration, if any. *)
+
+val clone : 'a t -> 'a t
+(** [clone e] creates a new enumeration that is copy of [e]. If [e]
+ is consumed by later operations, the clone will not get affected. *)
+
 val force : 'a t -> unit
 (** [force e] forces the application of all lazy functions and the
  enumeration of all elements, exhausting the enumeration. 

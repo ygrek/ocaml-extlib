@@ -144,6 +144,12 @@ let peek t =
 		push t x;
 		Some x
 
+let junk t =
+	try
+		ignore(t.next())
+	with
+		No_more_elements -> ()
+
 let empty t =
 	if t.fast then
 		t.count() = 0
