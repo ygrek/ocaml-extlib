@@ -190,6 +190,39 @@ val set_enum : 'a t -> int -> 'a Enum.t -> unit
 	so the first element of [e] has index [idx], etc.  The elements with
 	indexs [idx], [idx]+1, etc. are overwritten. *)
 
+(* Reversed enum functions *)
+
+val rev_enum : 'a t -> 'a Enum.t
+(** [rev_enum xarr] returns the reverse enumeration of [xarr]- elements are
+	enumerated in reverse order- from largest index to smallest. *)
+
+val sub_rev_enum : 'a t -> int -> int -> 'a Enum.t
+(** [sub_rev_enum xarr idx len] returns an enumeration of a subset of [len]
+	elements of [xarr], starting with the element at index [idx]+[len]-1.
+	The elements are returned in reverse order- from highest index to
+	lowest index.  So the last element returned from [e] becomes the
+	element at index [idx]. *)
+
+val of_rev_enum : ?resizer:(int -> int -> int) -> 'a -> 'a Enum.t -> 'a t
+(** [of_rev_enum nullval e] returns an Xarray.t that holds, in reverse order, 
+	the elements of [e].  The first element returned from [e] becomes the
+	highest indexed element of the returned Xarray.t, and so on. *)
+
+val insert_rev_enum : 'a t -> int -> 'a Enum.t -> unit
+(** [insert_rev_enum xarr idx e] inserts the elements of [e] into [xarr]
+	so the first element of [e] has index [idx]+[len]-1, the second index 
+	[idx]+[len]-2, etc, where [len] is the count of elements initially in 
+	[e].   The last element from [e] becomes the element at index [idx].  
+	All the elements of [xarr] with index greater than or equal to [idx] 
+	are moved up by the number of elements in [e] to make room. *)
+
+val set_rev_enum : 'a t -> int -> 'a Enum.t -> unit
+(** [set_rev_enum xarr idx e] sets the elements from [e] into [xarr],
+	so the first element of [e] has index [idx]+[len]-1, etc, where [len]
+	is the count of elements initially in [e].  The last element of [e]
+	has index [idx].  The elements with indexes [idx], [idx]+1, etc. are 
+	overwritten. *)
+
 val exponential_resizer : int -> int -> int
 (** The exponential resizer- [exponential_resizer curr used] returns the
 	array length required to hold [used] items- generally some function of

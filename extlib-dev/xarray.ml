@@ -283,7 +283,6 @@ let fold_right f a x =
 	in
 	loop (a.length - 1) x
 
-
 let enum xarr =
 	let idxref = ref 0 in
 	let next () =
@@ -351,3 +350,67 @@ let set_enum xarr idx e =
 		let max = idx + c in
 		if max > xarr.length then newlength xarr max;
 		Enum.iteri (fun i x -> (xarr.arr.(i+idx) <- x)) e
+
+
+let rev_enum xarr =
+	let idxref = ref (xarr.length - 1) in
+	let next () =
+		if !idxref < 0 then
+			raise Enum.No_more_elements
+		else
+			let retval = xarr.arr.( !idxref ) in
+			decr idxref;
+			retval
+	and count () =
+		if !idxref < 0 then 0
+		else 1 + !idxref
+	in
+	Enum.make ~next:next ~count:count
+
+
+let sub_rev_enum xarr initidx len =
+	let idxref = ref (len - 1)
+	in
+	let next () =
+		if !idxref < 0 then
+			raise Enum.No_more_elements
+		else if !idxref >= (xarr.length - initidx) then
+			invalid_arg "Xarray.sub_rev_enum"
+		else
+			let retval = xarr.arr.( initidx + !idxref ) in
+			decr idxref;
+			retval
+	and count () =
+		if !idxref < 0 then 0
+		else 1 + !idxref
+	in
+	Enum.make ~next:next ~count:count
+
+
+let of_rev_enum ?(resizer = exponential_resizer) nullval e =
+	let c = Enum.count e in
+	let retval = Array.make (resizer 1 c) nullval in
+	Enum.iteri (fun i x -> (retval.(c - 1 - i) <- x)) e;
+	{ resize = resizer; null = nullval; length = c; arr = retval }
+
+
+let insert_rev_enum xarr idx e =
+	if (idx < 0) || (idx > xarr.length) then
+		invalid_arg "Xarray.insert_enum"
+	else
+	let c = Enum.count e in
+	let oldlen = xarr.length in
+	newlength xarr (c + xarr.length);
+	if idx < oldlen then
+		Array.blit xarr.arr idx xarr.arr (idx + c) (oldlen - idx);
+	Enum.iteri (fun i x -> (xarr.arr.(idx+c-1-i) <- x)) e
+
+let set_rev_enum xarr idx e =
+	if (idx < 0) || (idx > xarr.length) then
+		invalid_arg "Xarray.set_enum"
+	else
+	let c = Enum.count e in
+	let max = idx + c in
+	if max > xarr.length then newlength xarr max;
+	Enum.iteri (fun i x -> (xarr.arr.(idx+c-1-i) <- x)) e
+
