@@ -54,3 +54,8 @@ external identity : 'a -> 'a = "%identity"
 
 val unique : unit -> int
 (** returns an unique identifier every time it is called. *)
+
+
+val finally : (unit -> unit) -> ('a -> 'b) -> 'a -> 'b 
+(** finally [fend f x] calls [f x] and then [fend()] even if [f x] raised
+	an exception. *)

@@ -89,6 +89,16 @@ let string_of_char c = String.make 1 c
 
 external identity : 'a -> 'a = "%identity"
 
+let finally handler f x =
+	let r = (
+		try
+			f x
+		with
+			e -> handler(); raise e
+	) in
+	handler();
+	r
+
 let __unique_counter = ref 0
 
 let unique() =
