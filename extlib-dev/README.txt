@@ -47,6 +47,7 @@ Contributors :
 
 Nicolas Cannasse (ncannasse@motion-twin.com)
 Brian Hurt (brian.hurt@qlogic.com)
+Yamagata Yoriyuki (yoriyuki@mbg.ocn.ne.jp)
 
 Licence :
 ---------
