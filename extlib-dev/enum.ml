@@ -212,39 +212,6 @@ let filter f t =
 	in
 	from next
 
-let append ta tb = 
-	let t = {
-		count = (fun () -> ta.count() + tb.count());
-		next = _dummy;
-	} in
-	t.next <- (fun () ->
-		try
-			ta.next()
-		with
-			No_more_elements ->
-				t.next <- tb.next;
-				t.next()
-	);
-	t
-
-let concat t =
-	let tc = {
-		count = (fun () -> fold (fun tt acc -> tt.count() + acc) 0 t);
-		next = _dummy;
-	} in
-	let rec concat_next() =
-		let tn = t.next() in
-		tc.next <- (fun () ->
-			try
-				tn.next()
-			with
-				No_more_elements ->
-					concat_next());
-		tc.next()
-	in
-	tc.next <- concat_next;
-	tc
-
 let filter_map f t =
     let rec next () =
         match f (t.next()) with
@@ -253,37 +220,106 @@ let filter_map f t =
     in
     from next
 
+let append ta tb = 
+	let append_next = ref _dummy in
+	append_next := (fun () ->
+		try
+			ta.next()
+		with
+			No_more_elements ->
+				append_next := tb.next;
+				!append_next ());
+	{
+		count = (fun () -> ta.count() + tb.count());
+		next = (fun () -> !append_next ());
+	}
+
+let concat t =
+	let concat_ref = ref _dummy in
+	let rec concat_next() =
+		let tn = t.next() in
+		concat_ref := (fun () ->
+			try
+				tn.next()
+			with
+				No_more_elements ->
+					concat_next());
+		!concat_ref ()
+	in
+	concat_ref := concat_next;
+	from (fun () -> !concat_ref ())
+
+(*
+	Note : this new implementation is using a shared mutable list between the
+	original and the clone enum, so if one of the two as been garbaged, cached
+	items will be also.
+*)
 let clone t =
-	let cache_t = ref [] in
+	let cache = [Obj.magic ()] in
+	let cache_t = ref cache in
+	let cache_tc = ref cache in
 	let cache_t_count = ref 0 in
-	let cache_tc = ref [] in
 	let cache_tc_count = ref 0 in
+	(*
+		Here we can localy store the next and count functions because theses
+		can only be modified by another clone or force.
+
+		'force' does not cause any probleme since if first enumerate all
+		elements, so the other clone cache will be filled in.
+
+		'clone' will just add another cache level, without causing any
+		trouble.
+
+		In order to keep clone working, no other Enum function should
+		modify the next and/or count functions after creation
+		(append and concat have been modified in this way).
+	*)
 	let fnext = t.next in
 	let fcount = t.count in
+	let global_count = ref 0 in
+	let global_fcount = ref _dummy in
+	(* 
+		since counting elements can make the next function to be called,
+		we need this hack to avoid bugs in counting when 'force' occurs.
+	*)
+	global_fcount := (fun () ->
+		global_count := 0;
+		let count = fcount() in
+		global_count := !global_count + count;
+		global_fcount := (fun () -> !global_count);
+		count);
 	let tc = {
 		next = (fun () ->
 					match !cache_tc with
-					| [] ->
+					| [x] as l ->
 						let e = fnext() in
+						let r = [ e ] in
+						decr global_count;
 						incr cache_t_count;
-						cache_t := e :: !cache_t;
+						Obj.set_field (Obj.repr l) 1 (Obj.repr r);
+						cache_tc := r;
 						e
-					| h :: t ->
+					| _ :: (h :: t as l) ->
 						decr cache_tc_count;
-						cache_tc := t;
-						h);
-		count = (fun () -> fcount() + !cache_tc_count);
+						cache_tc := l;
+						h
+					| [] -> assert false);
+		count = (fun () -> !global_fcount () + !cache_tc_count);
 	} in
 	t.next <- (fun () ->
 		match !cache_t with
-		| [] ->
+		| [x] as l ->
 			let e = fnext() in
+			let r = [ e ] in
+			decr global_count;
 			incr cache_tc_count;
-			cache_tc := e :: !cache_tc;
+			Obj.set_field (Obj.repr l) 1 (Obj.repr r);
+			cache_t := r;
 			e
-		| h :: t ->
+		| _ :: (h :: t as l) ->
 			decr cache_t_count;
-			cache_t := t;
-			h);
-	t.count <- (fun () -> fcount() + !cache_t_count);
+			cache_t := l;
+			h
+		| [] -> assert false);
+	t.count <- (fun () -> !global_fcount () + !cache_t_count);
 	tc
