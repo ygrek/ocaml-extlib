@@ -1,4 +1,4 @@
-(* 
+(*
  * DynArray - Resizeable Ocaml arrays
  * Copyright (C) 2003 Brian Hurt
  * Copyright (C) 2003 Nicolas Cannasse
@@ -29,10 +29,10 @@ external imake : int -> int -> 'a intern = "obj_block"
 external iget : 'a intern -> int -> 'a = "%obj_field"
 external iset : 'a intern -> int -> 'a -> unit = "%obj_set_field"
 
-type 'a t = { 
+type 'a t = {
 	mutable arr : 'a intern;
-	mutable len : int; 
-	mutable resize: resizer_t; 
+	mutable len : int;
+	mutable resize: resizer_t;
 }
 
 exception Invalid_arg of int * string * string
@@ -48,13 +48,13 @@ let exponential_resizer ~currslots ~oldlength ~newlength =
 		1
 	else if currslots < newlength then
 		doubler currslots
-	else 
+	else
 		halfer currslots
 
 let step_resizer step =
 	if step <= 0 then invalid_arg step "step_resizer" "step";
 	(fun ~currslots ~oldlength ~newlength ->
-		if currslots < newlength || newlength < (currslots - step) 
+		if currslots < newlength || newlength < (currslots - step)
 		then
 		   (newlength + step - (newlength mod step))
 		else
@@ -77,7 +77,7 @@ let default_resizer = conservative_exponential_resizer
 
 let changelen (d : 'a t) newlen =
 	let oldsize = ilen d.arr in
-	let r = d.resize 
+	let r = d.resize
 			~currslots:oldsize
 			~oldlength:d.len
 			~newlength:newlen
@@ -105,14 +105,14 @@ let compact d =
 		d.arr <- newarr;
 	end
 
-let create() = 
+let create() =
 	{
 		resize = default_resizer;
 		len = 0;
 		arr = imake 0 0;
 	}
 
-let make initsize = 
+let make initsize =
 	if initsize < 0 then invalid_arg initsize "make" "size";
 	{
 		resize = default_resizer;
@@ -141,11 +141,11 @@ let get_resizer d =
 let empty d =
 	d.len = 0
 
-let get d idx = 
+let get d idx =
 	if idx < 0 || idx >= d.len then invalid_arg idx "get" "index";
 	iget d.arr idx
 
-let last d = 
+let last d =
 	if d.len = 0 then invalid_arg 0 "last" "<array len is 0>";
 	iget d.arr (d.len - 1)
 
@@ -171,35 +171,62 @@ let delete d idx =
 	if idx < 0 || idx >= d.len then invalid_arg idx "delete" "index";
 	let oldsize = ilen d.arr in
 	(* we don't call changelen because we want to blit *)
-	let r = d.resize 
+	let r = d.resize
 		~currslots:oldsize
 		~oldlength:d.len
 		~newlength:(d.len - 1)
 	in
-	d.len <- d.len - 1;
-	let newsize = (if r < d.len then d.len else r) in
+	let newsize = (if r < d.len - 1 then d.len - 1 else r) in
 	if oldsize <> newsize then begin
 		let newarr = imake 0 newsize in
 		for i = 0 to idx - 1 do
 			iset newarr i (iget d.arr i);
 		done;
-		for i = idx to d.len - 1 do
+		for i = idx to d.len - 2 do
 			iset newarr i (iget d.arr (i+1));
 		done;
 		d.arr <- newarr;
 	end else begin
-		if idx = d.len then
-			(* erase for GC *)
-			iset d.arr idx (Obj.magic 0)
-		else begin
-			for i = idx to d.len - 1 do
-				iset d.arr i (iget d.arr (i+1));
-			done;
-			iset d.arr d.len (Obj.magic 0)
-		end;
-	end
+		for i = idx to d.len - 2 do
+			iset d.arr i (iget d.arr (i+1));
+		done;
+		iset d.arr (d.len - 1) (Obj.magic 0)
+	end;
+	d.len <- d.len - 1
 
-let delete_last d = 
+
+let delete_range d idx len =
+	if len < 0 then invalid_arg len "delete_range" "length";
+	if idx < 0 || idx + len > d.len then invalid_arg idx "delete_range" "index";
+	let oldsize = ilen d.arr in
+	(* we don't call changelen because we want to blit *)
+	let r = d.resize
+		~currslots:oldsize
+		~oldlength:d.len
+		~newlength:(d.len - len)
+	in
+	let newsize = (if r < d.len - len then d.len - len else r) in
+	if oldsize <> newsize then begin
+		let newarr = imake 0 newsize in
+		for i = 0 to idx - 1 do
+			iset newarr i (iget d.arr i);
+		done;
+		for i = idx to d.len - len - 1 do
+			iset newarr i (iget d.arr (i+len));
+		done;
+		d.arr <- newarr;
+	end else begin
+		for i = idx to d.len - len - 1 do
+			iset d.arr i (iget d.arr (i+len));
+		done;
+		for i = d.len - len to d.len - 1 do
+			iset d.arr i (Obj.magic 0)
+		done;
+	end;
+	d.len <- d.len - len
+
+
+let delete_last d =
 	if d.len <= 0 then invalid_arg 0 "delete_last" "<array len is 0>";
 	(* erase for GC, in case changelen don't resize our array *)
 	iset d.arr (d.len - 1) (Obj.magic 0);
@@ -227,9 +254,9 @@ let rec blit src srcidx dst dstidx len =
 		done
 
 let append src dst =
-	blit src 0 dst dst.len src.len 
+	blit src 0 dst dst.len src.len
 
-let to_list d = 
+let to_list d =
 	let rec loop idx accum =
 		if idx < 0 then accum else loop (idx - 1) (iget d.arr idx :: accum)
 	in
@@ -237,7 +264,7 @@ let to_list d =
 
 let to_array d =
 	if d.len = 0 then begin
-		(* since the empty array is an atom, we don't care if float or not *)	
+		(* since the empty array is an atom, we don't care if float or not *)
 		[||]
 	end else begin
 		let arr = Array.make d.len (iget d.arr 0) in
@@ -273,7 +300,7 @@ let of_array src =
 		end else
 			(* copy the fields *)
 			idup (Obj.magic src : 'a intern))
-	in	
+	in
 	{
 		resize = default_resizer;
 		len = size;

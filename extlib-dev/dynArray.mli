@@ -89,6 +89,11 @@ val delete_last : 'a t -> unit
 (** [delete_last darr] deletes the last element of [darr]. This is equivalent
 	of doing [delete darr ((length darr) - 1)]. *)
 
+val delete_range : 'a t -> int -> int -> unit
+(** [delete_range darr p len] deletes [len] elements starting at index [p].
+	All elements with an index greater than [p+len] are moved to fill
+	in the hole. *)
+
 val blit : 'a t -> int -> 'a t -> int -> int -> unit
 (** [blit src srcidx dst dstidx len] copies [len] elements from [src]
 	starting with index [srcidx] to [dst] starting at [dstidx]. *)
@@ -131,11 +136,12 @@ val sub : 'a t -> int -> int -> 'a t
 
 val iter : ('a -> unit) -> 'a t -> unit
 (** [iter f darr] calls the function [f] on every element of [darr].  It
-	is equivalent to [for i = 0 to length darr do f (get darr i) done;] *)
+	is equivalent to [for i = 0 to length darr - 1 do f (get darr i) done;] *)
 
 val iteri : (int -> 'a -> unit) -> 'a t -> unit
 (** [iter f darr] calls the function [f] on every element of [darr].  It
-	is equivalent to [for i = 0 to length darr do f i (get darr i) done;] *)
+	is equivalent to [for i = 0 to length darr - 1 do f i (get darr i) done;]
+	*)
 
 val map : ('a -> 'b) -> 'a t -> 'b t
 (** [map f darr] applies the function [f] to every element of [darr]
