@@ -486,10 +486,13 @@ module Formatter =
                 | [] -> ())
              help;
 
-           if Buffer.nth buf (Buffer.length buf - 1) <> '\n' then
-             Buffer.add_char buf '\n';
-
-           Buffer.contents buf
+           let contents =
+             Buffer.contents buf
+           in
+             if String.length contents > 0 && not (String.ends_with contents "\n") then
+               contents ^ "\n"
+             else
+               contents
       }
 
     let titled_formatter ?(level = ref 0) ?(indent = ref 0) 
