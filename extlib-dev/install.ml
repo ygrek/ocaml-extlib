@@ -99,7 +99,7 @@ let install() =
 		| "n" | "N" -> false
 		| _ -> failwith "Invalid choice, exit.");
 	in
-	if doc then run (sprintf "mkdir %sdoc" dest);
+	if doc && not (Sys.file_exists "doc") then run (sprintf "mkdir %sdoc" dest);
 	run (sprintf "ocamlc -c %s" (m_list ".mli"));
 	if byte then begin
 		List.iter (fun m -> run (sprintf "ocamlc -c %s.ml" m)) modules;
