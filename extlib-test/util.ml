@@ -19,7 +19,8 @@
  *)
 
 let log s = 
-  Printf.printf "%s\n" s
+  Printf.printf "%s\n" s;
+  flush stdout
 
 let random_char () = 
   char_of_int (Random.int 256)
@@ -45,7 +46,7 @@ let random_string_len len =
 
 let run_test ?(test_name="<unknown>") f = 
   try
-    Printf.printf "\nrun: %s" test_name;
+    Printf.printf "run: %s\n" test_name;
     flush stdout;
     f ();
   with 

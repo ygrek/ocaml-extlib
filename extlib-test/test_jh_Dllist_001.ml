@@ -18,5 +18,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
-let test () =
-  Util.run_test ~test_name:"ExtString" Test_jh_ExtString.test
+let test_simple () = 
+  for i = 1 to 5 do
+    let rec make_lst accu n = 
+      if n < i then make_lst (i::accu) (n+1)
+      else accu in
+    let lst = make_lst [] 0 in
+    let dlst = Dllist.of_list lst in
+    assert (List.length lst = Dllist.length dlst);
+    List.iter 
+      (fun e -> 
+         let dl_elem = Dllist.get dlst in
+         assert (e = dl_elem);
+         Dllist.remove dlst) lst;
+  done
+
+let test () = 
+  Util.run_test ~test_name:"jh_Dllist.test_simple" test_simple

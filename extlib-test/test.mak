@@ -20,7 +20,9 @@ SOURCES:=\
 EXTLIB_DIR:=../extlib-dev
 
 all:
-	ocamlc -I $(EXTLIB_DIR) -g extLib.cma $(SOURCES) -o $(RESULT)
+	ocamlc -o mktest str.cma unix.cma mktest.ml
+	./mktest
+#	ocamlc -I $(EXTLIB_DIR) -g extLib.cma $(SOURCES) -o $(RESULT)
 
 opt:
 	ocamlopt -I $(EXTLIB_DIR) extLib.cmxa $(SOURCES) -o $(RESULT)
