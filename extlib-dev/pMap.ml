@@ -1,5 +1,5 @@
 (*
- * pMap - Polymorphic maps
+ * PMap - Polymorphic maps
  * Copyright (C) 1996-2003 Xavier Leroy, Nicolas Cannasse, Markus Mottl
  *
  * This library is free software; you can redistribute it and/or
@@ -129,19 +129,33 @@ let iter f { map = map } =
 let map f { cmp = cmp; map = map } =
   let rec loop = function
     | Empty -> Empty
-    | Node (l, k, v, r, h) -> Node (loop l, k, f v, loop r, h) in
+    | Node (l, k, v, r, h) -> 
+	  let l = loop l in
+	  let r = loop r in
+	  Node (l, k, f v, r, h) in
   { cmp = cmp; map = loop map }
 
 let mapi f { cmp = cmp; map = map } =
   let rec loop = function
     | Empty -> Empty
-    | Node (l, k, v, r, h) -> Node (loop l, k, f k v, loop r, h) in
+    | Node (l, k, v, r, h) ->
+	  let l = loop l in
+	  let r = loop r in
+	  Node (l, k, f k v, r, h) in
   { cmp = cmp; map = loop map }
 
 let fold f { cmp = cmp; map = map } acc =
   let rec loop acc = function
     | Empty -> acc
-    | Node (l, k, v, r, _) -> loop l (f k v (loop r acc)) in
+    | Node (l, k, v, r, _) ->
+	  loop (f v (loop acc l)) r in
+  loop acc map
+
+let foldi f { cmp = cmp; map = map } acc =
+  let rec loop acc = function
+    | Empty -> acc
+	| Node (l, k, v, r, _) ->
+       loop (f k v (loop acc l)) r in
   loop acc map
 
 let enum m =
