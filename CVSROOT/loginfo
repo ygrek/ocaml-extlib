@@ -23,7 +23,7 @@
 # For example:
 #
 
-ALL (echo ""; id; echo %s; date; cat) >> $CVSROOT/CVSROOT/commit.log
+ALL (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commit.log
 
 # or
 #DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
