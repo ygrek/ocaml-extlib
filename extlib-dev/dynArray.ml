@@ -225,6 +225,9 @@ let delete_range d idx len =
 	end;
 	d.len <- d.len - len
 
+let clear d =
+	d.len <- 0;
+	d.arr <- imake 0 0
 
 let delete_last d =
 	if d.len <= 0 then invalid_arg 0 "delete_last" "<array len is 0>";
@@ -235,7 +238,7 @@ let delete_last d =
 let rec blit src srcidx dst dstidx len =
 	if len < 0 then invalid_arg len "blit" "len";
 	if srcidx < 0 || srcidx + len > src.len then invalid_arg srcidx "blit" "source index";
-	if dstidx < 0 || dstidx >= dst.len then invalid_arg dstidx "blit" "dest index";
+	if dstidx < 0 || dstidx > dst.len then invalid_arg dstidx "blit" "dest index";
 	let newlen = dstidx + len in
 	if newlen > ilen dst.arr then begin
 		(* this case could be inlined so we don't blit on just-copied elements *)

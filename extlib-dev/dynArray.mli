@@ -94,6 +94,9 @@ val delete_range : 'a t -> int -> int -> unit
 	All elements with an index greater than [p+len] are moved to fill
 	in the hole. *)
 
+val clear : 'a t -> unit
+(** remove all elements from the array and resize it to 0. *)
+
 val blit : 'a t -> int -> 'a t -> int -> int -> unit
 (** [blit src srcidx dst dstidx len] copies [len] elements from [src]
 	starting with index [srcidx] to [dst] starting at [dstidx]. *)
