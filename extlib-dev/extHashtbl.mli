@@ -24,7 +24,7 @@ module Hashtbl :
   (** The wrapper module *)
   sig
 
-	type ('a,'b) t
+	type ('a,'b) t = ('a,'b) Hashtbl.t
 	(** The type of a hashtable. *)
 
 	(** {6 New Functions} *)
