@@ -118,6 +118,6 @@ let test () =
   Util.run_test ~test_name:"jh_ExtString.t_map" t_map;
   Util.run_test ~test_name:"jh_ExtString.t_lchop" t_lchop;
   Util.run_test ~test_name:"jh_ExtString.t_rchop" t_rchop;
-(*  Util.run_test ~test_name:"jh_ExtString.t_split" t_split;*)
+  Util.run_test ~test_name:"jh_ExtString.t_split" t_split;
   Util.run_test ~test_name:"jh_ExtString.t_replace_1" t_replace1;
   Util.run_test ~test_name:"jh_ExtString.t_strip" t_strip
