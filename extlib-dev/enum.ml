@@ -63,6 +63,12 @@ let from f =
 	e.count <- (fun () -> force e; e.count());
 	e
 
+let next t =
+	try
+		Some (t.next())
+	with
+		No_more_elements -> None
+
 let count t =
 	t.count()
 
@@ -87,12 +93,12 @@ let iteri f t =
 		No_more_elements -> ()
 
 let iter2 f t u =
-	let rec loop idx =
+	let rec loop () =
 		f (t.next()) (u.next());
-		loop (idx + 1)
+		loop ()
 	in
 	try
-		loop 0
+		loop ()
 	with
 		No_more_elements -> ()
 
@@ -169,10 +175,10 @@ let map f t =
 	}
 
 let mapi f t =
-	let idx = ref 0 in
+	let idx = ref (-1) in
 	{
 		count = t.count;
-		next = (fun () -> let i = !idx in incr idx; f i (t.next()));
+		next = (fun () -> incr idx; f !idx (t.next()));
 	}
 
 let map2 f t u =
@@ -182,10 +188,10 @@ let map2 f t u =
 	}
 
 let map2i f t u =
-	let idx = ref 0 in
+	let idx = ref (-1) in
 	{
 		count = (fun () -> (min (t.count()) (u.count())));
-		next = (fun () -> let i = !idx in incr idx; f i (t.next()) (u.next()));
+		next = (fun () -> incr idx; f !idx (t.next()) (u.next()));
 	}
 
 let filter f t =
@@ -193,7 +199,7 @@ let filter f t =
 		let x = t.next() in
 		if f x then x else next()
 	in
-	Enum.from next
+	from next
 
 let append ta tb = 
 	let t = {

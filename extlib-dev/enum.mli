@@ -48,6 +48,8 @@ val force : 'a t -> unit
 
 val clone : 'a t -> 'a t
 
+val next : 'a t -> 'a option
+
 (* Lazy operations, cost O(1) *)
 
 val map : ('a -> 'b) -> 'a t -> 'b t
