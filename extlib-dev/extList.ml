@@ -119,6 +119,18 @@ let take n l =
 	loop n dummy l;
 	dummy.tl
 
+(* takewhile and dropwhile by Richard W.M. Jones. *)
+let rec takewhile f = function
+  | [] -> []
+  | x :: xs when f x -> x :: takewhile f xs
+  | _ -> []
+
+let rec dropwhile f = function
+  | [] -> []
+  | x :: xs when f x -> dropwhile f xs
+  | xs -> xs
+
+
 let rec unique ?(cmp = ( = )) l =
 	let rec loop dst = function
 		| [] -> ()
@@ -345,6 +357,15 @@ let rec init size f =
 		let r = { hd = f 0; tl = [] } in
 		loop r 1;
 		inj r
+
+(* make by Richard W.M. Jones. *)
+let make i x =
+  if i < 0 then invalid_arg "ExtList.List.make";
+  let rec make' x = function
+    | 0 -> []
+    | i -> x :: make' x (i-1)
+  in
+  make' x i
 
 let mapi f = function
 	| [] -> []

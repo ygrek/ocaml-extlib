@@ -38,6 +38,11 @@ module List :
 	 the results of (f 0),(f 1).... (f (n-1)).
 	 Raise [Invalid_arg "ExtList.init"] if n < 0.*)
 
+	val make : int -> 'a -> 'a list
+	  (** Similar to [String.make], [make n x] returns a
+	    * list containing [n] elements [x].
+    	    *)
+
 	val first : 'a list -> 'a
 	(** Returns the first element of the list, or raise [Empty_list] if
 	 the list is empty (similar to [hd]). *)
@@ -84,7 +89,7 @@ module List :
 	 using ( = ). *)
 
 	val remove_if : ('a -> bool) -> 'a list -> 'a list
-	(** [remove_if cmp l x] is similar to [remove], but with [cmp] used
+	(** [remove_if cmp l] is similar to [remove], but with [cmp] used
 	 instead of ( = ). *)
 
 	val remove_all : 'a list -> 'a -> 'a list
@@ -98,6 +103,14 @@ module List :
 	val drop : int -> 'a list -> 'a list
 	(** [drop n l] returns [l] without the first [n] elements, or the empty
 	 list if [l] have less than [n] elements. *)
+
+	val takewhile : ('a -> bool) -> 'a list -> 'a list
+	  (** [takewhile f xs] returns the first elements of list [xs]
+	      which satisfy the predicate [f]. *)
+
+	val dropwhile : ('a -> bool) -> 'a list -> 'a list
+	  (** [dropwhile f xs] returns the list [xs] with the first
+	      elements satisfying the predicate [f] dropped. *)
 
 	(** {6 Enum functions} *)
 
