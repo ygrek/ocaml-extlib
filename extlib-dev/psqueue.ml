@@ -24,6 +24,11 @@ exception Not_found
 
 exception Exists
 
+(* Used by the modification routines to say what sort of balancing is
+ * needed
+ *)
+type balance_t = NoBalance | Insert | Delete;;
+
 (* Color of a node in a loser tree (used for balancing) *)
 type color_t = Red | Black
 
@@ -40,6 +45,7 @@ type ('a, 'b) psq_ltree_t
 	         * 'a                     (* search key *)
 	         * ('a, 'b) psq_ltree_t   (* left subtree *)
 	         * ('a, 'b) psq_ltree_t   (* right subtree *)
+
 
 
 (* A winner tree is a topped loser tree- i.e. a loser tree with the
@@ -108,214 +114,206 @@ let finalize a =
 			              l_right)), w_maxkey)
 		| _ -> a
 
+(* Rotate the node left, which has the effect of shortening the right
+ * branch and lengthening the left branch:
+ *
+ *      A                B
+ *     / \              / \
+ *    /   \            /   \
+ *   C     B   ==>    A     D
+ *        / \        / \
+ *       E   D      C   E
+ *
+ * Note that we have to deal with updating the dominance, and we may
+ * have to swap A and B (depending).  Also note that we may have
+ * allocated a new B, so we pass the right child in instead of picking
+ * it out of A.  Note also we pass in what color the new root and 
+ * child nodes should be.
+ *)
+let rotate_left pricmp a b rootcol childcol =
+	match a, b with
+
+		(*
+		 *      A                B
+		 *     / \d             / \d
+		 *    /   \            /   \
+		 *   C     B   ==>    A     D  (no swap)
+		 *        / \d       / \d
+		 *       E   D      C   E
+		 *
+		 *)
+		| Loser(_, Right, a_key, a_data, a_skey, c, _),
+		  Loser(_, Right, b_key, b_data, b_skey, d, e)
+		->
+			Loser(rootcol, Right, b_key, b_data, b_skey,
+			      Loser(childcol, Right, a_key, a_data, a_skey, c, d), e)
+
+
+		(*
+		 *      A                A
+		 *     / \d             / \d
+		 *    /   \            /   \
+		 *   C     B   ==>    B     D   (swap required)
+		 *       d/ \        / \d
+		 *       E   D      C   E
+		 *
+		 *)
+		(* Note that when we swap A and B, we don't swap search keys *)
+		| Loser(_, Right, a_key, a_data, a_skey, c, _),
+		  Loser(_, Left, b_key, b_data, b_skey, d, e)
+		->
+			Loser(rootcol, Right, a_key, a_data, b_skey,
+			      Loser(childcol, Right, b_key, b_data, a_skey, c, d), e)
+
+
+		(*
+		 *      A                B
+		 *    d/ \              / \d
+		 *    /   \            /   \
+		 *   C     B   ==>    A     D  (no swap)
+		 *        / \d      d/ \
+		 *       E   D      C   E
+		 *
+		 *)
+		| Loser(_, Left, a_key, a_data, a_skey, c, _),
+		  Loser(_, Right, b_key, b_data, b_skey, d, e)
+		->
+			Loser(rootcol, Right, b_key, b_data, b_skey,
+			      Loser(childcol, Left, a_key, a_data, a_skey, c, d), e)
+
+
+		(*
+		 *      A                B            A
+		 *    d/ \             d/ \         d/ \
+		 *    /   \            /   \        /   \
+		 *   C     B   ==>    A     D or   B     D (swap maybe)
+		 *       d/ \       d/ \          / \d
+		 *       E   D      C   E        C   E
+		 *
+		 *)
+		| Loser(_, Left, a_key, a_data, a_skey, c, _),
+		  Loser(_, Left, b_key, b_data, b_skey, d, e)
+		->
+			if ((pricmp a_data b_data) < 0) then
+				(* swap required *)
+				(* Note that when we swap A and B, we don't swap
+				 * search keys
+				 *)
+				Loser(rootcol, Left, a_key, a_data, b_skey,
+				      Loser(childcol, Right, b_key, b_data, a_skey, c, d), e)
+			else
+				(* no swap *)
+				Loser(rootcol, Left, b_key, b_data, b_skey,
+				      Loser(childcol, Left, a_key, a_data, a_skey, c, d), e)
+
+		(* We should never hit this case- basically, this means we
+		 * passed Start in as one of the two nodes, which is bad.
+		 *)
+		| _ -> assert false
+
+
+(* Rotate the node right, which has the effect of shortening the left
+ * branch and lengthening the right branch:
+ *
+ *       A              B
+ *      / \            / \
+ *     /   \          /   \
+ *    B     C   ==>  D     A
+ *   / \                  / \
+ *  D   E                E   C
+ *
+ * Note that we have to deal with updating the dominance, and we may
+ * have to swap A and B (depending).  Also note that we may have
+ * allocated a new B, so we pass the left child in instead of picking
+ * it out of A.  Note also we pass in what color the new root and child
+ * nodes should be.
+ *)
+let rotate_right pricmp a b rootcol childcol =
+	match a, b with
+
+		(*
+		 *       A              B
+		 *     d/ \           d/ \
+		 *     /   \          /   \
+		 *    B     C   ==>  D     A    (no swap)
+		 *  d/ \                 d/ \
+		 *  D   E                E   C
+		 *
+		 *)
+		| Loser(_, Left, a_key, a_data, a_skey, _, c),
+		  Loser(_, Left, b_key, b_data, b_skey, d, e)
+		->
+			Loser(rootcol, Left, b_key, b_data, b_skey, d,
+			      Loser(childcol, Left, a_key, a_data, a_skey, e, c))
+
+		(*
+		 *       A              A
+		 *     d/ \           d/ \
+		 *     /   \          /   \
+		 *    B     C   ==>  D     B   (swap required)
+		 *   / \d                d/ \
+		 *  D   E                E   C
+		 *
+		 *)
+		(* Note that when we swap A and B, we don't swap search keys *)
+		| Loser(_, Left, a_key, a_data, a_skey, _, c),
+		  Loser(_, Right, b_key, b_data, b_skey, d, e)
+		->
+			Loser(rootcol, Left, a_key, a_data, b_skey, d,
+			      Loser(childcol, Left, b_key, b_data, a_skey, e, c))
+
+		(*
+		 *       A              B
+		 *      / \d          d/ \
+		 *     /   \          /   \
+		 *    B     C   ==>  D     A    (no swap)
+		 *  d/ \                  / \d
+		 *  D   E                E   C
+		 *
+		 *)
+		| Loser(_, Right, a_key, a_data, a_skey, _, c),
+		  Loser(_, Left, b_key, b_data, b_skey, d, e)
+		->
+			Loser(rootcol, Left, b_key, b_data, b_skey, d,
+			      Loser(childcol, Right, a_key, a_data, a_skey, e, c))
+
+		(*
+		 *       A              B             A
+		 *      / \d           / \d          / \d
+		 *     /   \          /   \         /   \
+		 *    B     C   ==>  D     A   or  D     B  (swap maybe)
+		 *   / \d                 / \d         d/ \
+		 *  D   E                E   C         E   C
+		 *
+		 *)
+		| Loser(_, Right, a_key, a_data, a_skey, _, c),
+		  Loser(_, Right, b_key, b_data, b_skey, d, e)
+		->
+			if ((pricmp a_data b_data) < 0) then
+				(* swap required *)
+				(* Note that when we swap A and B, we don't swap
+				 * search keys
+				 *)
+				Loser(rootcol, Right, a_key, a_data, b_skey, d,
+				      Loser(childcol, Left, b_key, b_data, a_skey, e, c))
+			else
+				(* no swap *)
+				Loser(rootcol, Right, b_key, b_data, b_skey, d,
+				      Loser(childcol, Right, a_key, a_data, a_skey, e, c))
+
+		| _ -> assert false
+
+
 
 (* Balance a loser node.  As ugly as this routine is, it's still O(1).
  * Which is good, as we call it on every loser node as we ascend up the
  * loser tree.
  *)
-let balance pricmp a =
+let insert_left pricmp a =
 
-	(* Rotate the node left, which has the effect of shortening the right
-	 * branch and lengthening the left branch:
-	 *
-	 *      A                B
-	 *     / \              / \
-	 *    /   \            /   \
-	 *   C     B   ==>    A     D
-	 *        / \        / \
-	 *       E   D      C   E
-	 *
-	 * Note that we have to deal with updating the dominance, and we may
-	 * have to swap A and B (depending).  Also note that we may have
-	 * allocated a new B, so we pass the right child in instead of picking
-	 * it out of A.  Note also we pass in what color the new root node
-	 * should be (the new left child is always red).
-	 *)
-	let rotate_left a b col =
-		match a, b with
-
-			(*
-			 *      A                B
-			 *     / \d             / \d
-			 *    /   \            /   \
-			 *   C     B   ==>    A     D  (no swap)
-			 *        / \d       / \d
-			 *       E   D      C   E
-			 *
-			 *)
-			| Loser(_, Right, a_key, a_data, a_skey, c, _),
-			  Loser(_, Right, b_key, b_data, b_skey, d, e)
-			->
-				Loser(col, Right, b_key, b_data, b_skey,
-				      Loser(Red, Right, a_key, a_data, a_skey, c, d), e)
-
-
-			(*
-			 *      A                A
-			 *     / \d             / \d
-			 *    /   \            /   \
-			 *   C     B   ==>    B     D   (swap required)
-			 *       d/ \        / \d
-			 *       E   D      C   E
-			 *
-			 *)
-			(* Note that when we swap A and B, we don't swap search keys *)
-			| Loser(_, Right, a_key, a_data, a_skey, c, _),
-			  Loser(_, Left, b_key, b_data, b_skey, d, e)
-			->
-				Loser(col, Right, a_key, a_data, b_skey,
-				      Loser(Red, Right, b_key, b_data, a_skey, c, d), e)
-
-
-			(*
-			 *      A                B
-			 *    d/ \              / \d
-			 *    /   \            /   \
-			 *   C     B   ==>    A     D  (no swap)
-			 *        / \d      d/ \
-			 *       E   D      C   E
-			 *
-			 *)
-			| Loser(_, Left, a_key, a_data, a_skey, c, _),
-			  Loser(_, Right, b_key, b_data, b_skey, d, e)
-			->
-				Loser(col, Right, b_key, b_data, b_skey,
-				      Loser(Red, Left, a_key, a_data, a_skey, c, d), e)
-
-
-			(*
-			 *      A                B            A
-			 *    d/ \             d/ \         d/ \
-			 *    /   \            /   \        /   \
-			 *   C     B   ==>    A     D or   B     D (swap maybe)
-			 *       d/ \       d/ \          / \d
-			 *       E   D      C   E        C   E
-			 *
-			 *)
-			| Loser(_, Left, a_key, a_data, a_skey, c, _),
-			  Loser(_, Left, b_key, b_data, b_skey, d, e)
-			->
-				if ((pricmp a_data b_data) < 0) then
-					(* swap required *)
-					(* Note that when we swap A and B, we don't swap
-					 * search keys
-					 *)
-					Loser(col, Left, a_key, a_data, b_skey,
-					      Loser(Red, Right, b_key, b_data, a_skey, c, d), e)
-				else
-					(* no swap *)
-					Loser(col, Left, b_key, b_data, b_skey,
-					      Loser(Red, Left, a_key, a_data, a_skey, c, d), e)
-
-			(* We should never hit this case- basically, this means we
-			 * passed Start in as one of the two nodes, which is bad.
-			 *)
-			| _ -> assert false
-
-
-	(* Rotate the node right, which has the effect of shortening the left
-	 * branch and lengthening the right branch:
-	 *
-	 *       A              B
-	 *      / \            / \
-	 *     /   \          /   \
-	 *    B     C   ==>  D     A
-	 *   / \                  / \
-	 *  D   E                E   C
-	 *
-	 * Note that we have to deal with updating the dominance, and we may
-	 * have to swap A and B (depending).  Also note that we may have
-	 * allocated a new B, so we pass the left child in instead of picking
-	 * it out of A.  Note also we pass in what color the new root node
-	 * should be (the new right child is always red).
-	 *)
-	and rotate_right a b col =
-		match a, b with
-
-			(*
-			 *       A              B
-			 *     d/ \           d/ \
-			 *     /   \          /   \
-			 *    B     C   ==>  D     A    (no swap)
-			 *  d/ \                 d/ \
-			 *  D   E                E   C
-			 *
-			 *)
-			| Loser(_, Left, a_key, a_data, a_skey, _, c),
-			  Loser(_, Left, b_key, b_data, b_skey, d, e)
-			->
-				Loser(col, Left, b_key, b_data, b_skey, d,
-				      Loser(Red, Left, a_key, a_data, a_skey, e, c))
-
-			(*
-			 *       A              A
-			 *     d/ \           d/ \
-			 *     /   \          /   \
-			 *    B     C   ==>  D     B   (swap required)
-			 *   / \d                d/ \
-			 *  D   E                E   C
-			 *
-			 *)
-			(* Note that when we swap A and B, we don't swap search keys *)
-			| Loser(_, Left, a_key, a_data, a_skey, _, c),
-			  Loser(_, Right, b_key, b_data, b_skey, d, e)
-			->
-				Loser(col, Left, a_key, a_data, b_skey, d,
-				      Loser(Red, Left, b_key, b_data, a_skey, e, c))
-
-			(*
-			 *       A              B
-			 *      / \d          d/ \
-			 *     /   \          /   \
-			 *    B     C   ==>  D     A    (no swap)
-			 *  d/ \                  / \d
-			 *  D   E                E   C
-			 *
-			 *)
-			| Loser(_, Right, a_key, a_data, a_skey, _, c),
-			  Loser(_, Left, b_key, b_data, b_skey, d, e)
-			->
-				Loser(col, Left, b_key, b_data, b_skey, d,
-				      Loser(Red, Right, a_key, a_data, a_skey, e, c))
-
-			(*
-			 *       A              B             A
-			 *      / \d           / \d          / \d
-			 *     /   \          /   \         /   \
-			 *    B     C   ==>  D     A   or  D     B  (swap maybe)
-			 *   / \d                 / \d         d/ \
-			 *  D   E                E   C         E   C
-			 *
-			 *)
-			| Loser(_, Right, a_key, a_data, a_skey, _, c),
-			  Loser(_, Right, b_key, b_data, b_skey, d, e)
-			->
-				if ((pricmp a_data b_data) < 0) then
-					(* swap required *)
-					(* Note that when we swap A and B, we don't swap
-					 * search keys
-					 *)
-					Loser(col, Right, a_key, a_data, b_skey, d,
-					      Loser(Red, Left, b_key, b_data, a_skey, e, c))
-				else
-					(* no swap *)
-					Loser(col, Right, b_key, b_data, b_skey, d,
-					      Loser(Red, Right, a_key, a_data, a_skey, e, c))
-
-			| _ -> assert false
-
-	in
+	(* If we know we have a black root, we don't need to balance anymore *)
 
 	match a with
-		Start -> a
-
-		(* If the current root is red, we just return.  If there is a
-		 * violation, we'll catch it at a higher level, unless this is the
-		 * true root.  In which case psq_finalize will simply color it
-		 * black.
-		 *)
-		| Loser(Red, _, _, _, _, _, _) -> a
-
 		(*
 		 * When any of the ? nodes are red:
 		 *
@@ -334,6 +332,7 @@ let balance pricmp a =
 		             (Loser(Red, _, _, _, _, _, _) as f),
 		             (Loser(Red, _, _, _, _, _, _) as g)))
 		->
+			Insert,
 			Loser(Red, a_dom, a_key, a_data, a_skey,
 			      Loser(Black, b_dom, b_key, b_data, b_skey, d, e),
 			      Loser(Black, c_dom, c_key, c_data, c_skey, f, g))
@@ -353,7 +352,7 @@ let balance pricmp a =
 		               Loser(Red, _, _, _, _, _, _), _) as b),
 		        ((Loser(Black,_,_,_,_,_,_)|Start) as c))
 		->
-			rotate_right a b Black
+			NoBalance, (rotate_right pricmp a b Black Red)
 
 		(*
 		 *       B                B              B
@@ -374,7 +373,44 @@ let balance pricmp a =
 			     as b),
 		        ((Loser(Black,_,_,_,_,_,_)|Start) as c))
 		->
-			rotate_right a (rotate_left b e Red) Black
+			NoBalance, (rotate_right pricmp a (rotate_left pricmp b e Red Red) 
+			                         Black Red)
+
+		(* Anything else, there are no violations. *)
+		| _ -> Insert, a
+
+
+(* Balance a loser node.  As ugly as this routine is, it's still O(1).
+ * Which is good, as we call it on every loser node as we ascend up the
+ * loser tree.
+ *)
+let insert_right pricmp a =
+
+	(* If we know we have a black root, we don't need to balance anymore *)
+
+	match a with
+		(*
+		 * When any of the ? nodes are red:
+		 *
+		 *      B               R
+		 *     / \             / \
+		 *    /   \           /   \
+		 *   R     R   ==>   B     B   (push down the black)
+		 *  / \   / \       / \   / \
+		 * ?   ? ?   ?     ?   ? ?   ?
+		 *)
+		| Loser(Black, a_dom, a_key, a_data, a_skey,
+		        Loser(Red, b_dom, b_key, b_data, b_skey,
+		             (Loser(Red, _, _, _, _, _, _) as d),
+		             (Loser(Red, _, _, _, _, _, _) as e)),
+		        Loser(Red, c_dom, c_key, c_data, c_skey,
+		             (Loser(Red, _, _, _, _, _, _) as f),
+		             (Loser(Red, _, _, _, _, _, _) as g)))
+		->
+			Insert,
+			Loser(Red, a_dom, a_key, a_data, a_skey,
+			      Loser(Black, b_dom, b_key, b_data, b_skey, d, e),
+			      Loser(Black, c_dom, c_key, c_data, c_skey, f, g))
 
 		(*
 		 *       B               B
@@ -391,7 +427,7 @@ let balance pricmp a =
 		        (Loser(Red, _, _, _, _, _,
 		               Loser(Red, _, _, _, _, _, _)) as b))
 		->
-			rotate_left a b Black
+			NoBalance, (rotate_left pricmp a b Black Red)
 
 		(*
 		 *    B             B                B
@@ -410,10 +446,253 @@ let balance pricmp a =
 		        (Loser(Red, _, _, _, _,
 		               (Loser(Red, _, _, _, _, _, _) as e), _) as b))
 		->
-			rotate_left a (rotate_right b e Red) Black
+			NoBalance, (rotate_left pricmp a (rotate_right pricmp b e Red Red) 
+			                        Black Red)
 
 		(* Anything else, there are no violations. *)
-		| _ -> a
+		| _ -> Insert, a
+
+
+let rec delete_left pricmp = function
+
+	(*     B          B
+	 *    / \   =>   / \
+	 *   R   ?      B   ?
+	 *
+	 * If the root of the left tree is red, we can simply color it black,
+	 * restoring the black height requirement.
+	 *)
+	| Loser(Black, adom, akey, adata, askey, 
+            Loser(Red, bdom, bkey, bdata, bskey, bleft, bright), aright)
+	->
+		NoBalance, Loser(Black, adom, akey, adata, askey,
+		                 Loser(Black, bdom, bkey, bdata, bskey, bleft, bright),
+		                 aright)
+
+	(* case 1 *)
+	(*      ?                ?
+	 *     / \              / \
+	 *    /   \            /   \
+	 *   B     R   ==>    R     B
+	 *        / \        / \
+	 *       B   B      B   B
+	 *
+	 * A rotate left, then we need to recurse down a level.
+	 *)
+	| Loser(col, _, _, _, _,
+	        (Loser(Black,_,_,_,_,_,_)|Start),
+	        Loser(Red, _, _, _, _,
+	              ((Loser(Black,_,_,_,_,_,_)|Start) as d),
+	              (Loser(Black,_,_,_,_,_,_)|Start))) as b
+	->
+		begin
+			match rotate_left pricmp b d col Red with
+				| Loser(col, dom, key, data, skey, left, right) ->
+					let bal, newleft = delete_left pricmp left in
+					let newroot = Loser(col, dom, key, data, skey,
+					                    newleft, right) in
+					if bal = NoBalance then
+						NoBalance, newroot
+					else
+						delete_left pricmp newroot
+				| _ -> assert false
+		end
+
+	(* case 2 *)
+	(*      B               B
+	 *     / \             / \
+	 *    /   \           /   \
+	 *   B     B    ==>  B     R    And we need to move up the tree
+	 *        / \             / \
+	 *       B   B           B   B
+	 *)
+	| Loser(Black, adom, akey, adata, askey, aleft,
+	        Loser(Black, bdom, bkey, bdata, bskey,
+	              ((Loser(Black,_,_,_,_,_,_)|Start) as bleft),
+	              ((Loser(Black,_,_,_,_,_,_)|Start) as bright)))
+	->
+		Delete, Loser(Black, adom, akey, adata, askey, aleft,
+		              Loser(Red, bdom, bkey, bdata, bskey, bleft, bright))
+
+	(*
+	 *      R                 B
+	 *     / \               / \
+	 *    /   \             /   \
+	 *   B     B    ==>    B     R    And the black is consumed
+	 *        / \               / \
+	 *       B   B             B   B
+	 *)
+	| Loser(Red, adom, akey, adata, askey, aleft,
+	        Loser(Black, bdom, bkey, bdata, bskey,
+	              ((Loser(Black,_,_,_,_,_,_)|Start) as bleft),
+	              ((Loser(Black,_,_,_,_,_,_)|Start) as bright)))
+	->
+		NoBalance, Loser(Black, adom, akey, adata, askey, aleft,
+		                 Loser(Red, bdom, bkey, bdata, bskey, bleft, bright))
+
+	(* case 3 *)
+	(*     ?              ?
+	 *    / \            / \
+	 *   /   \          /   \
+	 *  B     B   ==>  B     B
+	 *       / \              \
+	 *      R   B              R
+	 *                          \
+	 *                           B
+	 *
+	 * Right child is rotated right, and we try again at this level.
+	 *)
+	| Loser(acol, adom, akey, adata, askey, aleft,
+	        (Loser(Black,_,_,_,_,
+                   (Loser(Red,_,_,_,_,_,_) as c),
+	               (Loser(Black,_,_,_,_,_,_)|Start)) as b))
+	->
+		delete_left pricmp (Loser(acol, adom, akey, adata, askey, aleft,
+		                          (rotate_right pricmp b c Black Red)))
+
+	(* case 4 *)
+	(*      ?                ?
+	 *     / \              / \
+	 *    /   \            /   \
+	 *   B     B    ==>   B     B
+	 *        / \        / \
+	 *       ?   R      B   ?
+	 *)
+	| Loser(c, _, _, _, _, _, 
+            Loser(Black, ddom, dkey, ddata, dskey, dleft,
+                  Loser(Red, edom, ekey, edata, eskey, eleft, eright))) as b
+	->
+		NoBalance, (rotate_left pricmp b 
+		            (Loser(Black, ddom, dkey, ddata, dskey, dleft,
+		                  Loser(Black, edom, ekey, edata, eskey, 
+		                        eleft, eright)))
+		            c Black)
+
+	| _ as a -> Delete, a
+
+
+let rec delete_right pricmp = function
+
+	(*     B          B
+	 *    / \   =>   / \
+	 *   ?   R      ?   B
+	 *
+	 * If the root of the right tree is red, we can simply color it black,
+	 * restoring the black height requirement.
+	 *)
+	| Loser(Black, adom, akey, adata, askey, aleft,
+	        Loser(Red, bdom, bkey, bdata, bskey, bleft, bright))
+	->
+		NoBalance, Loser(Black, adom, akey, adata, askey, aleft,
+		      Loser(Black, bdom, bkey, bdata, bskey, bleft, bright))
+
+	(* case 1 *)
+	(*      ?                ?
+	 *     / \              / \
+	 *    /   \            /   \
+	 *   R     B   ==>    B     R
+	 *  / \                    / \
+	 * B   B                  B   B
+	 *
+	 * A rotate right, then we need to recurse down a level.
+	 *)
+	| Loser(col, _, _, _, _,
+	        (Loser(Red, _, _, _, _,
+	              (Loser(Black, _, _, _, _, _, _)|Start),
+	              (Loser(Black, _, _, _, _, _, _)|Start)) as d),
+	        (Loser(Black, _, _, _, _, _, _)|Start)) as b
+	->
+		begin
+			match rotate_right pricmp b d col Red with
+				| Loser(col, dom, key, data, skey, left, right) ->
+					let bal, newright = delete_right pricmp right in
+					let newroot = Loser(col, dom, key, data, skey,
+					                    left, newright) in
+					if bal = NoBalance then
+						NoBalance, newroot
+					else
+						delete_right pricmp newroot
+				| _ -> assert false
+		end
+
+	(* case 2 *)
+	(*      B               B
+	 *     / \             / \
+	 *    /   \           /   \
+	 *   B     B    ==>  R     B    And we need to move up the tree
+	 *  / \             / \
+	 * B   B           B   B
+	 *)
+	| Loser(Black, adom, akey, adata, askey, 
+	        Loser(Black, bdom, bkey, bdata, bskey,
+	              ((Loser(Black,_,_,_,_,_,_)|Start) as bleft),
+	              ((Loser(Black,_,_,_,_,_,_)|Start) as bright)),
+	        aright)
+	->
+		Delete, Loser(Black, adom, akey, adata, askey,
+		              Loser(Red, bdom, bkey, bdata, bskey, bleft, bright),
+		              aright)
+
+	(*
+	 *      R                 B
+	 *     / \               / \
+	 *    /   \             /   \
+	 *   B     B    ==>    R     B    And the black is consumed
+	 *  / \               / \
+	 * B   B             B   B
+	 *)
+	| Loser(Red, adom, akey, adata, askey,
+	        Loser(Black, bdom, bkey, bdata, bskey,
+	              ((Loser(Black,_,_,_,_,_,_)|Start) as bleft),
+	              ((Loser(Black,_,_,_,_,_,_)|Start) as bright)),
+	        aright)
+	->
+		NoBalance, Loser(Black, adom, akey, adata, askey,
+		                 Loser(Red, bdom, bkey, bdata, bskey, bleft, bright),
+		                 aright)
+
+	(* case 3 *)
+	(*      ?                  ?
+	 *     / \                / \
+	 *    /   \              /   \
+	 *   B     B   ==>      B     B
+	 *  / \                /
+	 * B   R              R
+	 *                   /
+	 *                  B
+	 *
+	 * Left child is rotated left, and we try again at this level.
+	 *)
+	| Loser(acol, adom, akey, adata, askey, 
+	        (Loser(Black,_,_,_,_,
+	               (Loser(Black,_,_,_,_,_,_)|Start),
+	               (Loser(Red,_,_,_,_,_,_) as c)) as b),
+	        aright)
+	->
+		delete_left pricmp (Loser(acol, adom, akey, adata, askey,
+		                          (rotate_left pricmp b c Black Red), aright))
+
+	(* case 4 *)
+	(*      ?                ?
+	 *     / \              / \
+	 *    /   \            /   \
+	 *   B     B    ==>   B     B
+	 *  / \                    / \
+	 * R   ?                  ?   B
+	 *)
+	| Loser(c, _, _, _, _,  
+            Loser(Black, ddom, dkey, ddata, dskey,
+                  Loser(Red, edom, ekey, edata, eskey, eleft, eright), 
+	              dright), _) 
+	  as b
+	->
+		NoBalance, (rotate_left pricmp b 
+		            (Loser(Black, ddom, dkey, ddata, dskey,
+		                  Loser(Black, edom, ekey, edata, eskey, 
+		                        eleft, eright), dright))
+		            c Black)
+
+	| _ as a -> Delete, a
 
 
 (* Given two winner trees, play the two winners to create a single combined
@@ -424,11 +703,23 @@ let balance pricmp a =
  * updating of an element, for example), the color is that of the loser
  * node we just destroyed.
  *)
-let play pricmp c a b =
-   match a, b with
-		| Void, Void -> Void
-		| Void, _ -> b
-		| _, Void -> a
+let play pricmp dir c a b bal =
+	let balance root =
+		match bal, dir with
+			| NoBalance, _ -> NoBalance, root
+			| Insert, Left -> insert_left pricmp root
+			| Insert, Right -> insert_right pricmp root
+			| Delete, Left -> delete_left pricmp root
+			| Delete, Right -> delete_right pricmp root
+	in
+	match a, b with
+		| Void, Void -> bal, Void
+		| Void, _ 
+		-> 
+			(if (bal = Delete) && (c = Red) then NoBalance else Delete), b
+		| _, Void 
+		-> 
+			(if (bal = Delete) && (c = Red) then NoBalance else Delete), a
 		| Winner(b_key, b_data, t, m),
 		  Winner(b'_key, b'_data, t', m')
 		->
@@ -438,15 +729,15 @@ let play pricmp c a b =
 			 * (and a lifetime supply of rice-a-roni, both boxes!).
 			 *)
 			if ((pricmp b_data b'_data) <= 0) then
-				Winner(b_key, b_data,
-				       (balance pricmp (Loser(c, Right, b'_key,
-			                                  b'_data, m, t, t'))),
-			           m')
+				let bal', root = balance (Loser(c, Right, b'_key,
+				                                b'_data, m, t, t'))
+				in
+				bal', Winner(b_key, b_data, root, m')
 			else
-				Winner(b'_key, b'_data,
-				       (balance pricmp (Loser(c, Left, b_key, b_data,
-				                              m, t, t'))),
-				       m')
+				let bal', root = balance (Loser(c, Left, b_key, b_data,
+				                              m, t, t'))
+				in
+				bal', Winner(b'_key, b'_data, root, m')
 
 
 (* Given a winner tree, create a psq_view of it.  This has the effect of
@@ -504,37 +795,40 @@ let modify found notfound empty k q =
 			Zero -> notfound ()
 			| One(b_key, b_data) ->
 				if ((q.keycmp k b_key) == 0) then
-					found b_key b_data
+					found b_key b_data 
 				else
 					begin
-						let b' = notfound () in
+						let bal, b' = notfound () in
 						match (b') with
-							| Void -> t
+							| Void -> bal, t
 							| Winner(b'_key, _, _, _) ->
 								if ((q.keycmp b'_key b_key) < 0) then
-									play q.pricmp Red b' t
+									play q.pricmp Left Red b' t bal
 								else
-									play q.pricmp Red t b'
+									play q.pricmp Right Red t b' bal
 					end
 			| Many(c, tl, tr) ->
 				if ((q.keycmp k (max_key tl)) <= 0) then
-					play q.pricmp c (modify_int tl) tr
+					let bal, newleft = modify_int tl in
+					play q.pricmp Left c newleft tr bal
 				else
-					play q.pricmp c tl (modify_int tr)
+					let bal, newright = modify_int tr in
+					play q.pricmp Right c tl newright bal
 	in
-		match q.tree with
-			| Void ->
-				{
-					keycmp = q.keycmp;
-					pricmp = q.pricmp;
-					tree = (empty ())
-				}
-			| _ ->
-				{
-					keycmp = q.keycmp;
-					pricmp = q.pricmp;
-					tree = (finalize (modify_int q.tree))
-				}
+	match q.tree with
+		| Void ->
+			{
+				keycmp = q.keycmp;
+				pricmp = q.pricmp;
+				tree = (empty ())
+			}
+		| _ ->
+			let _, root = modify_int q.tree in
+			{
+				keycmp = q.keycmp;
+				pricmp = q.pricmp;
+				tree = (finalize root)
+			}
 
 
 (* Returns the highest priority element of a priority search queue in O(1) *)
@@ -605,7 +899,7 @@ let contains k q =
 
 (* precise priority changes *)
 let adjust f k q =
-	let found key data = Winner(key, (f data), Start, key)
+	let found key data = NoBalance, Winner(key, (f data), Start, key)
 	and notfound () = raise Not_found
 	and empty () = raise Empty
 	in
@@ -614,8 +908,8 @@ let adjust f k q =
 
 (* imprecise priority changes *)
 let update f k q =
-	let found key data = Winner(key, (f data), Start, key)
-	and notfound () = Void
+	let found key data = NoBalance, Winner(key, (f data), Start, key)
+	and notfound () = NoBalance, Void
 	and empty () = Void
 	in
 		modify found notfound empty k q
@@ -624,7 +918,7 @@ let update f k q =
 (* precise insertion *)
 let add b_key b_data q =
 	let found b'_key b'_data = raise Exists
-	and notfound () = Winner(b_key, b_data, Start, b_key)
+	and notfound () = Insert, Winner(b_key, b_data, Start, b_key)
 	and empty () = Winner(b_key, b_data, Start, b_key)
 	in
 		modify found notfound empty b_key q
@@ -633,8 +927,8 @@ let add b_key b_data q =
 (* imprecise insertion *)
 let insert b_key b_data q =
 	let found b'_key b'_data = (* update *)
-			Winner(b_key, b_data, Start, b_key)
-	and notfound () = Winner(b_key, b_data, Start, b_key)
+			NoBalance, Winner(b_key, b_data, Start, b_key)
+	and notfound () = Insert, Winner(b_key, b_data, Start, b_key)
 	and empty () = Winner(b_key, b_data, Start, b_key)
 	in
 		modify found notfound empty b_key q
@@ -642,7 +936,7 @@ let insert b_key b_data q =
 
 (* precise deletion *)
 let remove k q =
-	let found key data = Void
+	let found key data = Delete, Void
 	and notfound () = raise Not_found
 	and empty () = raise Empty
 	in modify found notfound empty k q
@@ -650,8 +944,8 @@ let remove k q =
 
 (* imprecise deletion *)
 let delete k q =
-	let found key data = Void
-	and notfound () = Void
+	let found key data = Delete, Void
+	and notfound () = NoBalance, Void
 	and empty () = Void
 	in modify found notfound empty k q
 
