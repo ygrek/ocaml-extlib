@@ -107,6 +107,8 @@ module Hashtbl =
 		let h = create (if Enum.fast_count e then Enum.count e else 0) in
 		Enum.iter (fun (k,v) -> add h k v) e;
 		h
-		
+	
+	let count h =
+		(h_conv h).size
 
   end
