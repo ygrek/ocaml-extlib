@@ -1,1 +1,0 @@
-module XString = XString.String

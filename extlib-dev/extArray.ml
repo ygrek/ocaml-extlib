@@ -1,1 +1,0 @@
-module XArray = XArray.Array
