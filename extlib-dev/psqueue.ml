@@ -587,10 +587,10 @@ let find k q =
     in
         search q.keycmp found notfound empty k q.tree
 
-let query def k q =
-    let found x = x
-    and notfound () = def
-    and empty () = def
+let query k q =
+    let found x = Some(x)
+    and notfound () = None
+    and empty () = None
     in
         search q.keycmp found notfound empty k q.tree
 

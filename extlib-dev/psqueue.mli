@@ -112,10 +112,10 @@ val contains : 'a -> ('a, 'b) t -> bool
 (** [contains x q] evaluates to true if a binding for [x] exists in
     [q], false otherwise. *)
 
-val query : 'b -> 'a -> ('a, 'b) t -> 'b
+val query : 'a -> ('a, 'b) t -> 'b option
 (** Imprecise search.
-    [query d k q] returns the current binding of [k] in [q], or
-    [d] if no such binding exists.  This is different from [find]
+    [query k q] returns the current binding of [k] in [q] as Some x, or
+    None if no such binding exists.  This is different from [find]
     in its behavior when the key does not exist in the queue. *)
 
 val update : ('b -> 'b) -> 'a -> ('a, 'b) t -> ('a, 'b) t
