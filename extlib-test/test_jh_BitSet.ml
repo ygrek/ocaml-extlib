@@ -20,6 +20,11 @@
 
 module B = BitSet
 
+let biased_rnd_28 () = 
+  let n_bits = [| 4; 8; 16; 28 |] in
+  let n = n_bits.(Random.int (Array.length n_bits)) in
+  Random.int (1 lsl n)
+
 let popcount n = 
   let p = ref 0 in
   for i = 0 to 29 do
@@ -66,7 +71,7 @@ let int_of_bitset_scale s scl =
 
 let test_rnd_creation () =
   for i = 0 to 255 do
-    let r1 = Random.int (1 lsl 28) in
+    let r1 = biased_rnd_28 () in
     let s = bitset_of_int r1 in
     let c = B.copy s in
     assert (int_of_bitset s = r1);
@@ -80,24 +85,19 @@ let test_rnd_creation () =
 
 let test_intersect () = 
   for i = 0 to 255 do
-    let s = bitset_of_int (Random.int 1 lsl 28) in
+    let s = bitset_of_int (biased_rnd_28 ()) in
     B.intersect s (B.empty ());
     assert (B.count s = 0)
   done
 
 let test_diff () = 
   for i = 0 to 255 do
-    let r = (Random.int 1 lsl 28) in
+    let r = biased_rnd_28 () in
     let s = bitset_of_int r in
     if r <> 0 then
       assert (B.count s <> 0);
 (*    assert (B.count ((B.diff s s)) = 0);*) (* TODO enable for new API *)
   done
-
-let biased_rnd_28 () = 
-  let n_bits = [| 4; 8; 16; 28 |] in
-  let n = n_bits.(Random.int (Array.length n_bits)) in
-  Random.int (1 lsl n)
 
 let test_sym_diff () =
   for i = 0 to 255 do
@@ -178,8 +178,8 @@ let test_set_opers () =
     | 2 -> (IS.union, B.union)
     | _ -> assert false in
   for i = 0 to 255 do
-    let r1 = Random.int (1 lsl 28) in
-    let r2 = Random.int (1 lsl 28) in
+    let r1 = biased_rnd_28 () in
+    let r2 = biased_rnd_28 () in
     let s1 = set_of_int r1
     and s2 = set_of_int r2
     and bs1 = bitset_of_int r1 

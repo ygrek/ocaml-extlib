@@ -27,7 +27,19 @@ let t_starts_with () =
   assert (S.starts_with s0 s0);
   assert (S.starts_with s0 "f");
   assert (not (S.starts_with s0 "bo"));
-  assert (not (S.starts_with "" "foo"))
+  assert (not (S.starts_with "" "foo"));
+  assert (S.starts_with s0 "");
+  assert (S.starts_with "" "")
+
+let t_ends_with () = 
+  let s0 = "foo" in
+  assert (S.ends_with s0 "foo");
+  assert (S.ends_with s0 "oo");
+  assert (S.ends_with s0 "o");
+  assert (S.ends_with s0 "");
+  assert (S.ends_with "" "");
+  assert (not (S.ends_with "" "b"));
+  assert (not (S.ends_with s0 "f"))
 
 let t_map () =
   let s0 = "foobar" in
@@ -58,7 +70,8 @@ let t_rchop () =
 let t_split () = 
   for i = 0 to 64 do
     let s = Util.random_string () in
-    let s' = String.replace_chars (fun c -> if c = '|' then "_" else String.of_char c) s in
+    let s' = String.replace_chars 
+               (fun c -> if c = '|' then "_" else String.of_char c) s in
     let len = String.length s' in
     if len > 0 then
       begin
@@ -80,9 +93,31 @@ let t_split () =
       end
   done
 
+let t_replace1 () =
+  let s = "karhupullo" in
+  assert (String.replace s "karhu" "kalja" = (true, "kaljapullo"));
+  assert (String.replace s "kalja" "karhu" = (false, s));
+  (* TODO is this correct?  Is "" supposed to always match? *)
+  assert (String.replace s "" "karhu" = (true, "karhu"^s));
+  assert (String.replace "" "" "karhu" = (true, "karhu"))
+
+let t_strip () = 
+  let s = "1234abcd5678" in
+  assert (S.strip ~chars:"" s = s);
+  assert (S.strip ~chars:"1" s = String.sub s 1 (String.length s-1));
+  assert (S.strip ~chars:"12" s = String.sub s 2 (String.length s-2));
+  assert (S.strip ~chars:"1234" s = "abcd5678");
+  assert (S.ends_with (S.strip ~chars:"8" s) "567");
+  assert (S.ends_with (S.strip ~chars:"87" s) "56");
+  assert (S.ends_with (S.strip ~chars:"86" s) "567");
+  assert (S.ends_with (S.strip ~chars:"" s) "5678")
+
 let test () = 
   Util.run_test ~test_name:"jh_ExtString.t_starts_with" t_starts_with;
+  Util.run_test ~test_name:"jh_ExtString.t_ends_with" t_ends_with;
   Util.run_test ~test_name:"jh_ExtString.t_map" t_map;
   Util.run_test ~test_name:"jh_ExtString.t_lchop" t_lchop;
   Util.run_test ~test_name:"jh_ExtString.t_rchop" t_rchop;
-  Util.run_test ~test_name:"jh_ExtString.t_split" t_split
+  Util.run_test ~test_name:"jh_ExtString.t_split" t_split;
+  Util.run_test ~test_name:"jh_ExtString.t_replace_1" t_replace1;
+  Util.run_test ~test_name:"jh_ExtString.t_strip" t_strip
