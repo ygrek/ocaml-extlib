@@ -24,20 +24,21 @@ type path =
 
 let modules = [
 	"enum";
-	"base64";
 	"bitSet";
+	"dbi";
 	"dynArray";
 	"extHashtbl";
 	"extList";
 	"extString";
-	"global";
+	"global";	
 	"IO";
 	"option";
 	"pMap";
 	"refList";
 	"std";
 	"uChar";
-	"uTF8"
+	"uTF8";
+	"base64"
 ]
 
 let m_list suffix =
@@ -170,7 +171,7 @@ let install() =
 		remove ("extLib"^obj_ext);
 	end;
 	if !autodoc then begin 
-		run (sprintf "ocamldoc -html -d %s %s" doc_dir (m_list ".mli"));
+		run (sprintf "ocamldoc -sort -html -d %s %s" doc_dir (m_list ".mli"));
 		run ((match path_type with
 				| PathDos -> sprintf "%s odoc_style.css %s\\style.css";
 				| PathUnix -> sprintf "%s odoc_style.css %s/style.css") cp_cmd doc_dir);
