@@ -97,16 +97,14 @@ let tst_rex = "^test_\\(.+\\)_\\(.+\\)_\\(.+\\)\\.ml$"
 let tests_of dirname =
   let h = Hashtbl.create 97 in
   let crexp = Str.regexp tst_rex in
-  List.iter
-  (fun s-> 
-    ignore(Str.string_match crexp s 0); 
-    let author_key = Str.matched_group 1 s in
-    let module_key = Str.matched_group 2 s in
-    let test_key = Str.matched_group 3 s in
-    Hashtbl.add h module_key (author_key,test_key)
-  )
-  (filter_files tst_re (find_files dirname));
-  h
+  List.map
+    (fun s-> 
+       ignore(Str.string_match crexp s 0); 
+       let author_key = Str.matched_group 1 s in
+       let module_key = Str.matched_group 2 s in
+       let test_key = Str.matched_group 3 s in
+       (module_key,author_key,test_key))
+    (filter_files tst_re (find_files dirname))
 
 
 let mtest all_tests mname =
@@ -133,7 +131,7 @@ let copy_file fin fout =
   let rec loop() =
     let s = input_line fi in
     output_string fo (s ^ "\n");
-    loop()
+    loop ()
   in try loop() with End_of_file ->
   output_string fo "\n";
   close_out fo;
@@ -145,13 +143,11 @@ let patch_test mname author test =
   let output_filename = build_dir_name (itest_filename author mname test ".ml") in
   copy_file input_filename output_filename
 
-  
+
 let patch_tests all_tests =
   Hashtbl.iter
-  (fun mname (author,test) -> 
-    patch_test mname author test
-  )
-  all_tests
+    (fun mname (author,test) -> 
+       patch_test mname author test) all_tests
 
 
 let exec cmd msg =
@@ -178,20 +174,14 @@ let compile_file build_type filename =
 let compile_tests build_type all_modules all_tests =
   (* compile individual tests *)
   Hashtbl.iter
-  (fun mname (author,test) ->
-    let filename = build_dir_name (itest_filename author mname test ".ml") in
-    compile_file build_type filename
-  )
-  all_tests
-  ;
+    (fun mname (author,test) ->
+       let filename = build_dir_name (itest_filename author mname test ".ml") in
+       compile_file build_type filename) all_tests;
   (* compile generated module level thunks *)
   List.iter
-  (fun s ->
-    let filename = build_dir_name (mtest_filename s ".ml") in
-    compile_file build_type filename
-  )
-  all_modules
-  ;
+    (fun s ->
+       let filename = build_dir_name (mtest_filename s ".ml") in
+       compile_file build_type filename) all_modules;
   (* compile mainline *)
   compile_file build_type (build_dir_name "extlib_test.ml")
 
@@ -227,6 +217,7 @@ exception InvalidArg of string
 let parse_options () =
   let options = 
     [(`OptArg, "author", "Use only tests made by the specified author");
+     (`OptArg, "module", "Use only tests that test the specified module");
      (`OptToggle, "opt", "Compile native code (default is bytecode)")] in
   let print_usage () = 
     P.fprintf stderr "Usage: %s [options]\n" (F.basename Sys.argv.(0));
@@ -267,29 +258,53 @@ let parse_options () =
       print_usage ();
       exit 1
   done;
-  !args
+  List.rev !args
   
+module SSet = Set.Make (String)
+
 let main =
   let option_list = parse_options () in
-  let author_selection = List.mem_assoc "author" option_list in
+  (* Author mask.  If empty, include all authors. *)
+  let authors = 
+    List.fold_left (fun accu (_,a) -> SSet.add a accu) SSet.empty 
+      (List.filter (function ("author",_) -> true | _ -> false) option_list) in
+  (* Module mask.  If empty, include all modules. *)
+  let modules = 
+    List.fold_left (fun accu (_,m) -> SSet.add m accu) SSet.empty 
+      (List.filter (function ("module",_) -> true | _ -> false) option_list) in
+  let include_module = 
+    if not (SSet.is_empty modules) then
+      (fun mname -> SSet.mem mname modules)
+    else (fun _ -> true) in
+  let include_author =
+    if not (SSet.is_empty authors) then
+      (fun aname -> SSet.mem aname authors) 
+    else (fun _ -> true) in
   let build_type = 
     if List.mem_assoc "opt" option_list then `CompileNative else `CompileByte in
 
   mkdir build_dir;
 
-  let all_modules = (modules_of extlib_dev_dir) in
+  (* Filter tests by modules and authors: *)
+  let all_modules = 
+    List.filter include_module (modules_of extlib_dev_dir) in
   let all_tests =
-    let all_tests = (tests_of Filename.current_dir_name) in
-    if author_selection then 
-      begin
-        let selected_tests = Hashtbl.create 97 in
-        Hashtbl.iter
-          (fun mname (author,test) ->
-             if List.mem ("author",author) option_list
-             then Hashtbl.add selected_tests mname (author,test)) all_tests;
-        selected_tests
-      end
-    else all_tests
+    let make_hash lst = 
+      let h = Hashtbl.create 10 in
+      List.iter 
+        (fun (mname, auth, tst) -> Hashtbl.add h mname (auth,tst)) lst;
+      h in
+    let all_tests = 
+      make_hash
+        (List.filter
+           (fun (mname,_,_) -> include_module mname)
+           (tests_of Filename.current_dir_name)) in
+    let selected_tests = Hashtbl.create 97 in
+    Hashtbl.iter
+      (fun mname (author,test) ->
+         if include_author author && (include_module mname) then
+           Hashtbl.add selected_tests mname (author,test)) all_tests;
+    selected_tests
   in
 
   print_endline "Modules:";
