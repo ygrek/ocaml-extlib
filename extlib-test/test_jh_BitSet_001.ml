@@ -244,13 +244,13 @@ let test_set_opers () =
   done
 
 let test () =
-  Util.run_test ~test_name:"jh_BitSet.test_intersect" test_intersect;
-  Util.run_test ~test_name:"jh_BitSet.test_diff" test_diff;
-  Util.run_test ~test_name:"jh_BitSet.test_sym_diff" test_sym_diff;
-  Util.run_test ~test_name:"jh_BitSet.test_rnd_creation" test_rnd_creation;
-  Util.run_test ~test_name:"jh_BitSet.test_empty" test_empty;
-  Util.run_test ~test_name:"jh_BitSet.test_exceptions" test_exceptions;
-  Util.run_test ~test_name:"jh_BitSet.test_compare" test_compare;
-  Util.run_test ~test_name:"jh_BitSet.test_compare_2" test_compare_2;
-  Util.run_test ~test_name:"jh_BitSet.test_compare_3" test_compare_3;
-  Util.run_test ~test_name:"jh_BitSet.test_set_opers" test_set_opers
+  Util.run_test ~test_name:"jh_BitSet_001.test_intersect" test_intersect;
+  Util.run_test ~test_name:"jh_BitSet_001.test_diff" test_diff;
+  Util.run_test ~test_name:"jh_BitSet_001.test_sym_diff" test_sym_diff;
+  Util.run_test ~test_name:"jh_BitSet_001.test_rnd_creation" test_rnd_creation;
+  Util.run_test ~test_name:"jh_BitSet_001.test_empty" test_empty;
+  Util.run_test ~test_name:"jh_BitSet_001.test_exceptions" test_exceptions;
+  Util.run_test ~test_name:"jh_BitSet_001.test_compare" test_compare;
+  Util.run_test ~test_name:"jh_BitSet_001.test_compare_2" test_compare_2;
+  Util.run_test ~test_name:"jh_BitSet_001.test_compare_3" test_compare_3;
+  Util.run_test ~test_name:"jh_BitSet_001.test_set_opers" test_set_opers
