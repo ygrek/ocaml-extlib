@@ -1,5 +1,5 @@
 (* 
- * Enum, enumeration over abstract collection of elements.
+ * Enum - enumeration over abstract collection of elements.
  * Copyright (C) 2003 Nicolas Cannasse
  * 
  * This library is free software; you can redistribute it and/or
@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
  *)
 
 (** Enumeration over abstract collection of elements.
@@ -77,8 +76,8 @@ val find : ('a -> bool) -> 'a t -> 'a
  Since [find] consumes a prefix of the enumeration, it can be used several 
  times on the same enumeration to find the next element. *)
 
-val empty : 'a t -> bool
-(** [empty e] returns true if [e] does not contains any element. *)
+val is_empty : 'a t -> bool
+(** [is_empty e] returns true if [e] does not contains any element. *)
 
 val peek : 'a t -> 'a option
 (** [peek e] returns [None] if [e] is empty or [Some x] where [x] is
@@ -154,6 +153,9 @@ exception No_more_elements
   other function specified in the interface.
 *)
 
+val empty : unit -> 'a t
+(** The empty enumeration : contains no element *)
+
 val make : next:(unit -> 'a) -> count:(unit -> int) -> clone:(unit -> 'a t) -> 'a t
 (** This function creates a fully defined enumeration.
 	{ul {li the [next] function {i shall} return the next element of the
@@ -196,7 +198,5 @@ val fast_count : 'a t -> bool
     function that will give an hint about [count] implementation. Basicly, if
     the enumeration has been created with [make] or [init] or if [force] has
 	been called on it, then [fast_count] will return true. *)
- 
-(**/**)
 
 

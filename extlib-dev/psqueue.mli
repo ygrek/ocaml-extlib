@@ -1,4 +1,3 @@
-
 (*
  * psq- an ocaml implementation of priority search queues.
  * Copyright (C) 2003 Brian Hurt

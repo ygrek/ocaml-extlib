@@ -1,6 +1,6 @@
 (*
  * Options - functions for the option type
- * Copyright (C) 2003 Nicolas Cannasse (ncannasse@motion-twin.com)
+ * Copyright (C) 2003 Nicolas Cannasse
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,7 +31,6 @@ val may : ('a -> unit) -> 'a option -> unit
 
 val map : ('a -> 'b) -> 'a option -> 'b option
 (** [map f (Some x)] returns [Some (f x)] and [map None] returns [None]. *)
-
 
 val default : 'a -> 'a option -> 'a
 (** [default x (Some v)] returns [v] and [default x None] returns [x]. *)

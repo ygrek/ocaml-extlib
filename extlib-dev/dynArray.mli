@@ -25,8 +25,7 @@
    that no initialization element is required.
 *)
 
-type 'a t (* abstract *)
-(** The abstract type of a dynamic array. *)
+type 'a t
 
 exception Invalid_arg of int * string * string
 (** When an operation on an array fails, [Invalid_arg] is raised. The
