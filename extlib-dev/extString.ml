@@ -160,10 +160,12 @@ let replace f s =
 	let len = String.length s in
 	let tlen = ref 0 in
 	let rec loop i acc =
-		if i = len then acc else 
+		if i = len then
+			acc
+		else 
 			let s = f (unsafe_get s i) in
 			tlen := !tlen + length s;
-			loop (i-1) (s :: acc)
+			loop (i+1) (s :: acc)
 	in
 	let strs = loop 0 [] in
 	let sbuf = create !tlen in
