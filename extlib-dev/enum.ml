@@ -60,6 +60,11 @@ let rec empty () =
 		fast = true;
 	}
 
+type 'a _mut_list = {
+	hd : 'a;
+	mutable tl : 'a _mut_list;
+}
+
 let force t =
 	let rec clone enum count =
 		let enum = ref !enum
@@ -78,19 +83,20 @@ let force t =
 		}
 	in
 	let count = ref 0 in
+	let _empty = Obj.magic [] in
 	let rec loop dst =
-		let x = [t.next()] in
+		let x = { hd = t.next(); tl = _empty } in
 		incr count;
-		Obj.set_field (Obj.repr dst) 1 (Obj.repr x);
+		dst.tl <- x;
 		loop x
 	in
-	let enum = ref [] in 
+	let enum = ref _empty  in 
 	(try
-		enum := [t.next()];
+		enum := { hd = t.next(); tl = _empty };
 		incr count;
 		loop !enum;
 	with No_more_elements -> ());
-	let tc = clone enum count in
+	let tc = clone (Obj.magic enum) count in
 	t.clone <- tc.clone;
 	t.next <- tc.next;
 	t.count <- tc.count;

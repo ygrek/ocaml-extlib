@@ -25,18 +25,22 @@ let input_chars ch =
   Enum.from (fun () ->
     try input_char ch with End_of_file -> raise Enum.No_more_elements)
 
+type 'a _mut_list = {
+  hd : 'a;
+  mutable tl : 'a _mut_list;
+}
+
 let input_list ch =
+  let _empty = Obj.magic [] in
   let rec loop dst =
-    let r = [ input_line ch ] in
-    Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
+    let r = { hd = input_line ch; tl = _empty } in
+    dst.tl <- r;
     loop r in
-  let r = [ Obj.magic () ] in
+  let r = { hd = Obj.magic(); tl = _empty } in
   try loop r
   with
     End_of_file ->
-      match r with
-      | _ :: l -> l
-      | [] -> assert false
+      Obj.magic r.tl
 
 let buf_len = 8192
 
