@@ -378,3 +378,54 @@ let write_i32 ch n =
 	write_byte ch (n lsr 8);
 	write_byte ch (n lsr 16);
 	write_byte ch (n asr 24)
+
+(* -------------------------------------------------------------- *)
+(* BITS APIS *)
+
+let input_bits ch =
+	let data = ref 0 in
+	let count = ref 0 in
+	let rec read n =
+		if !count >= n then begin
+			if n < 0 then raise (Invalid_argument "read bits");
+			let c = !count - n in
+			let k = (!data asr c) land ((1 lsl n) - 1) in
+			count := c;
+			k
+		end else begin
+			if !count >= 24 then raise (Overflow "read bits");
+			let k = read_byte ch in
+			data := (!data lsl 8) lor k;
+			count := !count + 8;
+			read n
+		end
+	in
+	create_in 
+		~read:(fun () -> read 1 = 1)
+		~nread:read
+		~pos:(fun () -> pos_in ch * 8 - !count)
+		~available:(fun () -> match available ch with None -> None | Some n -> Some (n * 8 + !count))
+		~close:(fun () -> close_in ch)
+
+let output_bits ch =
+	let data = ref 0 in
+	let count = ref 0 in
+	let write (nbits,value) =
+		if nbits < 0 then raise (Invalid_argument "write bits");
+		if nbits + !count >= 32 then raise (Overflow "write bits");
+		data := (!data lsl nbits) lor (value land ((1 lsl nbits)-1));
+		count := !count + nbits;
+		while !count >= 8 do
+			count := !count - 8;
+			write_byte ch (!data asr !count)
+		done
+	in
+	let flush_bits() =
+		if !count > 0 then write (8 - !count,0)
+	in
+	create_out
+		~write:(fun b -> if b then write (1,1) else write (1,0))
+		~nwrite:write
+		~pos:(fun () -> pos_out ch * 8 + !count)
+		~flush:(fun () -> flush_bits(); flush ch)
+		~close:(fun () -> flush_bits(); close_out ch)
