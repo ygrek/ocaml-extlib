@@ -19,10 +19,10 @@
 
 (** Base64 codec.
 
- 8-bits characters are encode into 6-bits ones using ASCII characters A-Z,
+ 8-bits characters are encoded into 6-bits ones using ASCII characters A-Z,
  a-z, 0-9, and '+' , '/' (in that order). *)
 
-(** This exception is raised when reading an invalid Base64 character
+(** This exception is raised when reading an invalid character
 	from a base64 input. *)
 exception Invalid_char
 
@@ -30,7 +30,7 @@ exception Invalid_char
 val str_encode : string -> string
 
 (** decode a string encoded into Base64, raise [Invalid_char] if a
-	character in the input string is not a base64 one. *)
+	character in the input string is not a valid one. *)
 val str_decode : string -> string
 
 (** Generic base64 encoding over an output. *)
