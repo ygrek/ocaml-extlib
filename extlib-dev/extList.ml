@@ -29,11 +29,11 @@ include List
 
 (* Inner functions prefixed with _ *)
 let _setcdr : 'a list -> 'a list -> unit = fun c v -> 
-    Obj.set_field (Obj.repr c) 1 (Obj.repr v)
+	Obj.set_field (Obj.repr c) 1 (Obj.repr v)
 
 let _duplicate = function
-    | [] -> assert false
-    | h :: t ->
+	| [] -> assert false
+	| h :: t ->
 		let rec loop dst = function
 			| [] -> dst
 			| h :: t -> 
@@ -41,17 +41,17 @@ let _duplicate = function
 				_setcdr dst r;
 				loop r t
 		in
-        let r = [ h ] in
-        r, loop r t
+		let r = [ h ] in
+		r, loop r t
 
 
 let hd = function
-    | [] -> raise Empty_list
-    | h :: t -> h
+	| [] -> raise Empty_list
+	| h :: t -> h
 
 let tl = function
-    | [] -> raise Empty_list
-    | h :: t -> t
+	| [] -> raise Empty_list
+	| h :: t -> t
 
 let nth l index =
 	if index < 0 then raise (Invalid_index index);
@@ -78,8 +78,8 @@ let append l1 l2 =
 		r
 
 let flatten = function
-    | [] -> []
-    | h :: t ->
+	| [] -> []
+	| h :: t ->
 		let rec loop dst = function
 			| [] -> ()
 			| h :: t ->
@@ -87,9 +87,9 @@ let flatten = function
 			   _setcdr dst a;
 			   loop b t
 		in
-        let a, b = _duplicate h in
-        loop b t;
-        a
+		let a, b = _duplicate h in
+		loop b t;
+		a
 
 let concat = flatten
 
@@ -108,21 +108,21 @@ let map f = function
 		r
 
 let fold_right f l accum =
-    let rec loop accum = function
-        | [] -> accum
-        | h :: t -> loop (f h accum) t
-    in
-    loop accum (rev l)
+	let rec loop accum = function
+		| [] -> accum
+		| h :: t -> loop (f h accum) t
+	in
+	loop accum (rev l)
 
 let rec fast_fold_right f l accum =
-    match l with
-    | [] -> accum
-    | h :: t -> f h (fast_fold_right f t accum)
+	match l with
+	| [] -> accum
+	| h :: t -> f h (fast_fold_right f t accum)
 
 let map2 f l1 l2 =
-    match l1, l2 with
-    | [], [] -> []
-    | h1 :: t1, h2 :: t2 ->
+	match l1, l2 with
+	| [], [] -> []
+	| h1 :: t1, h2 :: t2 ->
 		let rec loop dst src1 src2 =
 			match src1, src2 with
 			| [], [] -> ()
@@ -133,58 +133,58 @@ let map2 f l1 l2 =
 			| _ -> raise (Different_list_size "map2")
 		in
 		let r = [ f h1 h2 ] in
-        loop r t1 t2;
-        r
-    | _ -> raise (Different_list_size "map2")
+		loop r t1 t2;
+		r
+	| _ -> raise (Different_list_size "map2")
 
 let rec iter2 f l1 l2 =
-    match l1, l2 with
-    | [], [] -> ()
-    | h1 :: t1, h2 :: t2 -> f h1 h2; iter2 f t1 t2
-    | _ -> raise (Different_list_size "iter2")
+	match l1, l2 with
+	| [], [] -> ()
+	| h1 :: t1, h2 :: t2 -> f h1 h2; iter2 f t1 t2
+	| _ -> raise (Different_list_size "iter2")
 
 let rec fold_left2 f accum l1 l2 =
-    match l1, l2 with
-    | [], [] -> accum
-    | h1 :: t1, h2 :: t2 -> fold_left2 f (f accum h1 h2) t1 t2
-    | _ -> raise (Different_list_size "fold_left2")
+	match l1, l2 with
+	| [], [] -> accum
+	| h1 :: t1, h2 :: t2 -> fold_left2 f (f accum h1 h2) t1 t2
+	| _ -> raise (Different_list_size "fold_left2")
 
 let fold_right2 f l1 l2 accum =
-    let rec loop l1 l2 accum =
-        match l1, l2 with
-        | [], [] -> accum
-        | h1 :: t1, h2 :: t2 -> loop t1 t2 (f h1 h2 accum)
-        | _ -> raise (Different_list_size "fold_right2")
-    in
-    loop (rev l1) (rev l2) accum
+	let rec loop l1 l2 accum =
+		match l1, l2 with
+		| [], [] -> accum
+		| h1 :: t1, h2 :: t2 -> loop t1 t2 (f h1 h2 accum)
+		| _ -> raise (Different_list_size "fold_right2")
+	in
+	loop (rev l1) (rev l2) accum
 
 let rec fast_fold_right2 f l1 l2 accum =
-    match l1, l2 with
-    | [], [] -> accum
-    | h1 :: t1, h2 :: t2 -> f h1 h2 (fast_fold_right2 f t1 t2 accum)
-    | _ -> raise (Different_list_size "fast_fold_right2")
+	match l1, l2 with
+	| [], [] -> accum
+	| h1 :: t1, h2 :: t2 -> f h1 h2 (fast_fold_right2 f t1 t2 accum)
+	| _ -> raise (Different_list_size "fast_fold_right2")
 
 let for_all2 p l1 l2 =
-    let rec loop l1 l2 =
-        match l1, l2 with
-        | [], [] -> true
-        | h1 :: t1, h2 :: t2 -> if p h1 h2 then loop t1 t2 else false
-        | _ -> raise (Different_list_size "for_all2")
-    in
-    loop l1 l2
+	let rec loop l1 l2 =
+		match l1, l2 with
+		| [], [] -> true
+		| h1 :: t1, h2 :: t2 -> if p h1 h2 then loop t1 t2 else false
+		| _ -> raise (Different_list_size "for_all2")
+	in
+	loop l1 l2
 
 let exists2 p l1 l2 =
-    let rec loop l1 l2 =
-        match l1, l2 with
-            | [], [] -> false
-            | h1 :: t1, h2 :: t2 -> if p h1 h2 then true else loop t1 t2
-            | _ -> raise (Different_list_size "exists2")
-    in
-    loop l1 l2
+	let rec loop l1 l2 =
+		match l1, l2 with
+			| [], [] -> false
+			| h1 :: t1, h2 :: t2 -> if p h1 h2 then true else loop t1 t2
+			| _ -> raise (Different_list_size "exists2")
+	in
+	loop l1 l2
 
 let remove_assoc x = function
-    | [] -> []
-    | (a, _ as pair) :: t ->
+	| [] -> []
+	| (a, _ as pair) :: t ->
 		let rec loop dst = function
 			| [] -> ()
 			| (a, _ as pair) :: t -> 
@@ -203,8 +203,8 @@ let remove_assoc x = function
 			r
 
 let remove_assq x = function
-    | [] -> []
-    | (a, _ as pair) :: t ->
+	| [] -> []
+	| (a, _ as pair) :: t ->
 		let rec loop dst = function
 			| [] -> ()
 			| (a, _ as pair) :: t -> 
@@ -216,8 +216,8 @@ let remove_assq x = function
 					loop r t
 		in
 		if a == x then
-            t
-        else
+			t
+		else
 			let r = [ pair ] in
 			loop r t;
 			r
@@ -225,11 +225,11 @@ let remove_assq x = function
 let rfind p l = find p (List.rev l)
 
 let find_all p l = 
-    let rec findfirst = function
-        | [] -> []
-        | h :: t ->
-            if p h then
-                let r = [ h ] in
+	let rec findfirst = function
+		| [] -> []
+		| h :: t ->
+			if p h then
+				let r = [ h ] in
 				let rec findnext dst = function
 					| [] -> ()
 					| h :: t -> 
@@ -240,18 +240,18 @@ let find_all p l =
 						else
 							findnext dst t
 				in
-                findnext r t;
-                r
-            else
-                findfirst t
-    in
-    findfirst l
+				findnext r t;
+				r
+			else
+				findfirst t
+	in
+	findfirst l
 
 let filter = find_all
 
 let partition p = function
-    | [] -> [], []
-    | h :: t ->
+	| [] -> [], []
+	| h :: t ->
 		let rec both yesdst nodst = function
 			| [] -> ()
 			| h :: t ->
@@ -288,15 +288,15 @@ let partition p = function
 					noonly r t
 				end
 		in
-        let r = [ h ] in
-        if p h then
-            (r, (yesonly r t))
-        else
-            ((noonly r t), r)
+		let r = [ h ] in
+		if p h then
+			(r, (yesonly r t))
+		else
+			((noonly r t), r)
 
 let split = function
-    | [] -> [], []
-    | (a, b) :: t ->
+	| [] -> [], []
+	| (a, b) :: t ->
 		let rec loop adst bdst = function
 			| [] -> ()
 			| (a, b) :: t -> 
@@ -305,14 +305,14 @@ let split = function
 				_setcdr bdst y;
 				loop x y t
 		in
-        let x = [ a ] and y = [ b ] in
-        loop x y t;
-        x, y
+		let x = [ a ] and y = [ b ] in
+		loop x y t;
+		x, y
 
 let combine l1 l2 =
-    match l1, l2 with
-    | [], [] -> []
-    | h1 :: t1, h2 :: t2 ->
+	match l1, l2 with
+	| [], [] -> []
+	| h1 :: t1, h2 :: t2 ->
 		let rec loop dst l1 l2 =
 			match l1, l2 with
 			| [], [] -> ()
@@ -322,10 +322,10 @@ let combine l1 l2 =
 				loop r t1 t2
 			| _, _ -> raise (Different_list_size "combine")
 		in
-        let r = [ h1, h2 ] in
+		let r = [ h1, h2 ] in
 		loop r t1 t2;
-        r
-    | _, _ -> raise (Different_list_size "combine")
+		r
+	| _, _ -> raise (Different_list_size "combine")
 
 let sort ?(cmp=compare) = List.sort cmp
 
@@ -349,8 +349,8 @@ let rec init size f =
 		r
 
 let mapi f = function
-    | [] -> []
-    | h :: t ->
+	| [] -> []
+	| h :: t ->
 		let rec loop dst n = function
 			| [] -> ()
 			| h :: t -> 
@@ -358,9 +358,9 @@ let mapi f = function
 				_setcdr dst r;
 				loop r (n+1) t
 		in	
-        let r = [ f 0 h ] in
-        loop r 1 t;
-        r
+		let r = [ f 0 h ] in
+		loop r 1 t;
+		r
 
 let iteri f l = 
 	let rec loop n = function
