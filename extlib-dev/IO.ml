@@ -223,6 +223,29 @@ let read_string i =
 	loop();
 	Buffer.contents b
 
+let read_line i =
+	let b = Buffer.create 8 in
+	let cr = ref false in
+	let rec loop() =
+		let c = read i in
+		match c with
+		| '\n' ->
+			()
+		| '\r' ->
+			cr := true;
+			loop()
+		| _ when !cr ->
+			cr := false;
+			Buffer.add_char b '\r';
+			Buffer.add_char b c;
+			loop();
+		| _ -> 
+			Buffer.add_char b c;
+			loop();
+	in
+	loop();
+	Buffer.contents b
+
 let read_ui16 i =
 	let ch1 = read_byte i in
 	let ch2 = read_byte i in
@@ -237,13 +260,16 @@ let read_i16 i =
 	else
 		n
 
-let read_ui32 ch =
+let read_i32 ch =
 	let ch1 = read_byte ch in
 	let ch2 = read_byte ch in
 	let ch3 = read_byte ch in
 	let ch4 = read_byte ch in
-	if ch4 > 0x7F then raise (Overflow "read_ui32");
-	ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor (ch4 lsl 24)
+	if ch4 land 64 <> 0 then raise (Overflow "read_i32");
+	if ch4 land 128 <> 0 then
+		ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor (((ch4 land 63) lor 64) lsl 24)
+	else
+		ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor (ch4 lsl 24)
 
 let write_byte o n =
 	(* doesn't test bounds of n in order to keep semantics of Pervasives.output_byte *)
@@ -252,6 +278,10 @@ let write_byte o n =
 let write_string o s =
 	nwrite o s;
 	write o '\000'
+
+let write_line o s =
+	nwrite o s;
+	write o '\n'
 
 let write_ui16 ch n =
 	if n < 0 || n > 0xFFFF then raise (Overflow "write_ui16");
@@ -265,7 +295,7 @@ let write_i16 ch n =
 	else
 		write_ui16 ch n
 
-let write_ui32 ch n =
+let write_i32 ch n =
 	write_byte ch n;
 	write_byte ch (n lsr 8);
 	write_byte ch (n lsr 16);

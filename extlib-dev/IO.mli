@@ -65,13 +65,16 @@ val output_enum : unit -> ('a, 'a Enum.t, 'a Enum.t) output
 exception Overflow of string
 
 val read_byte : (char,'a) input -> int
-val read_string : (char,'a) input -> string
 val read_ui16 : (char,'a) input -> int
-val read_ui32 : (char,'a) input -> int
+val read_i32 : (char,'a) input -> int
 val read_i16 : (char,'a) input -> int
+val read_string : (char,'a) input -> string
+val read_line : (char,'a) input -> string
 
 val write_byte : (char,'a,'b) output -> int -> unit
-val write_ui32 : (char,'a,'b) output -> int -> unit
+val write_i32 : (char,'a,'b) output -> int -> unit
 val write_ui16 : (char,'a,'b) output -> int -> unit
 val write_i16 : (char,'a,'b) output -> int -> unit
 val write_string : 'a stdout -> string -> unit
+val write_line : 'a stdout -> string -> unit
+
