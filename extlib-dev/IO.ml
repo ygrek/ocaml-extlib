@@ -1,4 +1,4 @@
-(* 
+(*
  * IO - Abstract input/output
  * Copyright (C) 2003 Nicolas Cannasse
  *
@@ -53,12 +53,12 @@ let create_out ~write ~output ~flush ~close =
 		out_write = write;
 		out_output = output;
 		out_close = close;
-		out_flush = flush;		
+		out_flush = flush;
 	}
 
 let read i = i.in_read()
 
-let nread i n = 
+let nread i n =
 	if n < 0 then raise (Invalid_argument "IO.nread");
 	if n = 0 then
 		""
@@ -76,7 +76,7 @@ let nread i n =
 	with
 		No_more_input as e ->
 			if !p = 0 then raise e;
-			String.sub s 0 !p 
+			String.sub s 0 !p
 
 let input i s p l =
 	let sl = String.length s in
@@ -86,7 +86,7 @@ let input i s p l =
 	else
 		i.in_input s p l
 
-let close_in i = 
+let close_in i =
 	let f _ = raise Input_closed in
 	i.in_close();
 	i.in_read <- f;
@@ -128,7 +128,7 @@ let read_all i =
 	let str = ref [] in
 	let pos = ref 0 in
 	let rec loop() =
-		let s = nread i maxlen in		
+		let s = nread i maxlen in
 		str := (s,!pos) :: !str;
 		pos := !pos + String.length s;
 		loop()
@@ -164,7 +164,7 @@ let pos_out o =
 	{
 		out_write = (fun c ->
 			o.out_write c;
-			incr p			
+			incr p
 		);
 		out_output = (fun s sp l ->
 			let n = o.out_output s sp l in
@@ -193,7 +193,7 @@ let input_string s =
 			let n = (if !pos + l > len then len - !pos else l) in
 			String.unsafe_blit s !pos sout p n;
 			pos := !pos + n;
-			n			
+			n
 		);
 		in_close = (fun () -> ());
 	}
@@ -242,7 +242,7 @@ let input_enum e =
 		in_read = (fun () ->
 			match Enum.get e with
 			| None -> raise No_more_input
-			| Some c -> 
+			| Some c ->
 				incr pos;
 				c
 		);
@@ -291,13 +291,13 @@ let pipe() =
 		Buffer.reset output;
 		if String.length !input = 0 then raise No_more_input
 	in
-	let read() =	
+	let read() =
 		if !inpos = String.length !input then flush();
 		let c = String.unsafe_get !input !inpos in
 		incr inpos;
 		c
 	in
-	let input s p l = 
+	let input s p l =
 		if !inpos = String.length !input then flush();
 		let r = (if !inpos + l > String.length !input then String.length !input - !inpos else l) in
 		String.unsafe_blit !input !inpos s p r;
@@ -319,7 +319,7 @@ let pipe() =
 		out_write = write;
 		out_output = output;
 		out_close = (fun () -> ());
-		out_flush = (fun () -> ());		
+		out_flush = (fun () -> ());
 	} in
 	input , output
 
@@ -365,7 +365,7 @@ let read_line i =
 			Buffer.add_char b '\r';
 			Buffer.add_char b c;
 			loop();
-		| _ -> 
+		| _ ->
 			Buffer.add_char b c;
 			loop();
 	in
@@ -422,12 +422,9 @@ let read_i64 ch =
 	let small = Int64.logor base (Int64.shift_left (Int64.of_int ch4) 24) in
 	let big = Int64.of_int32 (read_real_i32 ch) in
 	Int64.logor (Int64.shift_left big 32) small
-	
+
 let read_double ch =
-	let i1 = Int64.of_int32 (read_real_i32 ch) in
-	let i2 = Int64.of_int32 (read_real_i32 ch) in
-	let i2 = (if i2 < Int64.zero then Int64.add i2 (Int64.shift_left Int64.one 32) else i2) in
-	Int64.float_of_bits (Int64.logor i2 (Int64.shift_left i1 32))
+	Int64.float_of_bits (read_i64 ch)
 
 let write_byte o n =
 	(* doesn't test bounds of n in order to keep semantics of Pervasives.output_byte *)
@@ -448,7 +445,7 @@ let write_ui16 ch n =
 
 let write_i16 ch n =
 	if n < -0x7FFF || n > 0x7FFF then raise (Overflow "write_i16");
-	if n < 0 then 
+	if n < 0 then
 		write_ui16 ch (65536 + n)
 	else
 		write_ui16 ch n
@@ -467,14 +464,12 @@ let write_real_i32 ch n =
 	write_byte ch (base lsr 16);
 	write_byte ch big
 
-let write_double ch f =
-	let i64 = Int64.bits_of_float f in
-	write_real_i32 ch (Int64.to_int32 (Int64.shift_right_logical i64 32));
-	write_real_i32 ch (Int64.to_int32 i64)
-
 let write_i64 ch n =
 	write_real_i32 ch (Int64.to_int32 n);
 	write_real_i32 ch (Int64.to_int32 (Int64.shift_right_logical n 32))
+
+let write_double ch f =
+	write_i64 ch (Int64.bits_of_float f)
 
 (* Big Endians *)
 
@@ -524,10 +519,7 @@ let read_i64 ch =
 	Int64.logor (Int64.shift_left big 32) small
 
 let read_double ch =
-	let i1 = Int64.of_int32 (read_real_i32 ch) in
-	let i2 = Int64.of_int32 (read_real_i32 ch) in
-	let i2 = (if i2 < Int64.zero then Int64.add i2 (Int64.shift_left Int64.one 32) else i2) in
-	Int64.float_of_bits (Int64.logor i2 (Int64.shift_left i1 32))
+	Int64.float_of_bits (read_i64 ch)
 
 let write_ui16 ch n =
 	if n < 0 || n > 0xFFFF then raise (Overflow "write_ui16");
@@ -536,7 +528,7 @@ let write_ui16 ch n =
 
 let write_i16 ch n =
 	if n < -0x7FFF || n > 0x7FFF then raise (Overflow "write_i16");
-	if n < 0 then 
+	if n < 0 then
 		write_ui16 ch (65536 + n)
 	else
 		write_ui16 ch n
@@ -560,9 +552,7 @@ let write_i64 ch n =
 	write_real_i32 ch (Int64.to_int32 n)
 
 let write_double ch f =
-	let i64 = Int64.bits_of_float f in
-	write_real_i32 ch (Int64.to_int32 (Int64.shift_right_logical i64 32));
-	write_real_i32 ch (Int64.to_int32 i64)
+	write_i64 ch (Int64.bits_of_float f)
 
 end
 
@@ -626,11 +616,11 @@ let from_out_channel ch =
 		~flush:ch#flush
 		~close:ch#close_out
 
-let from_in_chars ch =	
+let from_in_chars ch =
 	let input s p l =
 		let i = ref 0 in
 		try
-			while !i < l do		
+			while !i < l do
 				String.unsafe_set s (p + !i) (ch#get());
 				incr i
 			done;
