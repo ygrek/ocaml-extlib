@@ -38,16 +38,25 @@ module Hashtbl =
 	let exists = mem
 
 	let enum h =
-		let hdata = Array.copy (h_conv h).data in
-		let rec make ipos ibuck icount =
+		let rec make ipos ibuck idata icount =
 			let pos = ref ipos in
 			let buck = ref ibuck in
+			let hdata = ref idata in
 			let hcount = ref icount in
+			let force() =
+				(** this is a hack in order to keep an O(1) enum contructor **)
+				if !hcount = -1 then begin
+					hcount := (h_conv h).size;
+					hdata := Array.copy (h_conv h).data;
+				end;
+			in
 			let rec next() =
+				force();
 				match !buck with
-				| Empty ->
-					if !hcount = 0 then raise Enum.No_more_elements
+				| Empty ->					
+					if !hcount = 0 then raise Enum.No_more_elements;
 					incr pos;
+					buck := Array.unsafe_get !hdata !pos;
 					next()
 				| Cons (k,i,next_buck) ->
 					buck := next_buck;
@@ -55,14 +64,15 @@ module Hashtbl =
 					(k,i)
 			in
 			let count() =
-				!hcount
+				if !hcount = -1 then (h_conv h).size else !hcount
 			in
 			let clone() =
-				make !pos !buck !hcount
+				force();
+				make !pos !buck !hdata !hcount
 			in
 			Enum.make ~next ~count ~clone
 		in		
-		make (-1) Empty (h_conv h).size
+		make (-1) Empty (Obj.magic()) (-1)
 
 	let keys h =
 		Enum.map (fun (k,_) -> k) (enum h)
