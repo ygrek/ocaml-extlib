@@ -31,6 +31,9 @@ type ('a,'b,'c) output = {
 	mutable out_flush : unit -> unit;
 }
 
+type stdin = (char, string) input
+type 'a stdout = (char, string,'a) output
+
 exception No_more_input
 exception Input_closed
 exception Output_closed
@@ -197,3 +200,68 @@ let output_enum() =
 	}
 
 (* -------------------------------------------------------------- *)
+(* STDIO APIS *)
+
+exception Overflow of string
+
+let read_byte i = int_of_char (read i)
+
+let read_string i =
+	let b = Buffer.create 8 in
+	let rec loop() =
+		let c = read i in
+		if c <> '\000' then begin
+			Buffer.add_char b c;
+			loop();
+		end;
+	in
+	loop();
+	Buffer.contents b
+
+let read_ui16 i =
+	let ch1 = read_byte i in
+	let ch2 = read_byte i in
+	ch1 lor (ch2 lsl 8)
+
+let read_i16 i =
+	let ch1 = read_byte i in
+	let ch2 = read_byte i in
+	let n = ch1 lor (ch2 lsl 8) in
+	if ch2 land 128 > 0 then
+		n - 65536
+	else
+		n
+
+let read_ui32 ch =
+	let ch1 = read_byte ch in
+	let ch2 = read_byte ch in
+	let ch3 = read_byte ch in
+	let ch4 = read_byte ch in
+	if ch4 > 0x7F then raise (Overflow "read_ui32");
+	ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor (ch4 lsl 24)
+
+let write_byte o n =
+	(* doesn't test bounds of n in order to keep semantics of Pervasives.output_byte *)
+	write o (char_of_int (n land 0xFF))
+
+let write_string o s =
+	nwrite o s;
+	write o '\000'
+
+let write_ui16 ch n =
+	if n < 0 || n > 0xFFFF then raise (Overflow "write_ui16");
+	write_byte ch n;
+	write_byte ch (n lsr 8)
+
+let write_i16 ch n =
+	if n < -0x7FFF || n > 0x7FFF then raise (Overflow "write_i16");
+	if n < 0 then 
+		write_ui16 ch (65536 + n)
+	else
+		write_ui16 ch n
+
+let write_ui32 ch n =
+	write_byte ch n;
+	write_byte ch (n lsr 8);
+	write_byte ch (n lsr 16);
+	write_byte ch (n asr 24)

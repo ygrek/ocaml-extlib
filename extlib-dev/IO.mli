@@ -20,6 +20,9 @@
 type ('a, 'b) input
 type ('a, 'b, 'c) output
 
+type stdin = (char, string) input
+type 'a stdout = (char, string,'a) output
+
 exception No_more_input
 exception Input_closed
 exception Output_closed
@@ -57,3 +60,18 @@ val output_channel : out_channel -> (char, string, unit) output
 
 val input_enum : 'a Enum.t -> ('a, 'a Enum.t) input
 val output_enum : unit -> ('a, 'a Enum.t, 'a Enum.t) output
+
+
+exception Overflow of string
+
+val read_byte : (char,'a) input -> int
+val read_string : (char,'a) input -> string
+val read_ui16 : (char,'a) input -> int
+val read_ui32 : (char,'a) input -> int
+val read_i16 : (char,'a) input -> int
+
+val write_byte : (char,'a,'b) output -> int -> unit
+val write_ui32 : (char,'a,'b) output -> int -> unit
+val write_ui16 : (char,'a,'b) output -> int -> unit
+val write_i16 : (char,'a,'b) output -> int -> unit
+val write_string : (char,string,'a) output -> string -> unit
