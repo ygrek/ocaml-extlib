@@ -437,7 +437,7 @@ let read_i32 ch =
 	let ch4 = read_byte ch in
 	if ch4 land 128 <> 0 then begin
 		if ch4 land 64 = 0 then raise (Overflow "read_i32");
-		ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor ((ch4 land 64) lsl 24)
+		ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor ((ch4 land 127) lsl 24)
 	end else begin
 		if ch4 land 64 <> 0 then raise (Overflow "read_i32");
 		ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor (ch4 lsl 24)
@@ -532,11 +532,13 @@ let read_i32 ch =
 	let ch3 = read_byte ch in
 	let ch2 = read_byte ch in
 	let ch1 = read_byte ch in
-	if ch4 land 64 <> 0 then raise (Overflow "read_i32");
-	if ch4 land 128 <> 0 then
-		ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor (((ch4 land 63) lor 64) lsl 24)
-	else
+	if ch4 land 128 <> 0 then begin
+		if ch4 land 64 = 0 then raise (Overflow "read_i32");
+		ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor ((ch4 land 127) lsl 24)
+	end else begin
+		if ch4 land 64 <> 0 then raise (Overflow "read_i32");
 		ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor (ch4 lsl 24)
+	end
 
 let read_real_i32 ch =
 	let big = Int32.shift_left (Int32.of_int (read_byte ch)) 24 in
