@@ -28,8 +28,6 @@ val count : 'a t -> int
 
 val has_more : 'a t -> bool
 
-val next : 'a t -> 'a
-
 val iter : ('a -> unit) -> 'a t -> unit
 
 val iteri : (int -> 'a -> unit) -> 'a t -> unit

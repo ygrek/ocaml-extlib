@@ -38,8 +38,6 @@ let count t =
 let has_more t =
 	t.count() > 0
 
-let next t = t.next()
-
 let iter f t =
 	let rec loop () =
 		f (t.next());
