@@ -62,6 +62,9 @@ module List : sig
 	val of_enum : 'a Enum.t -> 'a list
 	val append_enum : 'a list -> 'a Enum.t -> 'a list
 
+	val unique : ?cmp:('a -> 'a -> bool) -> 'a list -> 'a list 
+	val filter_map : ('a -> 'b option) -> 'a list -> 'b list
+
 (*
  * remaining functions to implement (proposals)
  *)
@@ -74,7 +77,6 @@ module List : sig
 
  (* return the list where there is no more duplicated
     elements. default comparator is ( = ) *)
- val unique : ?cmp:('a -> 'a -> bool) -> 'a list -> 'a list 
 
  (* find the last element of the given list that match the
 	given predicate *)

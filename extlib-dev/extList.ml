@@ -26,20 +26,6 @@ exception Different_list_size of string
 
 include List
 
-let _duplicate = function
-	| [] -> assert false
-	| h :: t ->
-		let rec loop dst = function
-			| [] -> dst
-			| h :: t -> 
-				let r = [ h ] in
-				Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
-				loop r t
-		in
-		let r = [ h ] in
-		r, loop r t
-
-
 let hd = function
 	| [] -> raise Empty_list
 	| h :: t -> h
@@ -72,17 +58,33 @@ let append l1 l2 =
 		loop r t;
 		r
 
-let flatten = function
+let rec flatten l =
+	let duplicate = function
+		| [] -> assert false
+		| h :: t ->
+			let rec loop dst = function
+				| [] -> dst
+				| h :: t -> 
+					let r = [ h ] in
+					Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
+					loop r t
+			in
+			let r = [ h ] in
+			r, loop r t
+	in
+	match l with
 	| [] -> []
+	| [] :: t -> flatten t
 	| h :: t ->
 		let rec loop dst = function
 			| [] -> ()
+			| [] :: t -> loop dst t
 			| h :: t ->
-				let a, b = _duplicate h in
+				let a, b = duplicate h in
 				Obj.set_field (Obj.repr dst) 1 (Obj.repr a);
 				loop b t
 		in
-		let a, b = _duplicate h in
+		let a, b = duplicate h in
 		loop b t;
 		a
 
@@ -101,6 +103,36 @@ let map f = function
 		let r = [f h] in
 		loop r t;
 		r
+
+let rec unique ?(cmp = ( = )) l =
+	let rec loop dst = function
+		| [] -> ()
+		| h :: t ->
+			match exists (cmp h) t with
+			| true -> loop dst t
+			| false ->
+				let r = [ h ] in
+				Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
+				loop r t
+	in
+	let dummy = [Obj.magic ()] in
+	loop dummy l;
+	tl dummy
+
+let filter_map f l =
+    let rec loop dst = function
+        | [] -> ()
+        | h :: t ->
+            match f h with
+            | None -> loop dst t
+            | Some x ->
+                    let r = [ x ] in
+                    Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
+                    loop r t
+    in
+    let dummy = [ Obj.magic () ] in
+    loop dummy l;
+    tl dummy
 
 let fold_right f l accum =
 	let rec loop accum = function
@@ -217,7 +249,7 @@ let remove_assq x = function
 			loop r t;
 			r
 
-let rfind p l = find p (List.rev l)
+let rfind p l = find p (rev l)
 
 let find_all p l = 
 	let rec findfirst = function
