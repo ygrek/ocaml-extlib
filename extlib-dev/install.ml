@@ -42,7 +42,8 @@ let modules = [
 	"uTF8";
 	"base64";
 	"unzip";
-	"optParse"
+	"optParse";
+        "dllist";
 ]
 
 let m_list suffix =

@@ -2,7 +2,7 @@
 
 MODULES = \
  enum bitSet dbi dynArray extHashtbl extList extString global IO option \
- pMap refList std uChar uTF8 base64 unzip optParse
+ pMap refList std uChar uTF8 base64 unzip optParse dllist
 
 # the list is topologically sorted
 
