@@ -143,6 +143,38 @@ let read_all i =
 			) !str;
 			buf
 
+let pos_in i =
+	let p = ref 0 in
+	{
+		in_read = (fun () ->
+			let c = i.in_read() in
+			incr p;
+			c
+		);
+		in_input = (fun s sp l ->
+			let n = i.in_input s sp l in
+			p := !p + n;
+			n
+		);
+		in_close = i.in_close
+	} , (fun () -> !p)
+
+let pos_out o =
+	let p = ref 0 in
+	{
+		out_write = (fun c ->
+			o.out_write c;
+			incr p			
+		);
+		out_output = (fun s sp l ->
+			let n = o.out_output s sp l in
+			p := !p + n;
+			n
+		);
+		out_close = o.out_close;
+		out_flush = o.out_flush;
+	} , (fun () -> !p)
+
 (* -------------------------------------------------------------- *)
 (* Standard IO *)
 

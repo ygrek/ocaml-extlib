@@ -127,6 +127,14 @@ val pipe : unit -> input * unit output
 (** Create a pipe between an input and an ouput. Data written from
   the output can be read from the input. *)
 
+val pos_in : input -> input * (unit -> int)
+(** Create an input that provide a count function of the number of bytes
+  read from it. *)
+
+val pos_out : 'a output -> 'a output * (unit -> int)
+(** Create an output that provide a count function of the number of bytes
+  written through it. *)
+
 (** {6 Binary files API}
 
 	Here is some API useful for working with binary files, in particular
