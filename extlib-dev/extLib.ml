@@ -33,8 +33,8 @@
 	included below so the resulting binary is bigger.
 *)
 
-module ExtList = ExtList.List
-module ExtString = ExtString.String
-module ExtHashtbl = ExtHashtbl.Hashtbl
+module List = ExtList.List
+module String = ExtString.String
+module Hashtbl = ExtHashtbl.Hashtbl
 
 include Std
