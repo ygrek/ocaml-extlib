@@ -17,7 +17,7 @@ let to_list rl = !rl
 let copy ~dst ~src = dst := !src
 let copy_list ~dst ~src = dst := src
 
-let add rl item = rl := XList.append !rl [item]
+let add rl item = rl := List.append !rl [item]
 let push rl item = rl := item::!rl
 
 let clear rl = rl := []
@@ -27,16 +27,16 @@ let hd rl = try List.hd !rl with _ -> raise Empty_list
 let tl rl = try ref (List.tl !rl) with _ -> raise Empty_list
 let iter f rl = List.iter f !rl
 let for_all f rl = List.for_all f !rl
-let map f rl = ref (XList.map f !rl)
-let map_list f rl = XList.map f !rl
+let map f rl = ref (List.map f !rl)
+let map_list f rl = List.map f !rl
 let find f rl = List.find f !rl
 let rev rl = rl := List.rev !rl
 let rev_list rl = List.rev !rl
 let find_exc f exn rl = try List.find f !rl with _ -> raise exn
 let exists f rl = List.exists f !rl
-let sort ?(cmp=compare) rl = rl := List.sort cmp !rl
+let sort ?(cmp=compare) rl = rl := List.sort ~cmp !rl
 
-let rfind f rl = XList.rfind f !rl
+let rfind f rl = List.rfind f !rl
 
 let first = hd
 
@@ -50,9 +50,9 @@ let last rl =
 	| [] -> raise Empty_list
 	| l -> loop l
 
-let remove rl item = rl := XList.remove !rl item
-let remove_if pred rl = rl := XList.remove_if pred !rl
-let remove_all rl item = rl := XList.remove_all !rl item
+let remove rl item = rl := List.remove !rl item
+let remove_if pred rl = rl := List.remove_if pred !rl
+let remove_all rl item = rl := List.remove_all !rl item
 let filter pred rl = rl := List.filter pred !rl
 
 let add_sort ?(cmp=compare) rl item =
@@ -82,12 +82,12 @@ let npop rl n =
 	pop_aux !rl n
 
 let shuffle rl =
-	rl := XList.shuffle !rl
+	rl := List.shuffle !rl
 
-let copy_enum ~dst ~src = dst := XList.of_enum src
-let append_enum rl e = rl := XList.append_enum !rl e
-let enum rl = XList.enum !rl
-let of_enum e = ref (XList.of_enum e)
+let copy_enum ~dst ~src = dst := List.of_enum src
+let append_enum rl e = rl := List.append_enum !rl e
+let enum rl = List.enum !rl
+let of_enum e = ref (List.of_enum e)
 
 module Index = struct
 
@@ -117,7 +117,7 @@ module Index = struct
 
 	let set rl pos newitem =
 		let p = ref (-1) in
-		rl := XList.map (fun item -> incr p; if !p = pos then newitem else item) !rl;
+		rl := List.map (fun item -> incr p; if !p = pos then newitem else item) !rl;
 		if !p < pos || pos < 0 then raise (Invalid_index pos)
 
 
