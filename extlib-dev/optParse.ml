@@ -48,11 +48,6 @@ module GetOpt =
       with
         Invalid_string -> haystack, []
 
-    let lchop ?(count = 1) s =
-      if count < 0 then raise (Invalid_argument "lchop")
-      else if count > String.length s then String.create 0
-      else String.sub s count (String.length s - count)
-
     let find_opt format_name options s =
       let rec loop l =
         match l with
@@ -76,7 +71,7 @@ module GetOpt =
         in
         let gather_long_opt s args =
           let (h, t) = split1 s "=" in
-          let (_, nargs, action) = find_long_opt (lchop ~count:2 h) in
+          let (_, nargs, action) = find_long_opt (String.slice ~first:2 h) in
           let (accum, args') = gather_args h (nargs - List.length t) args in
           action h (t @ accum); args'
         in
@@ -106,7 +101,7 @@ module GetOpt =
           if nargs = 0 then gather_short_opt_concat false s k args
           else
             let (accum, args') =
-              let h = lchop ~count:(k + 1) s in
+              let h = String.slice ~first:(k+1) s in
               if String.length h = 0 then gather_args ostr nargs args
               else
                 let (t, args'') = gather_args ostr (nargs - 1) args in
@@ -267,18 +262,47 @@ module Formatter =
     (* Note that the whitespace regexps must NOT treat the non-breaking
        space character as whitespace. *)
     let whitespace = "\t\n\013\014\r "
-    let regex_ws = Str.regexp ("[" ^ whitespace ^ "]")
-    let regex_ws_only = Str.regexp ("^[" ^ whitespace ^ "]*$")
 
-    let split_into_chunks text =
-      List.map
-        (fun f ->
-           match f with
-             Str.Text s -> s
-           | Str.Delim s -> s)
-        (Str.full_split regex_ws text)
+    let split_into_chunks s =
+      let buf = Buffer.create (String.length s) in
+      let flush () =
+        let s = Buffer.contents buf
+        in
+          Buffer.clear buf;
+          s
+      in
+      let rec loop state accum i =
+        if (i<String.length s) then
+          if ((state && not (String.contains whitespace s.[i])) || 
+              ((not state) && String.contains whitespace s.[i])) then
+            if Buffer.length buf > 0 then
+               loop (not state) (flush () :: accum) i 
+             else 
+               loop (not state) accum i
+          else
+            begin
+              Buffer.add_char buf s.[i];
+              loop state accum (i+1)
+            end
+        else
+          if Buffer.length buf > 0 then
+            flush () :: accum
+          else 
+            accum
+      in
+        List.rev (loop false [] 0)
 
-    let is_whitespace s = Str.string_match regex_ws_only s 0
+    let is_whitespace s =
+      let rec loop i =
+        if i<String.length s then
+          if String.contains whitespace s.[i] then
+            loop (i+1)
+          else 
+            false
+        else 
+          true
+      in
+        loop 0
 
     let expand_tabs ?(tab_size = 8) s =
       let len = String.length s in
@@ -516,11 +540,19 @@ module OptParser =
       op_groups : group 
     }
 
+    let replace_substring needle replacement_needle haystack =
+      try
+        let i =
+          String.find haystack needle
+        in
+          (String.slice ~last:i haystack) ^ 
+          replacement_needle ^ 
+          (String.slice ~first:(i+(String.length needle)) haystack)
+      with
+        ExtString.Invalid_string -> String.copy haystack
+
     let unprogify optparser s =
-      Str.global_replace
-        (Str.regexp "\\([^%]\\)%prog\\b")
-        ("\\1" ^ optparser.op_prog) (* TODO: quote \1's in prog *)
-        s
+      replace_substring "%prog" optparser.op_prog s
 
     let add optparser ?(group = optparser.op_groups) ?help ?(hide = false)
       ?short_name ?(short_names = []) ?long_name ?(long_names = []) opt =

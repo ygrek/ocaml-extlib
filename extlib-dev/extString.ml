@@ -100,6 +100,21 @@ let rec nsplit str sep =
 
 let join = concat
 
+let slice ?first ?last s =
+	let i = match first with
+                  None -> 0
+                | Some i when i<0 -> (length s + i)   
+                | Some i -> i
+        and j = match last with
+                  None -> length s
+                | Some j when j<0 -> (length s + j)
+                | Some j -> j
+        in
+        if i>=j || i>=length s then
+               	create 0
+        else
+        	sub s i (j-i)
+
 let lchop s =
 	if s = "" then "" else sub s 1 (length s - 1)
 
