@@ -134,20 +134,21 @@ let install() =
 			      _ -> failwith ("Directory "^dest^" does not exists or cannot be written."));
 			    Dir dest;
 			  end else Findlib in
-			let doc = 
-			  match !docflag with
-			    Some doc -> doc
-			  | None ->
-			      printf "Do you want to generate ocamldoc documentation (Y/N) ?\n> ";
-			      (match read_line() with
-			      | "y" | "Y" -> true
-			      | "n" | "N" -> false
-			      | _ -> failwith "Invalid choice, exit.") in
-			autodoc := doc;
 			autobyte := byte;
 			autonative := native;
 			dest
 	) in
+	let doc = 
+		match !docflag with
+		Some doc -> doc
+		| None ->
+			printf "Do you want to generate ocamldoc documentation (Y/N) ?\n> ";
+			(match read_line() with
+			| "y" | "Y" -> true
+			| "n" | "N" -> false
+			| _ -> failwith "Invalid choice, exit.")
+	in
+	autodoc := doc;	
 	let doc_dir = 
 	  match install_dir with
 	    Findlib -> "extlib-doc"
