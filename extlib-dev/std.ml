@@ -66,6 +66,17 @@ let input_all ic =
       else loop acc new_total buf new_ofs in
   loop [] 0 (String.create buf_len) 0
 
+let input_file fname =
+  let ch = open_in fname in
+  let str = input_all ch in
+  close_in ch;
+  str
+
+let output_file ~filename ~text =
+  let ch = open_out filename in
+  output_string ch text;
+  close_out ch
+
 let print_bool = function
   | true -> print_string "true"
   | false -> print_string "false"
@@ -73,3 +84,13 @@ let print_bool = function
 let prerr_bool = function
   | true -> prerr_string "true"
   | false -> prerr_string "false"
+
+let string_of_char c = String.make 1 c
+
+external identity : 'a -> 'a = "%identity"
+
+let __unique_counter = ref 0
+
+let unique() =
+  incr __unique_counter;
+  !__unique_counter

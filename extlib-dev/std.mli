@@ -39,3 +39,18 @@ val print_bool : bool -> unit
 
 val prerr_bool : bool -> unit
 (** Print a boolean to stderr. *)
+
+val input_file : string -> string
+(** returns the data of a given filename. *)
+
+val output_file : filename:string -> text:string -> unit
+(** creates a filename, write text into it and close it. *)
+
+val string_of_char : char -> string
+(** creates a string from a char. *)
+
+external identity : 'a -> 'a = "%identity"
+(** the identity function. *)
+
+val unique : unit -> int
+(** returns an unique identifier every time it is called. *)
