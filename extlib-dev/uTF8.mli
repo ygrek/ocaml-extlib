@@ -1,4 +1,4 @@
-(* $Id: uTF8.mli,v 1.1 2003-06-27 18:34:30 yori Exp $ *)
+(* $Id: uTF8.mli,v 1.2 2003-06-28 15:53:12 yori Exp $ *)
 (* Copyright 2002, 2003 Yamagata Yoriyuki. *)
 
 open UChar
@@ -47,7 +47,7 @@ val look : t -> index -> uchar
  * tests whether [i] points the valid position of [s]. *)
 val out_of_range : t -> index -> bool
 
-(* compare s i1 i2 : returnes
+(* compare_index s i1 i2 : returnes
  * If [i1] is the position located before [i2], a value < 0,
  * If [i1] and [i2] points the same location, 0,
  * If [i1] is the position located after [i2], a value > 0. *)
