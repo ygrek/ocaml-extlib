@@ -34,7 +34,17 @@ val iter : ('a -> unit) -> 'a t -> unit
 
 val iteri : (int -> 'a -> unit) -> 'a t -> unit
 
+val iter2 : ('a -> 'b -> unit) -> 'a t -> 'b t -> unit
+
+val iter2i : ( int -> 'a -> 'b -> unit) -> 'a t -> 'b t -> unit
+
 val fold : ('a -> 'b -> 'b) -> 'b -> 'a t -> 'b
+
+val foldi : (int -> 'a -> 'b -> 'b) -> 'b -> 'a t -> 'b
+
+val fold2 : ('a -> 'b -> 'c -> 'c) -> 'c -> 'a t -> 'b t -> 'c
+
+val fold2i : (int -> 'a -> 'b -> 'c -> 'c) -> 'c -> 'a t -> 'b t -> 'c
 
 val find : ('a -> bool) -> 'a t -> 'a (* raise Not_found *)
 
@@ -45,6 +55,10 @@ val force : 'a t -> unit
 val map : ('a -> 'b) -> 'a t -> 'b t
 
 val mapi : (int -> 'a -> 'b) -> 'a t -> 'b t
+
+val map2 : ('a -> 'b -> 'c ) -> 'a t -> 'b t -> 'c t
+
+val map2i : (int -> 'a -> 'b -> 'c ) -> 'a t -> 'b t -> 'c t
 
 val filter : ('a -> bool) -> 'a t -> 'a t
 

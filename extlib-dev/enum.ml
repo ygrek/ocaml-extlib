@@ -60,6 +60,26 @@ let iteri f t =
 	with
 		No_more_elements -> ()
 
+let iter2 f t u =
+	let rec loop idx =
+		f (t.next()) (u.next());
+		loop (idx + 1)
+	in
+	try
+		loop 0
+	with
+		No_more_elements -> ()
+
+let iter2i f t u =
+	let rec loop idx =
+		f idx (t.next()) (u.next());
+		loop (idx + 1)
+	in
+	try
+		loop 0
+	with
+		No_more_elements -> ()
+
 let fold f init t =
 	let ret = ref init in
 	let rec loop accu =
@@ -67,6 +87,42 @@ let fold f init t =
 	in
 	try
 		loop init
+	with
+		No_more_elements -> !ret
+
+let foldi f init t =
+	let ret = ref init in
+	let rec loop idx accu =
+		loop (idx + 1) (f idx (try t.next() with No_more_elements as e -> ret := accu; raise e) accu)
+	in
+	try
+		loop 0 init
+	with
+		No_more_elements -> !ret
+
+let fold2 f init t u =
+	let ret = ref init in
+	let rec loop accu =
+		let a, b = try t.next(), u.next()
+				with No_more_elements as e -> ret := accu; raise e
+		in
+		loop (f a b accu)
+	in
+	try
+		loop init
+	with
+		No_more_elements -> !ret
+
+let fold2i f init t u =
+	let ret = ref init in
+	let rec loop idx accu =
+		let a, b = try t.next(), u.next()
+				with No_more_elements as e -> ret := accu; raise e
+		in
+		loop (idx + 1) (f idx a b accu)
+	in
+	try
+		loop 0 init
 	with
 		No_more_elements -> !ret
 
@@ -87,10 +143,23 @@ let map f t =
 	}
 
 let mapi f t =
-    let idx = ref 0 in
+	let idx = ref 0 in
 	{
 		count = t.count;
 		next = (fun () -> let i = !idx in incr idx; f i (t.next()));
+	}
+
+let map2 f t u =
+	{
+		count = (fun () -> (min (t.count()) (u.count())));
+		next = (fun () -> f (t.next()) (u.next()))
+	}
+
+let map2i f t u =
+	let idx = ref 0 in
+	{
+		count = (fun () -> (min (t.count()) (u.count())));
+		next = (fun () -> let i = !idx in incr idx; f i (t.next()) (u.next()));
 	}
 
 let force t =
