@@ -33,5 +33,22 @@ let test_simple () =
          Dllist.remove dlst) lst;
   done
 
+(* Failure case reported by Christopher Wedman on extlib mailing list 2005/Feb/12.  *)
+let test_regression_1 () = 
+  let lst = Dllist.create 1 in
+  ignore (Dllist.append lst 2);
+  ignore (Dllist.demote lst);
+  ignore (Dllist.length lst) (* <-- hangs here *)
+
+(* Failure case reported by Christopher Wedman on extlib mailing list 2005/Feb/12.  *)
+let test_regression_2 () = 
+  let lst = Dllist.create 1 in
+  ignore (Dllist.append lst 2);
+  ignore (Dllist.promote lst);
+  assert (Dllist.length lst = 2)  (* returned 1, but should return 2 *)
+  
+
 let test () = 
-  Util.run_test ~test_name:"jh_Dllist.test_simple" test_simple
+  Util.run_test ~test_name:"jh_Dllist.test_simple" test_simple;
+  Util.run_test ~test_name:"jh_Dllist.test_regression_1" test_regression_1;
+  Util.run_test ~test_name:"jh_Dllist.test_regression_2" test_regression_2
