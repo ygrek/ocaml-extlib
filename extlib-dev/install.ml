@@ -24,6 +24,7 @@ type path =
 
 let modules = [
 	"enum";
+	"base64";
 	"bitSet";
 	"dynArray";
 	"extHashtbl";
