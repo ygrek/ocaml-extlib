@@ -26,6 +26,20 @@ exception Different_list_size of string
 
 include List
 
+(* This code comes from Jacques Garrigue, and thanks *)
+
+type 'a mut_list = 
+	{
+		hd: 'a; 
+		mutable tl: 'a list
+	}
+
+external inj : 'a mut_list -> 'a list = "%identity"
+
+(* The end of Garrigue's code *)
+
+let dummy_node () = { hd = (Obj.magic ()); tl = [] }
+
 let hd = function
 	| [] -> raise Empty_list
 	| h :: t -> h
@@ -47,46 +61,32 @@ let append l1 l2 =
 	match l1 with
 	| [] -> l2
 	| h :: t ->
-		let rec loop accu = function
-		| [] -> Obj.set_field (Obj.repr accu) 1 (Obj.repr l2)
+		let rec loop dst = function
+		| [] -> dst.tl <- l2; ()
 		| h :: t ->
-			let cell = [h] in
-			Obj.set_field (Obj.repr accu) 1 (Obj.repr cell);
+			let cell = { hd = h; tl = [] } in
+			dst.tl <- (inj cell);
 			loop cell t
 		in
-		let r = [h] in
+		let r = { hd = h; tl = [] } in
 		loop r t;
-		r
+		inj r
 
 let rec flatten l =
-	let duplicate = function
-		| [] -> assert false
+	let rec inner dst = function
+		| [] -> dst
 		| h :: t ->
-			let rec loop dst = function
-				| [] -> dst
-				| h :: t -> 
-					let r = [ h ] in
-					Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
-					loop r t
-			in
-			let r = [ h ] in
-			r, loop r t
+			let r = { hd = h; tl = [] } in
+			dst.tl <- (inj r);
+			inner r t
 	in
-	match l with
-	| [] -> []
-	| [] :: t -> flatten t
-	| h :: t ->
-		let rec loop dst = function
-			| [] -> ()
-			| [] :: t -> loop dst t
-			| h :: t ->
-				let a, b = duplicate h in
-				Obj.set_field (Obj.repr dst) 1 (Obj.repr a);
-				loop b t
-		in
-		let a, b = duplicate h in
-		loop b t;
-		a
+	let rec outer dst = function
+		| [] -> ()
+		| h :: t -> outer (inner dst h) t
+	in
+	let r = dummy_node () in
+	outer r l;
+	r.tl
 
 let concat = flatten
 
@@ -96,13 +96,13 @@ let map f = function
 		let rec loop dst = function
 		| [] -> ()
 		| h :: t ->
-			let r = [f h] in
-			Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
+			let r = { hd = f h; tl = [] } in
+			dst.tl <- (inj r);
 			loop r t
 		in
-		let r = [f h] in
+		let r = { hd = f h; tl = [] } in
 		loop r t;
-		r
+		inj r
 
 let rec unique ?(cmp = ( = )) l =
 	let rec loop dst = function
@@ -111,28 +111,28 @@ let rec unique ?(cmp = ( = )) l =
 			match exists (cmp h) t with
 			| true -> loop dst t
 			| false ->
-				let r = [ h ] in
-				Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
+				let r = { hd =  h; tl = [] }  in
+				dst.tl <- inj r;
 				loop r t
 	in
-	let dummy = [Obj.magic ()] in
+	let dummy = dummy_node() in
 	loop dummy l;
-	tl dummy
+	dummy.tl
 
 let filter_map f l =
-    let rec loop dst = function
-        | [] -> ()
-        | h :: t ->
-            match f h with
-            | None -> loop dst t
-            | Some x ->
-                    let r = [ x ] in
-                    Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
-                    loop r t
-    in
-    let dummy = [ Obj.magic () ] in
-    loop dummy l;
-    tl dummy
+	let rec loop dst = function
+		| [] -> ()
+		| h :: t ->
+		match f h with
+			| None -> loop dst t
+			| Some x ->
+				let r = { hd = x; tl = [] }  in
+				dst.tl <- (inj r);
+				loop r t
+	in
+	let dummy = dummy_node() in
+	loop dummy l;
+	dummy.tl
 
 let fold = fold_left
 
@@ -153,23 +153,24 @@ let fold_right f l init =
 	in
 	loop 0 l
 
+let rec fast_fold_right f l accum =
+	match l with
+	| [] -> accum
+	| h :: t -> f h (fast_fold_right f t accum)
+
 let map2 f l1 l2 =
-	match l1, l2 with
-	| [], [] -> []
-	| h1 :: t1, h2 :: t2 ->
-		let rec loop dst src1 src2 =
-			match src1, src2 with
+	let rec loop dst src1 src2 =
+		match src1, src2 with
 			| [], [] -> ()
 			| h1 :: t1, h2 :: t2 ->
-				let r = [ f h1 h2 ] in
-				Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
+				let r = { hd = f h1 h2; tl = [] } in
+				dst.tl <- inj r;
 				loop r t1 t2
 			| _ -> raise (Different_list_size "map2")
-		in
-		let r = [ f h1 h2 ] in
-		loop r t1 t2;
-		r
-	| _ -> raise (Different_list_size "map2")
+	in
+	let dummy = dummy_node () in
+	loop dummy l1 l2;
+	dummy.tl
 
 let rec iter2 f l1 l2 =
 	match l1, l2 with
@@ -216,150 +217,106 @@ let exists2 p l1 l2 =
 	in
 	loop l1 l2
 
-let remove_assoc x = function
-	| [] -> []
-	| (a, _ as pair) :: t ->
-		let rec loop dst = function
-			| [] -> ()
-			| (a, _ as pair) :: t -> 
-				if a = x then
-					Obj.set_field (Obj.repr dst) 1 (Obj.repr t)
-				else
-					let r = [ pair ] in
-					Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
-					loop r t
-		in
-		if a = x then
-			t
-		else
-			let r = [ pair ] in
-			loop r t;
-			r
+let remove_assoc x lst = 
+	let rec loop dst = function
+		| [] -> ()
+		| (a, _ as pair) :: t ->
+			if a = x then
+				dst.tl <- t
+			else
+				let r = { hd = pair; tl = [] } in
+				dst.tl <- inj r;
+				loop r t
+	in
+	let dummy = dummy_node () in
+	loop dummy lst;
+	dummy.tl
 
-let remove_assq x = function
-	| [] -> []
-	| (a, _ as pair) :: t ->
-		let rec loop dst = function
-			| [] -> ()
-			| (a, _ as pair) :: t -> 
-				if a == x then
-					Obj.set_field (Obj.repr dst) 1 (Obj.repr t)
-				else
-					let r = [ pair ] in
-					Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
-					loop r t
-		in
-		if a == x then
-			t
-		else
-			let r = [ pair ] in
-			loop r t;
-			r
+let remove_assq x lst = 
+	let rec loop dst = function
+		| [] -> ()
+		| (a, _ as pair) :: t ->
+			if a == x then
+				dst.tl <- t
+			else
+				let r = { hd =  pair; tl = [] } in
+				dst.tl <- inj r;
+				loop r t
+	in
+	let dummy = dummy_node() in
+	loop dummy lst;
+	dummy.tl
 
 let rfind p l = find p (rev l)
 
 let find_all p l = 
-	let rec findfirst = function
-		| [] -> []
-		| h :: t ->
+	let rec findnext dst = function
+		| [] -> ()
+		| h :: t -> 
 			if p h then
-				let r = [ h ] in
-				let rec findnext dst = function
-					| [] -> ()
-					| h :: t -> 
-						if p h then
-							let r = [ h ] in
-							Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
-							findnext r t
-						else
-							findnext dst t
-				in
-				findnext r t;
-				r
+				let r = { hd = h; tl = [] } in
+				dst.tl <- (inj r);
+				findnext r t
 			else
-				findfirst t
+				findnext dst t
 	in
-	findfirst l
+	let dummy = dummy_node () in
+	findnext dummy l;
+	dummy.tl
 
 let filter = find_all
 
-let partition p = function
-	| [] -> [], []
-	| h :: t ->
-		let rec both yesdst nodst = function
-			| [] -> ()
-			| h :: t ->
-				let r = [ h ] in
-				if p h then begin
-					Obj.set_field (Obj.repr yesdst) 1 (Obj.repr r);
-					both r nodst t
-				end else begin
-					Obj.set_field (Obj.repr nodst) 1 (Obj.repr r);
-					both yesdst r t
+let partition p lst = 
+	let rec loop yesdst nodst = function
+		| [] -> ()
+		| h :: t ->
+			let r = { hd = h; tl = [] } in
+			if p h then
+				begin
+					yesdst.tl <- inj r;
+					loop r nodst t
 				end
-		in
-		let rec yesonly yesdst = function
-			| [] -> []
-			| h :: t ->
-				let r = [ h ] in
-				if p h then begin
-					Obj.set_field (Obj.repr yesdst) 1 (Obj.repr r);
-					yesonly r t
-				end else begin
-					both yesdst r t;
-					r
+			else
+				begin
+					nodst.tl <- inj r;
+					loop yesdst r t
 				end
-		in 
-		let rec noonly nodst = function
-			| [] -> []
-			| h :: t ->
-				let r = [ h ] in
-				if p h then begin
-					both r nodst t;
-					r
-				end else begin
-					Obj.set_field (Obj.repr nodst) 1 (Obj.repr r);
-					noonly r t
-				end
-		in
-		let r = [ h ] in
-		if p h then
-			(r, (yesonly r t))
-		else
-			((noonly r t), r)
+	in
+	let yesdummy = dummy_node()
+	and nodummy = dummy_node()
+	in
+	loop yesdummy nodummy lst;
+	yesdummy.tl, nodummy.tl
 
-let split = function
-	| [] -> [], []
-	| (a, b) :: t ->
-		let rec loop adst bdst = function
-			| [] -> ()
-			| (a, b) :: t -> 
-				let x = [ a ] and y = [ b ] in
-				Obj.set_field (Obj.repr adst) 1 (Obj.repr x);
-				Obj.set_field (Obj.repr bdst) 1 (Obj.repr y);
-				loop x y t
-		in
-		let x = [ a ] and y = [ b ] in
-		loop x y t;
-		x, y
+let split lst =
+	let rec loop adst bdst = function
+		| [] -> ()
+		| (a, b) :: t -> 
+			let x = { hd = a; tl = [] } 
+			and y = { hd = b; tl = [] } in
+			adst.tl <- inj x;
+			bdst.tl <- inj y;
+			loop x y t
+	in
+	let adummy = dummy_node ()
+	and bdummy = dummy_node ()
+	in
+	loop adummy bdummy lst;
+	adummy.tl, bdummy.tl
 
 let combine l1 l2 =
-	match l1, l2 with
-	| [], [] -> []
-	| h1 :: t1, h2 :: t2 ->
-		let rec loop dst l1 l2 =
-			match l1, l2 with
-			| [], [] -> ()
-			| h1 :: t1, h2 :: t2 -> 
-				let r = [ h1, h2 ] in
-				Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
-				loop r t1 t2
-			| _, _ -> raise (Different_list_size "combine")
-		in
-		let r = [ h1, h2 ] in
-		loop r t1 t2;
-		r
-	| _, _ -> raise (Different_list_size "combine")
+	let rec loop dst l1 l2 =
+		match l1, l2 with
+		| [], [] -> ()
+		| h1 :: t1, h2 :: t2 -> 
+			let r = { hd = h1, h2; tl = [] } in
+			dst.tl <- (inj r);
+			loop r t1 t2
+		| _, _ -> raise (Different_list_size "combine")
+	in
+	let dummy = dummy_node () in
+	loop dummy l1 l2;
+	dummy.tl
 
 let sort ?(cmp=compare) = List.sort cmp
 
@@ -374,13 +331,13 @@ let rec init size f =
 	else
 		let rec loop dst n =
 			if n < size then
-				let r = [ f n ] in
-				Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
+				let r = { hd = f n; tl = [] } in
+				dst.tl <- inj r;
 				loop r (n+1)
 		in
-		let r = [ f 0 ] in
+		let r = { hd = f 0; tl = [] } in
 		loop r 1;
-		r
+		inj r
 
 let mapi f = function
 	| [] -> []
@@ -388,13 +345,13 @@ let mapi f = function
 		let rec loop dst n = function
 			| [] -> ()
 			| h :: t -> 
-				let r = [ f n h ] in
-				Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
+				let r = { hd = f n h; tl = [] } in
+				dst.tl <- inj r;
 				loop r (n+1) t
 		in	
-		let r = [ f 0 h ] in
+		let r = { hd = f 0 h; tl = [] } in
 		loop r 1 t;
-		r
+		inj r
 
 let iteri f l = 
 	let rec loop n = function
@@ -423,12 +380,12 @@ let split_nth index = function
 				match l with
 				| [] -> raise (Invalid_index index)
 				| h :: t ->
-					let r = [ h ] in
-					Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
+					let r = { hd =  h; tl = [] } in
+					dst.tl <- inj r;
 					loop (n-1) r t 
 			in
-			let r = [ h ] in
-			r, loop (index-1) r t
+			let r = { hd = h; tl = [] } in
+			(inj r), loop (index-1) r t
 
 let find_exc f e l =
 	try
@@ -437,53 +394,54 @@ let find_exc f e l =
 		Not_found -> raise e
 
 let remove l x =
-	match l with
-	| [] -> raise Not_found
-	| h :: t ->
-		if x = h then t
-		else
-			let rec loop dst = function
-				| [] -> raise Not_found
-				| h :: t ->
-					if x = h then 
-						Obj.set_field (Obj.repr dst) 1 (Obj.repr t)
-					else
-						let r = [ h ] in
-						Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
-						loop r t
-			in
-			let r = [ h ] in
-			loop r t;
-			r
+	let rec loop dst = function
+		| [] -> raise Not_found
+		| h :: t ->
+			if x = h then 
+				dst.tl <- t
+			else
+				let r = { hd = h; tl = [] } in
+				dst.tl <- inj r;
+				loop r t
+	in
+	let dummy = dummy_node () in
+	loop dummy l;
+	dummy.tl
 
-let rec remove_if f = function
-	| x::l when (f x) -> l
-	| x::l -> x::(remove_if f l)
-	| [] -> raise Not_found
+let rec remove_if f lst =
+	let rec loop dst = function
+		| [] -> ()
+		| x :: l ->
+			if f x then
+				dst.tl <- l
+			else
+				let r = { hd = x; tl = [] } in
+				dst.tl <- inj r;
+				loop r l
+	in
+	let dummy = dummy_node () in
+	loop dummy lst;
+	dummy.tl
 
 let rec remove_all l x =
-	match l with
-	| [] -> []
-	| h :: t ->
-		if x = h then remove_all t x
-		else
-			let rec loop dst = function
-				| [] -> ()
-				| h :: t ->
-					if x = h then
-						loop dst t
-					else
-						let r = [ h ] in
-						Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
-						loop r t
-			in
-			let r = [ h ] in
-			loop r t;
-			r
+	let rec loop dst = function
+		| [] -> ()
+		| h :: t ->
+			if x = h then
+				loop dst t
+			else
+				let r = { hd = h; tl = [] } in
+				dst.tl <- inj r;
+				loop r t
+	in
+	let dummy = dummy_node () in
+	loop dummy l;
+	dummy.tl
+
 let shuffle l =
 	let a = Array.of_list l in
 	let len = Array.length a in	
-	for i = 0 to len-1 do
+	for i = 0 to len-2 do
 		let p = (Random.int (len-i))+i in
 		let tmp = a.(p) in
 		a.(p) <- a.(i);
@@ -516,12 +474,12 @@ let enum l =
 	make (ref l) (ref (-1))
 
 let of_enum e =
-	let h = [ Obj.magic () ] in
+	let h = dummy_node() in
 	let _ = Enum.fold (fun x acc ->
-		let r = [ x ] in
-		Obj.set_field (Obj.repr acc) 1 (Obj.repr r);
+		let r = { hd = x; tl = [] }  in
+		acc.tl <- inj r;
 		r) h e in
-	tl h
+	h.tl
 
 let append_enum l e =
 	append l (of_enum e)
