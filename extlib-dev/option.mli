@@ -1,7 +1,7 @@
 (*
  * Options - functions for the option type
  * Copyright (C) 2003 Nicolas Cannasse
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -17,7 +17,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
- 
+
 (** Functions for the option type.
 
     Options are an Ocaml standard type that can be either [None] (undefined)
@@ -41,10 +41,10 @@ val map_default : ('a -> 'b) -> 'b -> 'a option -> 'b
 	returns [x]. *)
 
 val is_none : 'a option -> bool
-(** [is_none None] returns [true] or [false] either. *)
+(** [is_none None] returns [true] otherwise it returns [false]. *)
 
 val is_some : 'a option -> bool
-(** [is_some (Some x)] returns [true] or [false] either. *)
+(** [is_some (Some x)] returns [true] otherwise it returns [false]. *)
 
 val get : 'a option -> 'a
 (** [get (Some x)] returns [x] and [get None] raises [No_value]. *)
