@@ -2,6 +2,7 @@
 *.cmo
 *.cma
 *.cmx
+doc
 dochtml
 ext-lib.odoc
 extLib.lib
