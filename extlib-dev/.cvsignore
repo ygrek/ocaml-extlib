@@ -1,4 +1,4 @@
 *.cmi
 *.cmo
 *.cma
-doc
+dochtml
