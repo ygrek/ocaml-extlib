@@ -42,10 +42,12 @@ let invalid_arg n f p = raise (Invalid_arg (n,f,p))
 let length d = d.len
 
 let exponential_resizer ~currslots ~oldlength ~newlength =
-	let rec doubler x = if x > newlength then x else doubler (x * 2) in
+	let rec doubler x = if x >= newlength then x else doubler (x * 2) in
 	let rec halfer x = if x / 2 < newlength then x else halfer (x / 2) in
 	if newlength = 1 then
 		1
+	else if currslots = 0 then
+		doubler 1
 	else if currslots < newlength then
 		doubler currslots
 	else
@@ -61,11 +63,13 @@ let step_resizer step =
 			currslots)
 
 let conservative_exponential_resizer ~currslots ~oldlength ~newlength =
-	let rec doubler x = if x > newlength then x else doubler (x * 2) in
+	let rec doubler x = if x >= newlength then x else doubler (x * 2) in
 	let rec halfer x = if x / 2 < newlength then x else halfer (x / 2) in
 	if currslots < newlength then begin
 		if newlength = 1 then
 			1
+		else if currslots = 0 then
+			doubler 1
 		else
 			doubler currslots
 	end else if oldlength < newlength then
