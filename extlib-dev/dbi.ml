@@ -1,4 +1,4 @@
-(* Generic database interface for mod_caml programs.
+(* Generic database interface.
  * Copyright (C) 2003-2004 Merjis Ltd.
  *
  * This library is free software; you can redistribute it and/or
@@ -16,14 +16,12 @@
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: dbi.ml,v 1.3 2004-05-06 09:44:41 ncannasse Exp $
+ * $Id: dbi.ml,v 1.4 2004-08-04 12:47:57 ncannasse Exp $
  *)
-
 
 open Printf
 
 let invalid_arg s = invalid_arg ("Dbi." ^ s)
-
 
 (*----------------------------------------------------------------------
   Decimal Module
@@ -217,6 +215,42 @@ let placeholders n =
   done;
   s.[2*n] <- ')';
   s
+
+(* [split_query "SELECT name FROM foo WHERE id = ? AND bar = ?"]
+   returns the splitted list in reverse order [""; " AND bar = ";
+   "SELECT name FROM foo WHERE id = "]. *)
+let split_query query =
+  let n = String.length query in
+  let rec outside_quote l i0 i =
+    if i >= n then (String.sub query i0 (i - i0)) :: l
+    else match String.unsafe_get query i with
+    | '?' -> outside_quote ((String.sub query i0 (i - i0)) :: l) (i+1) (i+1)
+    | '\'' -> inside_quote l i0 (i+1)
+    | _ -> outside_quote l i0 (i+1)
+  and inside_quote l i0 i =
+    if i >= n then failwith "Incorrect query syntax" (* FIXME: -> Dbi.Error *)
+    else if String.unsafe_get query i = '\'' then
+      let i1 = i + 1 in
+      if i1 >= n || String.unsafe_get query i1 <> '\'' then
+        outside_quote l i0 i1
+      else (* c.[i1] = '\'' *)
+        inside_quote l i0 (i1 + 1)
+    else
+      inside_quote l i0 (i + 1)  in
+  outside_quote [] 0 0
+
+(* Given the splitted query [split_query], the arguments [args] and
+   an encoding function [sql2db], [make_query sql2db split_query args]
+   returns a string containing the query where the placeholders in the
+   original query (before it got splitted) are substitued with the
+   corresponding arguments. *)
+let make_query msg sql2db q_rev args =
+  let rec loop acc q a =
+    match q, a with
+    | q0 :: qtl, a0 :: atl -> loop ((sql2db a0) ^ q0 ^ acc) qtl atl
+    | [q0], [] -> q0 ^ acc
+    | _ -> invalid_arg msg in
+  loop "" q_rev (List.rev args)
 
 type precommit_handle = int
 type postrollback_handle = int
@@ -426,28 +460,4 @@ object (self)
           flush stderr
         );
 	false
-end
-
-
-module Factory = struct
-  (* List of registered database types. *)
-  let types = Hashtbl.create 8
-
-  let database_types () =
-    Hashtbl.fold (fun x _ xs -> x :: xs) types []
-
-  let connect database_type ?host ?port ?user ?password database_name =
-    try
-      let connect = Hashtbl.find types database_type in
-      connect ?host ?port ?user ?password database_name
-    with
-      Not_found ->
-	let keys = String.concat ", " (database_types()) in
-	invalid_arg ("Dbi.Factory.connect: database type " ^
-		     database_type ^ " is not known.  Known types: " ^
-		     keys)
-
-
-  let register (database_type : string) connect =
-    Hashtbl.replace types database_type connect
 end

@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: dbi.mli,v 1.4 2004-07-19 19:30:18 ncannasse Exp $
+ * $Id: dbi.mli,v 1.5 2004-08-04 12:47:57 ncannasse Exp $
  *)
 
 (** Generic database interface.
@@ -165,6 +165,9 @@ type precommit_handle
 type postrollback_handle
 (** See {!Dbi.connection.register_postrollback}. *)
 
+(* The following functions are used by drivers, hence not documented here. *)
+val split_query : string -> string list
+val make_query : string -> (sql_t -> string) -> string list -> sql_t list -> string
 
 (** {1 SQL utility functions.} *)
 
@@ -378,30 +381,4 @@ object
 
   method unregister_postrollback : postrollback_handle -> unit
     (** Unregister a postrollback callback. *)
-end
-
-
-module Factory :
-sig
-  val connect : string ->
-    ?host:string -> ?port:string -> ?user:string -> ?password:string ->
-    string -> connection
-    (** Connect to a specific type of database.  The first string parameter
-        is the database type, eg. "postgres", "mysql", etc.
-
-        @raise Invalid_argument if the database type is not known.
-        May throw other connection-specific SQL errors.
-      *)
-
-  val database_types : unit -> string list
-    (** Returns a list of registered database types. *)
-
-  val register : string ->
-    (?host:string -> ?port:string -> ?user:string -> ?password:string ->
-      string -> connection)
-    -> unit
-    (** Specific database drivers register themselves on load (or
-      [Dynlink]) by calling this function.  The first argument is the
-      database type (usually the name of the database engine) and the
-      second is the connection function. *)
 end
