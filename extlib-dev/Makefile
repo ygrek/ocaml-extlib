@@ -12,6 +12,7 @@ clean:
 doc: all
 	-mkdir dochtml
 	ocamldoc -d dochtml -html *.mli
+	cp odoc_style.css dochtml/style.css
 	
 doc-dump: all
 	ocamldoc -dump ext-lib.odoc *.mli
