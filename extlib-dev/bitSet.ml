@@ -109,40 +109,56 @@ let is_set t x =
 	else
 		false
 
-(* we can't use Pervasives.compare because bitsets might be of different
-   sizes but are actually the same integer *)
+
+exception Break_int of int
+
+(* Find highest set element or raise Not_found *)
+let find_msb t =
+  (* Find highest set bit in a byte.  Does not work with zero. *)
+  let byte_msb b = 
+    assert (b <> 0);
+    let rec loop n = 
+      if b land (1 lsl n) = 0 then
+        loop (n-1)
+      else n in
+    loop 7 in
+  let n = t.len - 1
+  and buf = t.data in
+  try 
+    for i = n downto 0 do
+      let byte = bget buf i in
+      if byte <> 0 then raise (Break_int ((i lsl log_int_size)+(byte_msb byte)))
+    done;
+    raise Not_found
+  with 
+    Break_int n -> n
+  | _ -> raise Not_found
+
 let compare t1 t2 =
-	let size1 = t1.len and size2 = t2.len in
-	let size = (if size1 < size2 then size1 else size2) in
-	let rec loop2 n =
-		if n >= size2 then
-			0
-		else if bget t2.data n <> 0 then
-			1
-		else
-			loop2 (n+1)
-	in
-	let rec loop1 n =
-		if n >= size1 then
-			0
-		else if bget t1.data n <> 0 then
-			-1
-		else
-			loop1 (n+1)
-	in
-	let rec loop n =
-		if n = size then
-			(if size1 > size2 then loop1 n else loop2 n)
-		else
-			let d = bget t2.data n - bget t1.data n in
-			if d = 0 then
-				loop (n+1)
-			else if d < 0 then
-				-1
-			else
-				1
-	in
-	loop 0
+  let some_msb b = try Some (find_msb b) with Not_found -> None in
+  match (some_msb t1, some_msb t2) with
+    (None, Some _) -> -1 (* 0-y -> -1 *)
+  | (Some _, None) -> 1  (* x-0 ->  1 *)
+  | (None, None) -> 0    (* 0-0 ->  0 *)
+  | (Some a, Some b) ->  (* x-y *)
+      if a < b then -1
+      else if a > b then 1
+      else
+        begin
+          (* MSBs differ, we need to scan arrays until we find a
+             difference *)
+          let ndx = a lsr log_int_size in 
+          assert (ndx < t1.len && ndx < t2.len);
+          try
+            for i = ndx downto 0 do
+              let b1 = bget t1.data i 
+              and b2 = bget t2.data i in
+              if b1 <> b2 then raise (Break_int (compare b1 b2))
+            done;
+            0
+          with
+            Break_int res -> res
+        end
 
 let equals t1 t2 =
 	compare t1 t2 = 0
