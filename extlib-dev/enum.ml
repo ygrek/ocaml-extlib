@@ -32,6 +32,37 @@ let make ~next ~count =
 		next = next;
 	}
 
+let force t =
+	let count = ref 1 in
+	let rec loop dst =
+		let x = [t.next()] in
+		incr count;
+		Obj.set_field (Obj.repr dst) 1 (Obj.repr x);
+		loop x
+	in
+	try
+		let x = [t.next()] in
+		(try loop x with No_more_elements -> ());
+		let enum = ref x in 
+		t.count <- (fun () -> !count);
+		t.next <- (fun () ->
+			decr count;
+			match !enum with
+			| [] -> raise No_more_elements
+			| h :: t -> enum := t; h);
+	with
+		No_more_elements ->
+			t.count <- (fun () -> 0);
+			t.next <- (fun () -> raise No_more_elements)
+
+let from f =
+	let e = {
+		next = f;
+		count = _dummy;
+	} in
+	e.count <- (fun () -> force e; e.count());
+	e
+
 let count t =
 	t.count()
 
@@ -157,42 +188,12 @@ let map2i f t u =
 		next = (fun () -> let i = !idx in incr idx; f i (t.next()) (u.next()));
 	}
 
-let force t =
-	let count = ref 1 in
-	let rec loop dst =
-		let x = [t.next()] in
-		incr count;
-		Obj.set_field (Obj.repr dst) 1 (Obj.repr x);
-		loop x
-	in
-	try
-		let x = [t.next()] in
-		(try loop x with No_more_elements -> ());
-		let enum = ref x in 
-		t.count <- (fun () -> !count);
-		t.next <- (fun () ->
-			decr count;
-			match !enum with
-			| [] -> raise No_more_elements
-			| h :: t -> enum := t; h);
-	with
-		No_more_elements ->
-			t.count <- (fun () -> 0);
-			t.next <- (fun () -> raise No_more_elements)
-
 let filter f t =
-	let rec filter_next() =
+	let rec next() =
 		let x = t.next() in
-		if f x then x else filter_next()
+		if f x then x else next()
 	in
-	let tf = {
-		count = _dummy;
-		next = filter_next;
-	} in
-	tf.count <- (fun () ->
-		force tf;
-		tf.count());
-	tf
+	Enum.from next
 
 let append ta tb = 
 	let t = {
@@ -226,14 +227,6 @@ let concat t =
 	in
 	tc.next <- concat_next;
 	tc
-
-let from f =
-	let e = {
-		next = f;
-		count = _dummy;
-	} in
-	e.count <- (fun () -> force e; e.count());
-	e
 
 let filter_map f t =
     let rec next () =
