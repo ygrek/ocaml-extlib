@@ -265,3 +265,8 @@ val conservative_exponential_resizer : resizer_t
 	this by comparing the oldlength and newlength parameters.  Other
 	than that, it acts like [exponential_resizer].
 *)
+
+(** {6 Unsafe operations} **)
+
+val unsafe_get : 'a t -> int -> 'a
+val unsafe_set : 'a t -> int -> 'a -> unit

@@ -390,3 +390,9 @@ let of_enum e =
 		let d = make 0 in
 		Enum.iter (add d) e;
 		d
+
+let unsafe_get a n =
+	iget a.arr n
+
+let unsafe_set a n x =
+	iset a.arr n x
