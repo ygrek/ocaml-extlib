@@ -184,6 +184,8 @@ let install() =
 	    let files = Buffer.create 0 in
 	    List.iter (fun m ->
 	      Buffer.add_string files (m ^ ".cmi");
+	      Buffer.add_char files ' ';
+	      Buffer.add_string files (m ^ ".mli");
 	      Buffer.add_char files ' ')
 	      modules;
 	    Buffer.add_string files "extLib.cmi ";

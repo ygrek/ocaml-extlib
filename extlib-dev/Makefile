@@ -6,7 +6,8 @@ MODULES = \
 
 # the list is topologically sorted
 
-SRC = $(MODULES:=.mli) $(MODULES:=.ml) extLib.ml
+MLI = $(MODULES:=.mli)
+SRC = $(MLI) $(MODULES:=.ml) extLib.ml
 
 all: 
 	ocamlc -a -o extLib.cma $(SRC)
@@ -20,7 +21,7 @@ doc:
 
 install:
 	cp META.txt META
-	ocamlfind install extlib META *.cmi *.cma $(wildcard *.cmxa) $(wildcard *.a)
+	ocamlfind install extlib META *.cmi *.cma $(MLI) $(wildcard *.cmxa) $(wildcard *.a)
 
 uninstall:
 	ocamlfind remove extlib
