@@ -114,7 +114,8 @@ let input_string s =
 			if n = 0 then
 				""
 			else begin
-				if !pos + n > len then raise No_more_input;
+				if !pos >= len then raise No_more_input;
+				let n = (if !pos + n > len then len - !pos else n) in
 				let s = String.sub s !pos n in
 				pos := !pos + n;
 				s
@@ -152,8 +153,12 @@ let input_channel ch =
 		in_nread = (fun n ->
 			let s = String.create n in
 			try
-				really_input ch s 0 n;
-				s
+				let nr = input ch s 0 n in
+				if nr <= 0 then raise No_more_input;
+				if nr = n then
+					s
+				else
+					String.sub s 0 nr
 			with
 				End_of_file -> raise No_more_input
 		);
@@ -196,7 +201,9 @@ let input_enum e =
 					ignore(Enum.find (fun x -> DynArray.unsafe_set elts !p x; incr p; incr pos; !p = n) e);					
 					DynArray.enum elts
 				with
-					Not_found -> raise No_more_input
+					Not_found -> 
+						if !p = 0 then raise No_more_input;
+						DynArray.enum elts
 		);
 		in_available = (fun () -> if Enum.fast_count e then Some (Enum.count e) else None);
 		in_close = (fun () -> ());
@@ -259,7 +266,8 @@ let pipe() =
 			get()
 		);
 		in_nread = (fun nr ->
-			if !n < nr then raise No_more_input;
+			if !n = 0 then raise No_more_input;
+			let nr = (if !n > nr then nr else !n) in
 			n := !n - nr;
 			nget nr
 		);
@@ -359,7 +367,7 @@ let read_i32 ch =
 
 let write_byte o n =
 	(* doesn't test bounds of n in order to keep semantics of Pervasives.output_byte *)
-	write o (char_of_int (n land 0xFF))
+	write o (Char.unsafe_chr (n land 0xFF))
 
 let write_string o s =
 	nwrite o s;
@@ -395,7 +403,6 @@ let input_bits ch =
 	let count = ref 0 in
 	let rec read n =
 		if !count >= n then begin
-			if n < 0 then raise (Invalid_argument "read bits");
 			let c = !count - n in
 			let k = (!data asr c) land ((1 lsl n) - 1) in
 			count := c;
