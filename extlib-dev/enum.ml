@@ -20,19 +20,24 @@
 type 'a t = {
 	mutable count : unit -> int;
 	mutable next : unit -> 'a;
+	mutable clone : unit -> 'a t;
+	mutable fast : bool;
 }
 
-exception No_more_elements (* raised by 'next' functions, does NOT goes outside the API *)
+(* raised by 'next' functions, should NOT goes outside the API *)
+exception No_more_elements
 
 let _dummy () = assert false
 
-let make ~next ~count =
+let make ~next ~count ~clone =
 	{
 		count = count;
 		next = next;
+		clone = clone;
+		fast = true;
 	}
 
-let init n f =
+let rec init n f =
 	if n < 0 then invalid_arg "Enum.init";
 	let count = ref n in
 	{
@@ -42,48 +47,115 @@ let init n f =
 			| 0 -> raise No_more_elements
 			| _ ->
 				decr count;
-				f (n - 1 - !count))
+				f (n - 1 - !count));
+		clone = (fun () -> init !count f);
+		fast = true;
 	}			
 
 let force t =
-	let count = ref 1 in
+	let rec clone enum count =
+		let enum = ref !enum
+		and	count = ref !count in
+		{
+			count = (fun () -> !count);
+			next = (fun () ->
+				match !enum with
+				| [] -> raise No_more_elements
+				| h :: t -> decr count; enum := t; h);
+			clone = (fun () ->
+				let enum = ref !enum
+				and count = ref !count in
+				clone enum count);
+			fast = true;
+		}
+	in
+	let count = ref 0 in
 	let rec loop dst =
 		let x = [t.next()] in
 		incr count;
 		Obj.set_field (Obj.repr dst) 1 (Obj.repr x);
 		loop x
 	in
-	try
-		let x = [t.next()] in
-		(try loop x with No_more_elements -> ());
-		let enum = ref x in 
-		t.count <- (fun () -> !count);
-		t.next <- (fun () ->
-			decr count;
-			match !enum with
-			| [] -> raise No_more_elements
-			| h :: t -> enum := t; h);
-	with
-		No_more_elements ->
-			t.count <- (fun () -> 0);
-			t.next <- (fun () -> raise No_more_elements)
+	let enum = ref [] in 
+	(try
+		enum := [t.next()];
+		incr count;
+		loop !enum;
+	with No_more_elements -> ());
+	let tc = clone enum count in
+	t.clone <- tc.clone;
+	t.next <- tc.next;
+	t.count <- tc.count;
+	t.fast <- true
 
 let from f =
 	let e = {
 		next = f;
 		count = _dummy;
+		clone = _dummy;
+		fast = false;
+	} in
+	e.count <- (fun () -> force e; e.count());
+	e.clone <- (fun () -> force e; e.clone());
+	e
+
+let from2 next clone =
+	let e = {
+		next = next;
+		count = _dummy;
+		clone = clone;
+		fast = false;
 	} in
 	e.count <- (fun () -> force e; e.count());
 	e
 
-let peek t =
+let get t =
 	try
 		Some (t.next())
 	with
 		No_more_elements -> None
 
+let peek t =
+	try
+		let e = t.next() in
+		let rec make t =
+			let fnext = t.next in
+			let fcount = t.count in
+			let fclone = t.clone in
+			let next_called = ref false in
+			t.next <- (fun () ->
+				next_called := true;
+				t.next <- fnext;
+				t.count <- fcount;
+				t.clone <- fclone;
+				e);
+			t.count <- (fun () ->
+				let n = fcount() in
+				if !next_called then n else n+1);
+			t.clone <- (fun () ->
+				let tc = fclone() in
+				if not !next_called then make tc;
+				tc);
+		in
+		make t;
+		Some e
+	with
+		No_more_elements -> None
+
+let empty t =
+	if t.fast then
+		t.count() = 0
+	else
+		peek t = None
+
 let count t =
 	t.count()
+
+let fast_count t =
+	t.fast
+
+let clone t =
+	t.clone()
 
 let iter f t =
 	let rec loop () =
@@ -179,48 +251,56 @@ let find f t =
 	with
 		No_more_elements -> raise Not_found
 
-let map f t =
+let rec map f t =
 	{
 		count = t.count;
 		next = (fun () -> f (t.next()));
+		clone = (fun () -> map f (t.clone()));
+		fast = t.fast;
 	}
 
-let mapi f t =
+let rec mapi f t =
 	let idx = ref (-1) in
 	{
 		count = t.count;
 		next = (fun () -> incr idx; f !idx (t.next()));
+		clone = (fun () -> mapi f (t.clone()));
+		fast = t.fast;
 	}
 
-let map2 f t u =
+let rec map2 f t u =
 	{
 		count = (fun () -> (min (t.count()) (u.count())));
-		next = (fun () -> f (t.next()) (u.next()))
+		next = (fun () -> f (t.next()) (u.next()));
+		clone = (fun () -> map2 f (t.clone()) (u.clone()));
+		fast = t.fast && u.fast;
 	}
 
-let map2i f t u =
+let rec map2i f t u =
 	let idx = ref (-1) in
 	{
 		count = (fun () -> (min (t.count()) (u.count())));
 		next = (fun () -> incr idx; f !idx (t.next()) (u.next()));
+		clone = (fun () -> map2i f (t.clone()) (u.clone()));
+		fast = t.fast && u.fast;
 	}
 
-let filter f t =
+let rec filter f t =
 	let rec next() =
 		let x = t.next() in
 		if f x then x else next()
 	in
-	from next
+	from2 next (fun () -> filter f (t.clone()))
 
-let filter_map f t =
+let rec filter_map f t =
     let rec next () =
         match f (t.next()) with
         | None -> next()
         | Some x -> x
     in
-    from next
+	from2 next (fun () -> filter_map f (t.clone()))
 
-let append ta tb = 
+let rec append ta tb = 
 	let append_next = ref _dummy in
 	append_next := (fun () ->
 		try
@@ -232,9 +312,11 @@ let append ta tb =
 	{
 		count = (fun () -> ta.count() + tb.count());
 		next = (fun () -> !append_next ());
+		clone = (fun () -> append (ta.clone()) (tb.clone()));
+		fast = ta.fast && tb.fast;
 	}
 
-let concat t =
+let rec concat t =
 	let concat_ref = ref _dummy in
 	let rec concat_next() =
 		let tn = t.next() in
@@ -247,79 +329,4 @@ let concat t =
 		!concat_ref ()
 	in
 	concat_ref := concat_next;
-	from (fun () -> !concat_ref ())
-
-(*
-	Note : this new implementation is using a shared mutable list between the
-	original and the clone enum, so if one of the two as been garbaged, cached
-	items will be also.
-*)
-let clone t =
-	let cache = [Obj.magic ()] in
-	let cache_t = ref cache in
-	let cache_tc = ref cache in
-	let cache_t_count = ref 0 in
-	let cache_tc_count = ref 0 in
-	(*
-		Here we can localy store the next and count functions because theses
-		can only be modified by another clone or force.
-
-		'force' does not cause any probleme since if first enumerate all
-		elements, so the other clone cache will be filled in.
-
-		'clone' will just add another cache level, without causing any
-		trouble.
-
-		In order to keep clone working, no other Enum function should
-		modify the next and/or count functions after creation
-		(append and concat have been modified in this way).
-	*)
-	let fnext = t.next in
-	let fcount = t.count in
-	let global_count = ref 0 in
-	let global_fcount = ref _dummy in
-	(* 
-		since counting elements can make the next function to be called,
-		we need this hack to avoid bugs in counting when 'force' occurs.
-	*)
-	global_fcount := (fun () ->
-		global_count := 0;
-		let count = fcount() in
-		global_count := !global_count + count;
-		global_fcount := (fun () -> !global_count);
-		count);
-	let tc = {
-		next = (fun () ->
-					match !cache_tc with
-					| [x] as l ->
-						let e = fnext() in
-						let r = [ e ] in
-						decr global_count;
-						incr cache_t_count;
-						Obj.set_field (Obj.repr l) 1 (Obj.repr r);
-						cache_tc := r;
-						e
-					| _ :: (h :: t as l) ->
-						decr cache_tc_count;
-						cache_tc := l;
-						h
-					| [] -> assert false);
-		count = (fun () -> !global_fcount () + !cache_tc_count);
-	} in
-	t.next <- (fun () ->
-		match !cache_t with
-		| [x] as l ->
-			let e = fnext() in
-			let r = [ e ] in
-			decr global_count;
-			incr cache_tc_count;
-			Obj.set_field (Obj.repr l) 1 (Obj.repr r);
-			cache_t := r;
-			e
-		| _ :: (h :: t as l) ->
-			decr cache_t_count;
-			cache_t := l;
-			h
-		| [] -> assert false);
-	t.count <- (fun () -> !global_fcount () + !cache_t_count);
-	tc
+	from2 (fun () -> !concat_ref ()) (fun () -> concat (t.clone()))

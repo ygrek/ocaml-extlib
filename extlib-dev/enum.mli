@@ -1,4 +1,3 @@
-
 (* Enum, a lazy implementation of abstracts enumerators
  * Copyright (C) 2003 Nicolas Cannasse
  * 
@@ -22,7 +21,7 @@ type 'a t
 
 exception No_more_elements
 
-val make : next:(unit -> 'a) -> count:(unit -> int) -> 'a t
+val make : next:(unit -> 'a) -> count:(unit -> int) -> clone:(unit -> 'a t) -> 'a t
 
 val from : (unit -> 'a) -> 'a t
 
@@ -44,13 +43,18 @@ val fold2 : ('a -> 'b -> 'c -> 'c) -> 'c -> 'a t -> 'b t -> 'c
 
 val fold2i : (int -> 'a -> 'b -> 'c -> 'c) -> 'c -> 'a t -> 'b t -> 'c
 
+(* find can be used several times since it consumes the enumeration *)
 val find : ('a -> bool) -> 'a t -> 'a (* raise Not_found *)
 
 val force : 'a t -> unit
 
 val clone : 'a t -> 'a t
 
+val empty : 'a t -> bool
+
 val peek : 'a t -> 'a option
+
+val get : 'a t -> 'a option
 
 (* Lazy operations, cost O(1) *)
 
@@ -64,14 +68,20 @@ val map2i : (int -> 'a -> 'b -> 'c ) -> 'a t -> 'b t -> 'c t
 
 val filter : ('a -> bool) -> 'a t -> 'a t
 
+val filter_map : ('a -> 'b option) -> 'a t -> 'b t
+
 val append : 'a t -> 'a t -> 'a t
 
 val concat : 'a t t -> 'a t
-
-val filter_map : ('a -> 'b option) -> 'a t -> 'b t
 
 (* Depending of the underlaying structure that is implementating the Enum
    functions, the count operation can be costly, and sometimes will need
    a intermediate list to be built and all operations applied. Use it with
    care. *)
 val count : 'a t -> int
+
+(* For users worried about the speed of count, theses can call the fast_count
+   function that will give an hint about count implementation. Basicly, if
+   the enum has been created with [make] or [init] if [force] has been called
+   on it, then fast_count will return true. *)
+val fast_count : 'a t -> bool
