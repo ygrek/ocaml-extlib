@@ -134,6 +134,8 @@ let filter_map f l =
     loop dummy l;
     tl dummy
 
+let fold = fold_left
+
 let fold_right f l accum =
 	let rec loop accum = function
 		| [] -> accum
@@ -488,18 +490,25 @@ let shuffle l =
 	- 2003-04-15, Nicolas Cannasse *)
 
 let enum l =
-	let lr = ref l in
-	Enum.make
-		~next:(fun () ->
-			match !lr with
-			| [] -> raise Enum.No_more_elements
-			| h :: t ->
-				lr := t;
-				h
-		)
-		~count:(fun () ->
-			length !lr
-		)
+	let rec make lr count =
+		Enum.make
+			~next:(fun () ->
+				match !lr with
+				| [] -> raise Enum.No_more_elements
+				| h :: t ->
+					decr count;
+					lr := t;
+					h
+			)
+			~count:(fun () ->
+				if !count < 0 then count := length !lr;
+				!count
+			)
+			~clone:(fun () ->
+				make (ref !lr) (ref !count)
+			)
+	in
+	make (ref l) (ref (-1))
 
 let of_enum e =
 	let h = [ Obj.magic () ] in

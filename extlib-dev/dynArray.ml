@@ -277,23 +277,8 @@ let fold_right f a x =
 	in
 	loop (a.length - 1) x
 
-let enum darr =
-	let idxref = ref 0 in
-	let next () =
-		if !idxref >= darr.length then
-			raise Enum.No_more_elements
-		else
-			let retval = darr.arr.( !idxref ) in
-			incr idxref;
-			retval
-	and count () =
-		if !idxref >= darr.length then 0
-		else darr.length - !idxref
-	in
-	Enum.make ~next:next ~count:count
-
-let sub_enum darr initidx len =
-	let idxref = ref 0
+let rec sub_enum darr initidx len =
+	let idxref = ref initidx
 	and lenref = ref len
 	in
 	let next () =
@@ -310,8 +295,27 @@ let sub_enum darr initidx len =
 			darr.length - !idxref
 		else
 		   !lenref
+	and clone () =
+		sub_enum darr !idxref !lenref
 	in
-	Enum.make ~next:next ~count:count
+	Enum.make ~next:next ~count:count ~clone:clone
+
+let enum darr =
+	let idxref = ref 0 in
+	let next () =
+		if !idxref >= darr.length then
+			raise Enum.No_more_elements
+		else
+			let retval = darr.arr.( !idxref ) in
+			incr idxref;
+			retval
+	and count () =
+		if !idxref >= darr.length then 0
+		else darr.length - !idxref
+	and clone () =
+		sub_enum darr !idxref (darr.length - !idxref)
+	in
+	Enum.make ~next:next ~count:count ~clone:clone
 
 let of_enum nullval e =
 	let c = Enum.count e in
@@ -339,22 +343,7 @@ let set_enum darr idx e =
 		if max > darr.length then changelength darr (max - darr.length);
 		Enum.iteri (fun i x -> (darr.arr.(i+idx) <- x)) e
 
-let rev_enum darr =
-	let idxref = ref (darr.length - 1) in
-	let next () =
-		if !idxref < 0 then
-			raise Enum.No_more_elements
-		else
-			let retval = darr.arr.( !idxref ) in
-			decr idxref;
-			retval
-	and count () =
-		if !idxref < 0 then 0
-		else 1 + !idxref
-	in
-	Enum.make ~next:next ~count:count
-
-let sub_rev_enum darr initidx len =
+let rec sub_rev_enum darr initidx len =
 	let idxref = ref (len - 1)
 	in
 	let next () =
@@ -368,8 +357,27 @@ let sub_rev_enum darr initidx len =
 	and count () =
 		if !idxref < 0 then 0
 		else 1 + !idxref
+	and clone () =
+		sub_rev_enum darr initidx (!idxref + 1)
 	in
-	Enum.make ~next:next ~count:count
+	Enum.make ~next:next ~count:count ~clone:clone
+
+let rev_enum darr =
+	let idxref = ref (darr.length - 1) in
+	let next () =
+		if !idxref < 0 then
+			raise Enum.No_more_elements
+		else
+			let retval = darr.arr.( !idxref ) in
+			decr idxref;
+			retval
+	and count () =
+		if !idxref < 0 then 0
+		else 1 + !idxref
+	and clone () =
+		sub_rev_enum darr 0 (!idxref + 1)
+	in
+	Enum.make ~next:next ~count:count ~clone:clone
 
 let of_rev_enum nullval e =
 	let c = Enum.count e in

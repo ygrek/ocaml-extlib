@@ -60,18 +60,21 @@ module String = struct
 			_ -> raise Invalid_string
 
 	let enum s =
-		let i = ref 0 in
 		let l = String.length s in
-		Enum.make 
-		~next:(fun () ->
-			if !i = l then
-				raise Enum.No_more_elements
-			else
-				let p = !i in
-				incr i;
-				s.[p]
-			)
-		~count:(fun () -> l - !i)
+		let rec make i =
+			Enum.make 
+			~next:(fun () ->
+				if !i = l then
+					raise Enum.No_more_elements
+				else
+					let p = !i in
+					incr i;
+					s.[p]
+				)
+			~count:(fun () -> l - !i)
+			~clone:(fun () -> make (ref !i))
+		in
+		make (ref 0)
 
 	let of_enum e =
 		let l = Enum.count e in
