@@ -34,7 +34,7 @@ val fold : ('a -> 'b -> 'b) -> 'b -> 'a t -> 'b
 
 val find : ('a -> bool) -> 'a t -> 'a (* raise Not_found *)
 
-val force : 'a t -> 'a t
+val force : 'a t -> unit
 
 (* Lazy operations, cost O(1) *)
 

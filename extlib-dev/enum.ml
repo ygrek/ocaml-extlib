@@ -86,20 +86,16 @@ let force t =
 		let x = [t.next()] in
 		(try loop x with No_more_elements -> ());
 		let enum = ref x in 
-		{
-			count = (fun () -> !count);
-			next = (fun () ->
-				decr count;
-				match !enum with
-				| [] -> raise No_more_elements
-				| h :: t -> enum := t; h);
-		}
+		t.count <- (fun () -> !count);
+		t.next <- (fun () ->
+			decr count;
+			match !enum with
+			| [] -> raise No_more_elements
+			| h :: t -> enum := t; h);
 	with
 		No_more_elements ->
-			{
-				count = (fun () -> 0);
-				next = (fun () -> raise No_more_elements);
-			}
+			t.count <- (fun () -> 0);
+			t.next <- (fun () -> raise No_more_elements)
 
 let filter f t =
 	let rec filter_next() =
@@ -111,9 +107,7 @@ let filter f t =
 		next = filter_next;
 	} in
 	tf.count <- (fun () ->
-		let tforced = force tf in
-		tf.count <- tforced.count;
-		tf.next <- tforced.next;
+		force tf;
 		tf.count());
 	tf
 
