@@ -27,7 +27,7 @@
     remove the highest priority element).
 
     The implementation here is the same one described by Ralf Hinze
-    (ralf@cs.uu.nl) in the paper "A Simple Implementation Technique for
+    (ralf @ cs.uu.nl) in the paper "A Simple Implementation Technique for
     Priority Search Queues".  Reading the paper before reading the code is
     highly recommended.
 
@@ -66,9 +66,9 @@ module type OrderedPriorityType =
                 are equal), [f k1 k2] is strictly negative if [k1] is
                 before [k2], and strictly positive if [k1] is after [k2].
                 A suitable ordering function is the generic structural
-                comparison {!Pervasives.compare}. *)
+                comparison [compare]. *)
     end
-(** Input signature of the functor {!psq.Make}. *)
+(** Input signature of the functor {!Psqueue.Make}. *)
 
 module type PSQ = 
     sig
@@ -159,7 +159,7 @@ module type PSQ =
         val query : elem_t -> key_t -> psq_t -> elem_t
         (** Imprecise search.
             [query d k q] returns the current binding of [k] in [q], or
-            [d] if no such binding exists.  This is different from {find}
+            [d] if no such binding exists.  This is different from [find]
             in its behavior when the key does not exist in the queue. *)
 
         val update : (elem_t -> elem_t) -> key_t -> psq_t -> psq_t
@@ -194,7 +194,7 @@ module type PSQ =
          *)
 
     end
-(** Output signature of the function {!Psq.Make}. *)
+(** Output signature of the function {!Psqueue.Make}. *)
 
 module Make (Ord: OrderedPriorityType) : PSQ with type key_t = Ord.k_t and type elem_t = Ord.e_t
 
