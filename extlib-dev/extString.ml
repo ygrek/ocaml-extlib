@@ -2,15 +2,44 @@ exception Invalid_string
 
 module String = struct
 
-	let end_with s e = assert false
+	let ends_with s e =
+		let el = String.length e in
+		let sl = String.length s in
+		if sl < el then
+			false
+		else
+			(String.compare (String.sub s (sl-el) el) e) = 0
 
-	let split s ~sep = assert false
+	let find str sub =
+		let sublen = String.length sub in
+		if sublen = 0 then
+			0
+		else
+			let found = ref 0 in
+			let len = String.length str in
+			try
+				for i = 0 to len - sublen do
+					let j = ref 0 in
+					while str.[i + !j] = sub.[!j] do
+						incr j;
+						if !j = sublen then begin found := i; raise Exit; end;
+					done;
+				done;
+				raise Invalid_string
+			with
+				Exit -> !found
 
-	let chomp s = assert false
+	let split str sep =
+		let p = find str sep in
+		let len = String.length sep in
+		let slen = String.length str in
+		String.sub str 0 p, String.sub str (p + len) (slen - p - len)
 
-	let lchop s = assert false
+	let lchop s =
+		String.sub s 1 ((String.length s)-1)
 
-	let rchop s = assert false
+	let rchop s =
+		String.sub s 0 ((String.length s)-1)
 
 	let of_int = string_of_int
 

@@ -3,17 +3,17 @@ exception Invalid_string
 module String :
   sig
 
-	val end_with : string -> string -> bool
+	val ends_with : string -> string -> bool
+
+	(* [find s x] return the starting index of the string [x]
+	   within the string [s] or raise Invalid_string if [x]
+	   is not a substring of [s]. *)
+	val find : string -> string -> int
 
 	(* split the given string among each part of the
 	   given separator.
 	   raise Invalid_string if the separator is not found *)
-	val split : string -> sep:string -> string * string
-
-	(* remove the newline character or the cr-newline (\r\n)
-	   characters at the end of the string. return the unmodified
-	   string if it doesn't end with \n *)
-	val chomp : string -> string
+	val split : string -> string -> string * string
 
 	(* return the same string but without the first character.
 	   do nothing if the string is empty *)
@@ -41,6 +41,7 @@ module String :
 	val to_float : string -> float
 
 	val enum : string -> char Enum.t
+
 	val of_enum : char Enum.t -> string
 	
   end
