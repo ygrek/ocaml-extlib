@@ -117,6 +117,10 @@ val for_all : ('a -> bool) -> 'a t -> bool
    the function returned values *)
 val map : ('a -> 'b) -> 'a t -> 'b t
 
+(* transform all elements in the ref list
+   using a function. *)
+val transform : ('a -> 'a) -> 'a t -> unit
+
 (* apply a function to all elements
    and return the list constructed with
    the function returned values *)
