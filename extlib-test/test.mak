@@ -1,7 +1,5 @@
 
 RESULT:=extlib_test
-LIBS:=extLib
-INCDIRS+=../extlib-dev
 
 SOURCES:=\
 	util.ml \
@@ -15,10 +13,13 @@ SOURCES:=\
 	test_ExtString.ml \
 	test_main.ml \
 
-all:debug-code
-opt:native-code
+EXTLIB_DIR:=../extlib-dev
+
+all:
+	ocamlc -I $(EXTLIB_DIR) -g extLib.cma $(SOURCES) -o $(RESULT)
+
+opt:
+	ocamlopt -I $(EXTLIB_DIR) extLib.cmxa $(SOURCES) -o $(RESULT)
 
 run:
 	./$(RESULT)
-
-include OCamlMakefile
