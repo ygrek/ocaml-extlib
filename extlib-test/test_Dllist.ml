@@ -18,12 +18,5 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
-let main =
-  Util.log "Extlib tester started..";
-  Test_Base64.test ();
-  Test_BitSet.test ();
-  Test_Dllist.test ();
-  Test_ExtString.test ();
-  Test_ExtList.test ();
-  Test_DynArray.test ();
-  Util.log "\nAll tests completed."
+let test () = 
+  Util.run_test ~test_name:"jh_Dllist" Test_jh_Dllist.test

@@ -18,12 +18,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
-let main =
-  Util.log "Extlib tester started..";
-  Test_Base64.test ();
-  Test_BitSet.test ();
-  Test_Dllist.test ();
-  Test_ExtString.test ();
-  Test_ExtList.test ();
-  Test_DynArray.test ();
-  Util.log "\nAll tests completed."
+let test_simple () = 
+  for i = 1 to 5 do
+    let rec make_lst accu n = 
+      if n < i then make_lst (i::accu) (n+1)
+      else accu in
+    let lst = make_lst [] 0 in
+    let dlst = Dllist.of_list lst in
+    assert (List.length lst = Dllist.length dlst);
+    List.iter 
+      (fun e -> 
+         let dl_elem = Dllist.get dlst in
+         assert (e = dl_elem);
+         Dllist.remove dlst) lst;
+  done
+
+let test () = 
+  Util.run_test ~test_name:"jh_Dllist.test_simple" test_simple
