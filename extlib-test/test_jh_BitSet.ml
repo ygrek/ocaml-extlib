@@ -46,6 +46,24 @@ let int_of_bitset s =
   done;
   !n
 
+let bitset_of_int_scale n scl = 
+  assert (n <= (1 lsl 29));
+  let s = B.create 30 in
+  for i = 0 to 29 do
+    if (n land (1 lsl i)) <> 0 then
+      B.set s (i*scl)
+  done;
+  assert (popcount n = B.count s);
+  s
+
+let int_of_bitset_scale s scl = 
+  let n = ref 0 in
+  for i = 0 to 29 do
+    if B.is_set s (i*scl) then
+      n := !n lor (1 lsl i)
+  done;
+  !n
+
 let test_rnd_creation () =
   for i = 0 to 255 do
     let r1 = Random.int (1 lsl 28) in
@@ -76,6 +94,25 @@ let test_diff () =
 (*    assert (B.count ((B.diff s s)) = 0);*) (* TODO enable for new API *)
   done
 
+let biased_rnd_28 () = 
+  let n_bits = [| 4; 8; 16; 28 |] in
+  let n = n_bits.(Random.int (Array.length n_bits)) in
+  Random.int (1 lsl n)
+
+let test_sym_diff () =
+  for i = 0 to 255 do
+    let s = (Random.int 3)+1 in
+    let r1 = biased_rnd_28 () in
+    let r2 = biased_rnd_28 () in
+    let s1 = bitset_of_int_scale r1 s in
+    let s2 = bitset_of_int_scale r2 s in
+    assert (int_of_bitset_scale (bitset_of_int_scale r1 s) s = r1);
+    assert (int_of_bitset_scale (B.sym_diff s1 s2) s = r1 lxor r2);
+    assert (int_of_bitset_scale (B.sym_diff s2 s1) s = r1 lxor r2);
+    assert (B.count (B.sym_diff s1 s1) = 0);
+    assert (B.count (B.sym_diff s2 s2) = 0);
+  done
+  
 (* TODO does not work 
 let test_compare () =
   for i = 0 to 255 do
@@ -118,7 +155,6 @@ let test_exceptions () =
                let s = B.create 8 in
                B.is_set s (-19)))
 
-(* TODO these tests need new extlib API 
 module IS = Set.Make (struct type t = int let compare = compare end)
 
 let set_of_int n = 
@@ -159,14 +195,15 @@ let test_set_opers () =
     let bs_int = int_of_bitset bs in
     assert (is_int = bs_int);
   done
-*)
+
 let test () =
   Util.run_test ~test_name:"jh_BitSet.test_intersect" test_intersect;
   Util.run_test ~test_name:"jh_BitSet.test_diff" test_diff;
+  Util.run_test ~test_name:"jh_BitSet.test_sym_diff" test_sym_diff;
   Util.run_test ~test_name:"jh_BitSet.test_rnd_creation" test_rnd_creation;
   Util.run_test ~test_name:"jh_BitSet.test_empty" test_empty;
   Util.run_test ~test_name:"jh_BitSet.test_exceptions" test_exceptions;
-(*  Util.run_test ~test_name:"jh_BitSet2.test_set_opers" test_set_opers*)
+  Util.run_test ~test_name:"jh_BitSet2.test_set_opers" test_set_opers
   
 
 (*  test_compare ();*)

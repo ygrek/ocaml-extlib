@@ -87,3 +87,15 @@ val differentiate : t -> t -> unit
 val differentiate_sym : t -> t -> unit
 (** [differentiate_sym s t] sets [s] to the symmetrical difference of the
   sets [s] and [t]. *)
+
+val inter : t -> t -> t
+(** [inter s t] returns the intersection of sets [s] and [t]. *)
+
+val union : t -> t -> t
+(** [union s t] return the union of sets [s]  and [t]. *)
+
+val diff : t -> t -> t
+(** [diff s t] returns [s]-[t]. *)
+
+val sym_diff : t -> t -> t
+(** [sym_diff s t] returns the symmetrical difference of [s] and [t]. *)

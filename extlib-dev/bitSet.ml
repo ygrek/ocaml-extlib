@@ -237,3 +237,49 @@ let differentiate_sym t t' =
 		t.data <- b;
 	end else
 		diff_sym_loop (size - 1)
+
+let raw_create size = 
+  let b = bcreate size in
+  bfill b 0 size 0;
+  { data = b; len = size }
+
+let inter a b =
+  let max_size = max a.len b.len in
+  let d = raw_create max_size in
+  let sl = min a.len b.len in
+  (* Note: rest of the array is set to zero automatically *)
+  for i = 0 to sl-1 do
+    bset d.data i ((bget a.data i) land (bget b.data i))
+  done;
+  d
+
+(* Note: rest of the array is handled automatically correct, since we
+   took a copy of the bigger set. *)
+let union a b = 
+  let d = if a.len > b.len then copy a else copy b in
+  let sl = min a.len b.len in
+  for i = 0 to sl-1 do
+    bset d.data i ((bget a.data i) lor (bget b.data i))
+  done;
+  d
+
+let diff a b = 
+  let maxlen = max a.len b.len in
+  let buf = bcreate maxlen in
+  bblit a.data 0 buf 0 a.len;
+  let sl = min a.len b.len in
+  for i = 0 to sl-1 do
+    bset buf i ((bget a.data i) land (lnot (bget b.data i)))
+  done;
+  { data = buf; len = maxlen }
+
+let sym_diff a b = 
+  let maxlen = max a.len b.len in
+  let buf = bcreate maxlen in
+  (* Copy larger (assumes missing bits are zero) *)
+  bblit (if a.len > b.len then a.data else b.data) 0 buf 0 maxlen;
+  let sl = min a.len b.len in
+  for i = 0 to sl-1 do
+    bset buf i ((bget a.data i) lxor (bget b.data i))
+  done;
+  { data = buf; len = maxlen }
