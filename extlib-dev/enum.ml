@@ -113,50 +113,48 @@ let iter2i f t u =
 		No_more_elements -> ()
 
 let fold f init t =
-	let ret = ref init in
-	let rec loop accu =
-		loop (f (try t.next() with No_more_elements as e -> ret := accu; raise e) accu)
+	let acc = ref init in
+	let rec loop() =
+		acc := f (t.next()) !acc;
+		loop()
 	in
 	try
-		loop init
+		loop()
 	with
-		No_more_elements -> !ret
+		No_more_elements -> !acc
 
 let foldi f init t =
-	let ret = ref init in
-	let rec loop idx accu =
-		loop (idx + 1) (f idx (try t.next() with No_more_elements as e -> ret := accu; raise e) accu)
+	let acc = ref init in
+	let rec loop idx =
+		acc := f idx (t.next()) !acc;
+		loop (idx + 1)
 	in
 	try
-		loop 0 init
+		loop 0
 	with
-		No_more_elements -> !ret
+		No_more_elements -> !acc
 
 let fold2 f init t u =
-	let ret = ref init in
-	let rec loop accu =
-		let a, b = try t.next(), u.next()
-				with No_more_elements as e -> ret := accu; raise e
-		in
-		loop (f a b accu)
+	let acc = ref init in
+	let rec loop() =
+		acc := f (t.next()) (u.next()) !acc;
+		loop()
 	in
 	try
-		loop init
+		loop()
 	with
-		No_more_elements -> !ret
+		No_more_elements -> !acc
 
 let fold2i f init t u =
-	let ret = ref init in
-	let rec loop idx accu =
-		let a, b = try t.next(), u.next()
-				with No_more_elements as e -> ret := accu; raise e
-		in
-		loop (idx + 1) (f idx a b accu)
+	let acc = ref init in
+	let rec loop idx =
+		acc := f idx (t.next()) (u.next()) !acc;
+		loop (idx + 1)
 	in
 	try
-		loop 0 init
+		loop 0
 	with
-		No_more_elements -> !ret
+		No_more_elements -> !acc
 
 let find f t =
 	let rec loop () =
