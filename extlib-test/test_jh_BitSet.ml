@@ -18,6 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
+open ExtList
+
 module B = BitSet
 
 let biased_rnd_28 () = 
@@ -96,7 +98,7 @@ let test_diff () =
     let s = bitset_of_int r in
     if r <> 0 then
       assert (B.count s <> 0);
-(*    assert (B.count ((B.diff s s)) = 0);*) (* TODO enable for new API *)
+    assert (B.count ((B.diff s s)) = 0);
   done
 
 let test_sym_diff () =
@@ -112,20 +114,48 @@ let test_sym_diff () =
     assert (B.count (B.sym_diff s1 s1) = 0);
     assert (B.count (B.sym_diff s2 s2) = 0);
   done
-  
-(* TODO does not work 
+
 let test_compare () =
   for i = 0 to 255 do
-    let r1 = Random.int (1 lsl 24)
-    and r2 = Random.int (1 lsl 24) in
+    let r1 = biased_rnd_28 () in
+    let r2 = biased_rnd_28 () in
     let s1 = bitset_of_int r1 
     and s2 = bitset_of_int r2 in
     let sr = B.compare s1 s2
-    and ir = compare r2 r1 in
-    Printf.printf "%i\n%i, %i %i\n\n" r1 r2 ir sr;
+    and ir = compare r1 r2 in
     assert (sr = ir)
+  done;
+  for i = 0 to 255 do
+    let scl = (Random.int 15)+1 in
+    let r1 = biased_rnd_28 () in
+    let r2 = biased_rnd_28 () in
+    let s1 = bitset_of_int_scale r1 scl
+    and s2 = bitset_of_int_scale r2 scl in
+    let sr = B.compare s1 s2
+    and ir = compare r1 r2 in
+    assert (sr = ir)
+  done;
+  for i = 1 to 255 do
+    let s1 = bitset_of_int (i-1) in
+    let s2 = bitset_of_int i in
+    assert (B.compare s1 s2 = -1)
+  done;
+  for i = 1 to 255 do
+    let s1 = bitset_of_int (i-1) in
+    let s2 = bitset_of_int i in
+    assert (B.compare s1 s2 = -1)
   done
-*)
+
+module BSSet = Set.Make (struct type t = BitSet.t let compare = B.compare end)
+
+let test_compare_2 () = 
+  let nums = List.init 256 Std.identity in
+  let num_set = 
+    List.fold_left (fun acc e -> BSSet.add (bitset_of_int e) acc) BSSet.empty nums in
+  List.iter
+    (fun e -> 
+       let bs = bitset_of_int e in
+       assert (BSSet.mem bs num_set)) nums
 
 let test_empty () = 
   for len = 0 to 63 do
@@ -203,7 +233,6 @@ let test () =
   Util.run_test ~test_name:"jh_BitSet.test_rnd_creation" test_rnd_creation;
   Util.run_test ~test_name:"jh_BitSet.test_empty" test_empty;
   Util.run_test ~test_name:"jh_BitSet.test_exceptions" test_exceptions;
+  Util.run_test ~test_name:"jh_BitSet.test_compare" test_compare;
+  Util.run_test ~test_name:"jh_BitSet.test_compare_2" test_compare_2;
   Util.run_test ~test_name:"jh_BitSet2.test_set_opers" test_set_opers
-  
-
-(*  test_compare ();*)
