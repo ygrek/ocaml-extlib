@@ -1,6 +1,7 @@
 (*
  * DynArray - Resizeable Ocaml arrays
  * Copyright (C) 2003 Brian Hurt
+ * Copyright (C) 2003 Nicolas Cannasse
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,19 +41,13 @@ exception Invalid_arg of int * string * string
 
 (** {6 Array creation} *)
 
-val make : int -> 'a -> 'a t
-(** [make size null] returns an array originally capable of holding [size]
-	elements, with a null element of [null].  The null element is used to 
-	fill unused elements of the underlying array.  
-*)
+val make : int -> 'a t
+(** [make size] returns an array originally capable of holding [size]
+	elements. *)
 
-val init : int -> int -> 'a -> (int -> 'a) -> 'a t
-(** [init size len null f] returns an array capable of holding [size]
-	elements, with a null element of [null].  The null element is used to 
-	fill unused elements of the underlying array.  The first [len] elements
-	are given values returned by the function [f], with element [idx]
-	having the value [f idx].
- *)
+val init : int -> (int -> 'a) -> 'a t
+(** [init len f] returns an array of [len] elements filled with values
+	returned by [f 0 , f 1, ... f (len-1)]. *)
 
 (** {6 Array manipulation functions} *)
 
@@ -81,17 +76,14 @@ val insert : 'a t -> int -> 'a -> unit
 (** [insert darr idx v] inserts [v] into [darr] at index [idx].  All elements
 	of [darr] with an index greater than or equal to [idx] have their
 	index incremented (are moved up one place) to make room for the new 
-	element.
-*)
+	element. *)
 
 val add : 'a t -> 'a -> unit
 (** [add darr v] appends [v] onto [darr].  [v] becomes the new 
 	last element of [darr]. *)
 
-val append : 'a t -> 'a t -> 'a t
-(** [append dst src] adds all elements of [src] to the end of [dst] and
-	then returns [dst].  Note that [dst] is imperitively modified by this
-	function. *)
+val append : 'a t -> 'a t -> unit
+(** [append src dst] adds all elements of [src] to the end of [dst]. *)
 
 val delete : 'a t -> int -> unit
 (** [delete darr idx] deletes the element of [darr] at [idx].  All elements
@@ -106,8 +98,10 @@ val blit : 'a t -> int -> 'a t -> int -> int -> unit
 (** [blit src srcidx dst dstidx len] copies [len] elements from [src]
 	starting with index [srcidx] to [dst] starting at [dstidx].  The
 	[dst] array can be in the same as [src], and even overlap.  This is a
-	fast way to move blocks of elements around.
- *)
+	fast way to move blocks of elements around. *)
+
+val compact : 'a t -> unit
+(** [compact darr] ensure that the space allocated by the array is minimal. *)
 
 (** {6 Array copy and conversion} *)
 
@@ -117,50 +111,42 @@ val to_list : 'a t -> 'a list
 val to_array : 'a t -> 'a array
 (** [to_array darr] returns the elements of [darr] in order as an array. *)
 
-val of_list : 'a -> 'a list -> 'a t
-(** [of_list null lst] returns a dynamic array with the elements of [lst] in
-	it in order, and [null] as it's null element.
-*)
+val of_list : 'a list -> 'a t
+(** [of_list lst] returns a dynamic array with the elements of [lst] in
+	it in order. *)
 
-val of_array : 'a -> 'a array -> 'a t
-(** [of_array null arr] returns an array with the elements of [arr] in it
-	in order, and [null] as it's null element. 
-*)
+val of_array : 'a array -> 'a t
+(** [of_array arr] returns an array with the elements of [arr] in it
+	in order. *)
 
 val copy : 'a t -> 'a t
 (** [copy src] returns a fresh copy of [src], such that no modification of
 	[src] affects the copy, or vice versa (all new memory is allocated for
-	the copy).  
-*)
+	the copy).   *)
 
 val sub : 'a t -> int -> int -> 'a t
 (** [sub darr start len] returns an array holding the subset of [len] 
-	elements from [darr] starting with the element at index [idx].
-*)
+	elements from [darr] starting with the element at index [idx]. *)
 
 (** {6 Array functional support} *)
 
 val iter : ('a -> unit) -> 'a t -> unit
 (** [iter f darr] calls the function [f] on every element of [darr].  It
-	is equivalent to for i = 0 to ([length darr]) do f ([get darr i]) done;
-*)
+	is equivalent to [for i = 0 to length darr do f (get darr i) done;] *)
 
 val iteri : (int -> 'a -> unit) -> 'a t -> unit
 (** [iter f darr] calls the function [f] on every element of [darr].  It
-	is equivalent to for i = 0 to ([length darr]) do f i ([get darr i]) done;
-*)
+	is equivalent to [for i = 0 to length darr do f i (get darr i) done;] *)
 
-val map : ('a -> 'b) -> 'b -> 'a t -> 'b t
-(** [map f nulldst darr] applies the function [f] to every element of [darr]
+val map : ('a -> 'b) -> 'a t -> 'b t
+(** [map f darr] applies the function [f] to every element of [darr]
 	and creates a dynamic array from the results - similiar to [List.map] or
-	[Array.map].  [nulldst] is the null element of the returned dynamic array.
-*)
+	[Array.map]. *)
 
-val mapi : (int -> 'a -> 'b) -> 'b -> 'a t -> 'b t
-(** [mapi f nulldst darr] applies the function [f] to every element of [darr]
+val mapi : (int -> 'a -> 'b) -> 'a t -> 'b t
+(** [mapi f darr] applies the function [f] to every element of [darr]
 	and creates a dynamic array from the results - similiar to [List.mapi] or
-	[Array.mapi]. [nulldst] is the null element of the returned dynamic array.
-*)
+	[Array.mapi]. *)
 
 val fold_left : ('a -> 'b -> 'a) -> 'a -> 'b t -> 'a
 (** [fold_left f x darr] computes 
@@ -177,14 +163,14 @@ val fold_right : ('a -> 'b -> 'b) -> 'a t -> 'b -> 'b
 val enum : 'a t -> 'a Enum.t
 (** [enum darr] returns the enumeration of [darr] *)
 
+val of_enum : 'a Enum.t -> 'a t
+(** [of_enum e] returns an t that holds, in order, the  elements of [e]. *)
+
+(*/* --- removed temporary
+
 val sub_enum : 'a t -> int -> int -> 'a Enum.t
 (** [sub_enum darr idx len] returns an enumeration of a subset of [len]
 	elements of [darr], starting with the element at index [idx]. *)
-
-val of_enum : 'a -> 'a Enum.t -> 'a t
-(** [of_enum nullval e] returns an t that holds, in order, the 
-	elements of [e].
-*)
 
 val insert_enum : 'a t -> int -> 'a Enum.t -> unit
 (** [insert_enum darr idx e] inserts the elements of [e] into [darr]
@@ -210,8 +196,8 @@ val sub_rev_enum : 'a t -> int -> int -> 'a Enum.t
 	lowest index.  So the last element returned from [e] becomes the
 	element at index [idx]. *)
 
-val of_rev_enum : 'a -> 'a Enum.t -> 'a t
-(** [of_rev_enum nullval e] returns a dynamic array that holds, in reverse
+val of_rev_enum : 'a Enum.t -> 'a t
+(** [of_rev_enum e] returns a dynamic array that holds, in reverse
 	order, the elements of [e].  The first element returned from [e] becomes
 	the highest indexed element of the returned dynamic array, and so on.
 	Otherwise it acts like [of_enum].
@@ -231,6 +217,7 @@ val set_rev_enum : 'a t -> int -> 'a Enum.t -> unit
 	is the count of elements initially in [e].  The last element of [e]
 	has index [idx].  Otherwise it acts like [set_enum].
 *)
+*/*)
 
 (** {6 Array resizers} *)
 
@@ -265,8 +252,7 @@ val get_resizer : 'a t -> resizer_t
 val default_resizer : resizer_t
 (** The default resizer function the library is using - in this version
 	of DynArray, this is the [exponential_resizer] but should change in
-	next versions.
-*)
+	next versions. *)
 
 val exponential_resizer : resizer_t
 (** The exponential resizer- The default resizer except when the resizer
@@ -313,7 +299,7 @@ val exponential_resizer : resizer_t
 	well (obviously deletes from anywhere else are O(n) work- you
 	have to move the n or so elements above the deleted element down).
 
- *)
+*)
 
 val step_resizer : int -> resizer_t
 (** The stepwise resizer- another example of a resizer function, this
@@ -326,7 +312,7 @@ val step_resizer : int -> resizer_t
 	For example, to make an darray with a step of 10, a length
 	of len, and a null of null, you would do:
 	[make] ~resizer:([step_resizer] 10) len null
- *)
+*)
 
 val conservative_exponential_resizer : resizer_t
 (** [conservative_exponential_resizer] is an example resizer function

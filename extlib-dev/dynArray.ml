@@ -1,6 +1,7 @@
-(*
- * DynArray - dynamic Ocaml arrays
+ (*
+ * DynArray - Resizeable Ocaml arrays
  * Copyright (C) 2003 Brian Hurt (bhurt@spnz.org)
+ * Copyright (C) 2003 Nicolas Cannasse (ncannasse@motion-twin.com)
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,30 +20,32 @@
 
 type resizer_t = currslots:int -> oldlength:int -> newlength:int -> int
 
+type 'a intern
+
+external ilen : 'a intern -> int = "%obj_size"
+external idup : 'a intern -> 'a intern = "obj_dup"
+external imake : tag:int -> size:int -> 'a intern = "obj_block"
+external iget : 'a intern -> int -> 'a = "%obj_field"
+external iset : 'a intern -> int -> 'a -> unit = "%obj_set_field"
+
 type 'a t = { 
-	mutable arr : 'a array;
-	mutable length : int; 
+	mutable arr : 'a intern;
+	mutable len : int; 
 	mutable resize: resizer_t; 
-	null : 'a; 
 }
 
 exception Invalid_arg of int * string * string
 
 let invalid_arg n f p = raise (Invalid_arg (n,f,p))
 
-let length darr = darr.length
+let length d = d.len
 
 let exponential_resizer ~currslots ~oldlength ~newlength =
-	let rec doubler x =
-		if x > newlength then x
-		else if x >= (Sys.max_array_length/2) then Sys.max_array_length
-		else doubler (x * 2)
-	in
-	let rec halfer x =
-		if x < 8 || (x / 4) < newlength then x
-		else halfer (x/2)
-	in
-	if currslots < newlength then
+	let rec doubler x = if x > newlength then x else doubler (x * 2) in
+	let rec halfer x = if x / 2 < newlength then x else halfer (x / 2) in
+	if newlength = 1 then
+		1
+	else if currslots < newlength then
 		doubler currslots
 	else 
 		halfer currslots
@@ -57,347 +60,314 @@ let step_resizer step =
 			currslots)
 
 let conservative_exponential_resizer ~currslots ~oldlength ~newlength =
-	let rec doubler x =
-		if x > newlength then x
-		else if x >= (Sys.max_array_length/2) then Sys.max_array_length
-		else doubler (x * 2)
-	in
-	let rec halfer x =
-		if x < 8 || (x / 4) < newlength then x
-		else halfer (x/2)
-	in
-	if currslots < newlength then
-		doubler currslots
-	else if oldlength < newlength then
+	let rec doubler x = if x > newlength then x else doubler (x * 2) in
+	let rec halfer x = if x / 2 < newlength then x else halfer (x / 2) in
+	if currslots < newlength then begin
+		if newlength = 1 then
+			1
+		else
+			doubler currslots
+	end else if oldlength < newlength then
 		halfer currslots
 	else
 		currslots
 
-let default_resizer = exponential_resizer
+let default_resizer = conservative_exponential_resizer
 
-let changelength darr step =
-	let t = darr.length + step in
-	let newlength = if t < 0 then 0 else t in
-	let oldsize = Array.length darr.arr in
-	let r = darr.resize 
-				~currslots:oldsize
-				~oldlength:darr.length
-				~newlength:newlength
+let changelen (d : 'a t) newlen =
+	let oldsize = ilen d.arr in
+	let r = d.resize 
+			~currslots:oldsize
+			~oldlength:d.len
+			~newlength:newlen
 	in
 	(* We require the size to be at least large enough to hold the number
 	 * of elements we know we need!
 	 *)
-	let newsize = if r < newlength then newlength else r in
-	if newsize > oldsize then begin
-		let newarr = Array.make newsize darr.null in
-		Array.blit darr.arr 0 newarr 0 oldsize ;
-		darr.arr <- newarr;
-	end else if newsize < oldsize then begin
-		let newarr = Array.sub darr.arr 0 newsize in
-		darr.arr <- newarr;
+	let newsize = if r < newlen then newlen else r in
+	if newsize <> oldsize then begin
+		let newarr = imake 0 newsize in
+		let cpylen = (if newlen < d.len then newlen else d.len) in
+		for i = 0 to cpylen - 1 do
+			iset newarr i (iget d.arr i);
+		done;
+		d.arr <- newarr;
 	end;
-	darr.length <- newlength
+	d.len <- newlen
 
-let make initsize nullval = 
+let compact d =
+	if d.len <> ilen d.arr then begin
+		let newarr = imake 0 d.len in
+		for i = 0 to d.len - 1 do
+			iset newarr i (iget d.arr i)
+		done;
+		d.arr <- newarr;
+	end
+
+let make initsize = 
 	if initsize < 0 then invalid_arg initsize "make" "size";
-	{ resize = default_resizer; length = 0; null = nullval; 
-	  arr = Array.make initsize nullval }
-
-let init initsize initlength nullval f =
-	if initsize < 0 then invalid_arg initsize "init" "size";
-	if initlength < 0 || initsize < initlength then
-		invalid_arg initlength "init" "length";
-	let retarr = Array.make initsize nullval in
-	for i = 0 to initlength-1 do
-		retarr.(i) <- (f i)
-	done;
-	{ resize = default_resizer; length = initlength; null = nullval; 
-	  arr = retarr }
-
-let set_resizer darr resizer =
-	darr.resize <- resizer
-
-let get_resizer darr =
-	darr.resize
-
-let empty darr =
-	darr.length = 0
-
-let get darr idx = 
-	if idx < 0 || idx >= darr.length then invalid_arg idx "get" "index";
-	darr.arr.(idx)
-
-let last darr = 
-	if darr.length = 0 then invalid_arg 0 "last" "<array length is 0>";
-	darr.arr.(darr.length - 1)
-
-let set darr idx v =
-	if idx >= 0 && idx < darr.length then
-		darr.arr.(idx) <- v
-	else if idx = darr.length then begin
-		changelength darr 1;
-		darr.arr.(idx) <- v
-	end else
-		invalid_arg idx "set" "index"
-
-let insert darr idx v =
-	if idx < 0 || idx > darr.length then
-		invalid_arg idx "insert" "index";
-	changelength darr 1;
-	if idx < (darr.length - 1) then
-		Array.blit darr.arr idx darr.arr (idx+1) (darr.length - idx - 1);
-	darr.arr.(idx) <- v
-
-let add darr v =
-	changelength darr 1;
-	darr.arr.(darr.length - 1) <- v
-
-let append dst src =
-	let oldlength = dst.length in
-	changelength dst src.length;
-	Array.blit src.arr 0 dst.arr oldlength src.length;
-	dst
-
-let delete darr idx =
-	if idx < 0 || idx >= darr.length then invalid_arg idx "delete" "index";
-	if idx < (darr.length - 1) then
-		Array.blit darr.arr (idx+1) darr.arr idx (darr.length - idx - 1);
-	darr.arr.(darr.length - 1) <- darr.null;
-	changelength darr (-1)
-
-let delete_last darr = 
-	if darr.length < 1 then invalid_arg 0 "delete_last" "<array length is 0>";
-	darr.arr.(darr.length - 1) <- darr.null;
-	changelength darr (-1)
- 
-let rec blit src srcidx dst dstidx len =
-	if srcidx < 0 || srcidx > (src.length - len) then 
-		invalid_arg srcidx "blit" "sou rce index";
-	if len < 0 then invalid_arg len "blit" "length";
-	if dstidx < 0 || dstidx > dst.length then
-		invalid_arg dstidx "blit" "dest index";
-	if dstidx > (dst.length - len) then
-		changelength dst (dstidx + len - dst.length);
-	Array.blit src.arr srcidx dst.arr dstidx len
-
-let to_list darr = 
-	let rec loop idx accum =
-		if idx < 0 then accum
-		else loop (idx - 1) (darr.arr.(idx) :: accum)
-	in
-	loop (darr.length - 1) []
-
-let to_array darr =
-	Array.sub darr.arr 0 darr.length
-
-let of_list nullval lst =
-	let rec f arr idx lst = 
-		match lst with
-		| h :: t ->
-			arr.(idx) <- h;
-			f arr (idx + 1) t
-		| [] -> ()
-	in
-	let xsize = List.length lst in
-	let retval = { resize = default_resizer; length = xsize; null = nullval; 
-				   arr = Array.make xsize nullval } in
-	f retval.arr 0 lst;
-	retval
-
-let of_array nullval arr =
 	{
 		resize = default_resizer;
-		length = Array.length arr;
-		null = nullval; 
-		arr = Array.make 0 nullval;
+		len = 0;
+		arr = imake 0 initsize;
+	}
+
+let init initlen f =
+	if initlen < 0 then invalid_arg initlen "init" "len";
+	let arr = imake 0 initlen in
+	for i = 0 to initlen-1 do
+		iset arr i (f i)
+	done;
+	{
+		resize = default_resizer;
+		len = initlen;
+		arr = arr;
+	}
+
+let set_resizer d resizer =
+	d.resize <- resizer
+
+let get_resizer d =
+	d.resize
+
+let empty d =
+	d.len = 0
+
+let get d idx = 
+	if idx < 0 || idx >= d.len then invalid_arg idx "get" "index";
+	iget d.arr idx
+
+let last d = 
+	if d.len = 0 then invalid_arg 0 "last" "<array len is 0>";
+	iget d.arr (d.len - 1)
+
+let set d idx v =
+	if idx < 0 || idx >= d.len then 	invalid_arg idx "set" "index";
+	iset d.arr idx v
+
+let insert d idx v =
+	if idx < 0 || idx > d.len then invalid_arg idx "insert" "index";
+	if d.len = ilen d.arr then changelen d (d.len + 1) else d.len <- d.len + 1;
+	if idx < d.len - 1 then begin
+		for i = d.len - 1 downto idx do
+			iset d.arr (i+1) (iget d.arr i)
+		done;
+	end;
+	iset d.arr idx v
+
+let add d v =
+	if d.len = ilen d.arr then changelen d (d.len + 1) else d.len <- d.len + 1;
+	iset d.arr (d.len - 1) v
+
+let delete d idx =
+	if idx < 0 || idx >= d.len then invalid_arg idx "delete" "index";
+	let oldsize = ilen d.arr in
+	(* we don't call changelen because we want to blit *)
+	let r = d.resize 
+		~currslots:oldsize
+		~oldlength:d.len
+		~newlength:(d.len - 1)
+	in
+	d.len <- d.len - 1;
+	let newsize = (if r < d.len then d.len else r) in
+	if oldsize <> newsize then begin
+		let newarr = imake 0 newsize in
+		for i = 0 to idx - 1 do
+			iset newarr i (iget d.arr i);
+		done;
+		for i = idx to d.len - 1 do
+			iset newarr i (iget d.arr (i+1));
+		done;
+		d.arr <- newarr;
+	end else begin
+		if idx = d.len then
+			(* erase for GC *)
+			iset d.arr idx (Obj.magic 0)
+		else begin
+			for i = idx to d.len - 1 do
+				iset d.arr i (iget d.arr (i+1));
+			done;
+			iset d.arr d.len (Obj.magic 0)
+		end;
+	end
+
+let delete_last d = 
+	if d.len <= 0 then invalid_arg 0 "delete_last" "<array len is 0>";
+	(* erase for GC, in case changelen don't resize our array *)
+	iset d.arr (d.len - 1) (Obj.magic 0);
+	changelen d (d.len - 1)
+
+let rec blit src srcidx dst dstidx len =
+	if len < 0 then invalid_arg len "blit" "len";
+	if srcidx < 0 || srcidx + len > src.len then invalid_arg srcidx "blit" "source index";
+	if dstidx < 0 || dstidx >= dst.len then invalid_arg dstidx "blit" "dest index";
+	let newlen = dstidx + len in
+	if newlen > ilen dst.arr then begin
+		(* this case could be inlined so we don't blit on just-copied elements *)
+		changelen dst newlen
+	end else begin
+		if newlen > dst.len then dst.len <- newlen;
+	end;
+	(* same array ! we need to copy in reverse order *)
+	if src.arr == dst.arr && dstidx > srcidx then
+		for i = len - 1 downto 0 do
+			iset dst.arr (dstidx+i) (iget src.arr (srcidx+i));
+		done
+	else
+		for i = 0 to len - 1 do
+			iset dst.arr (dstidx+i) (iget src.arr (srcidx+i));
+		done
+
+let append src dst =
+	blit src 0 dst dst.len src.len 
+
+let to_list d = 
+	let rec loop idx accum =
+		if idx < 0 then accum else loop (idx - 1) (iget d.arr idx :: accum)
+	in
+	loop (d.len - 1) []
+
+let to_array d =
+	if d.len = 0 then begin
+		(* since the empty array is an atom, we don't care if float or not *)	
+		[||]
+	end else begin
+		let arr = Array.make d.len (iget d.arr 0) in
+		for i = 1 to d.len - 1 do
+			Array.unsafe_set arr i (iget d.arr i)
+		done;
+		arr;
+	end
+
+let of_list lst =
+	let size = List.length lst in
+	let arr = imake 0 size in
+	let rec loop idx =  function
+		| h :: t -> iset arr idx h; loop (idx + 1) t
+		| [] -> ()
+	in
+	loop 0 lst;
+	{
+		resize = default_resizer;
+		len = size;
+		arr = arr;
+	}
+
+let of_array src =
+	let size = Array.length src in
+	let is_float = Obj.tag (Obj.repr src) = Obj.double_array_tag in
+	let arr = (if is_float then begin
+			let arr = imake 0 size in
+			for i = 0 to size - 1 do
+				iset arr i (Array.unsafe_get src i);
+			done;
+			arr
+		end else
+			(* copy the fields *)
+			idup (Obj.magic src : 'a intern))
+	in	
+	{
+		resize = default_resizer;
+		len = size;
+		arr = arr;
 	}
 
 let copy src =
 	{
 		resize = src.resize;
-		length = src.length;
-		null = src.null;
-		arr = Array.sub src.arr 0 src.length;
+		len = src.len;
+		arr = idup src.arr;
 	}
 
 let sub src start len =
-	if start < 0 || start >= (src.length - len) then
-		invalid_arg start "sub" "start";
-	if len < 0 || (len+start) > src.length then
-		invalid_arg len "sub" "length";
-	let newsize = src.resize
-					~currslots:0 
-					~oldlength:0
-					~newlength:len 
-	in
-	{ resize = src.resize; length = len; null = src.null; 
-	  arr = Array.sub src.arr start len }
+	if len < 0 then invalid_arg len "sub" "len";
+	if start < 0 || start + len > src.len then invalid_arg start "sub" "start";
+	let arr = imake 0 len in
+	for i = 0 to len - 1 do
+		iset arr i (iget src.arr (i+start));
+	done;
+	{
+		resize = src.resize;
+		len = len;
+		arr = arr;
+	}
 
-let iter f darr =
-	for i = 0 to (darr.length - 1) do
-		f darr.arr.(i)
+let iter f d =
+	for i = 0 to d.len - 1 do
+		f (iget d.arr i)
 	done
 
-let iteri f darr =
-	for i = 0 to (darr.length - 1) do
-		f i darr.arr.(i)
+let iteri f d =
+	for i = 0 to d.len - 1 do
+		f i (iget d.arr i)
 	done
 
-let map f dstnull src =
-	let dst = { resize = src.resize;
-				length = src.length; 
-				null = dstnull; 
-				arr = Array.make (Array.length src.arr) dstnull } in
-	for i = 0 to (src.length - 1) do
-		dst.arr.(i) <- f src.arr.(i)
-	done ;
-	dst
+let map f src =
+	let arr = imake 0 src.len in
+	for i = 0 to src.len - 1 do
+		iset arr i (f (iget src.arr i))
+	done;
+	{
+		resize = src.resize;
+		len = src.len;
+		arr = arr;
+	}
 
-let mapi f dstnull src =
-	let dst = { resize = src.resize;
-				length = src.length; 
-				null = dstnull; 
-				arr = Array.make (Array.length src.arr) dstnull } in
-	for i = 0 to (src.length - 1) do
-		dst.arr.(i) <- f i src.arr.(i)
-	done ;
-	dst
+let mapi f src =
+	let arr = imake 0 src.len in
+	for i = 0 to src.len - 1 do
+		iset arr i (f i (iget src.arr i))
+	done;
+	{
+		resize = src.resize;
+		len = src.len;
+		arr = arr;
+	}
 
 let fold_left f x a =
 	let rec loop idx x =
-		if idx >= a.length then x
-		else loop (idx + 1) (f x a.arr.(idx))
+		if idx >= a.len then x else loop (idx + 1) (f x (iget a.arr idx))
 	in
 	loop 0 x
 
 let fold_right f a x =
 	let rec loop idx x =
 		if idx < 0 then x
-		else loop (idx - 1) (f a.arr.(idx) x)
+		else loop (idx - 1) (f (iget a.arr idx) x)
 	in
-	loop (a.length - 1) x
+	loop (a.len - 1) x
 
-let rec sub_enum darr initidx len =
-	let idxref = ref initidx
-	and lenref = ref len
+let enum d =
+	let rec make start =
+		let idxref = ref 0 in
+		let next () =
+			if !idxref >= d.len then
+				raise Enum.No_more_elements
+			else
+				let retval = iget d.arr !idxref in
+				incr idxref;
+				retval
+		and count () =
+			if !idxref >= d.len then 0
+			else d.len - !idxref
+		and clone () =
+			make !idxref
+		in
+		Enum.make ~next:next ~count:count ~clone:clone
 	in
-	let next () =
-		if !idxref >= darr.length || !lenref <= 0 then
-			raise Enum.No_more_elements
-		else
-			let retval = darr.arr.( !idxref ) in
-			incr idxref;
-			decr lenref;
-			retval
-	and count () =
-		if !idxref >= darr.length then 0
-		else if !idxref + !lenref - 1 >= darr.length then 
-			darr.length - !idxref
-		else
-		   !lenref
-	and clone () =
-		sub_enum darr !idxref !lenref
-	in
-	Enum.make ~next:next ~count:count ~clone:clone
+	make 0
 
-let enum darr =
-	let idxref = ref 0 in
-	let next () =
-		if !idxref >= darr.length then
-			raise Enum.No_more_elements
-		else
-			let retval = darr.arr.( !idxref ) in
-			incr idxref;
-			retval
-	and count () =
-		if !idxref >= darr.length then 0
-		else darr.length - !idxref
-	and clone () =
-		sub_enum darr !idxref (darr.length - !idxref)
-	in
-	Enum.make ~next:next ~count:count ~clone:clone
-
-let of_enum nullval e =
-	let c = Enum.count e in
-	let retval = Array.make c nullval in
-	Enum.iteri (fun i x -> (retval.(i) <- x)) e;
-	{ resize = default_resizer; null = nullval; length = c; arr = retval }
-
-let insert_enum darr idx e =
-	if idx < 0 || idx > darr.length then
-		invalid_arg idx "insert_enum" "index";
-	let c = Enum.count e in
-	let oldlen = darr.length in
-	changelength darr c ;
-	if idx < oldlen then
-		Array.blit darr.arr idx darr.arr (idx + c) (oldlen - idx);
-	Enum.iteri (fun i x -> (darr.arr.(i+idx) <- x)) e
-
-let set_enum darr idx e =
-	if idx < 0 || idx > darr.length then invalid_arg idx "set_enum" "index";
-	let c = Enum.count e in
-	if c <= 0 then
-		Enum.iteri (fun i x -> (set darr (i+idx) x)) e
-	else
-		let max = idx + c in
-		if max > darr.length then changelength darr (max - darr.length);
-		Enum.iteri (fun i x -> (darr.arr.(i+idx) <- x)) e
-
-let rec sub_rev_enum darr initidx len =
-	let idxref = ref (len - 1)
-	in
-	let next () =
-		if !idxref < 0 then
-			raise Enum.No_more_elements;
-		if !idxref >= (darr.length - initidx) then
-			invalid_arg !idxref "sub_rev_enum" "index";
-		let retval = darr.arr.( initidx + !idxref ) in
-		decr idxref;
-		retval
-	and count () =
-		if !idxref < 0 then 0
-		else 1 + !idxref
-	and clone () =
-		sub_rev_enum darr initidx (!idxref + 1)
-	in
-	Enum.make ~next:next ~count:count ~clone:clone
-
-let rev_enum darr =
-	let idxref = ref (darr.length - 1) in
-	let next () =
-		if !idxref < 0 then
-			raise Enum.No_more_elements
-		else
-			let retval = darr.arr.( !idxref ) in
-			decr idxref;
-			retval
-	and count () =
-		if !idxref < 0 then 0
-		else 1 + !idxref
-	and clone () =
-		sub_rev_enum darr 0 (!idxref + 1)
-	in
-	Enum.make ~next:next ~count:count ~clone:clone
-
-let of_rev_enum nullval e =
-	let c = Enum.count e in
-	let retval = Array.make c nullval 
-	in
-	Enum.iteri (fun i x -> (retval.(c - 1 - i) <- x)) e;
-	{ resize = default_resizer; null = nullval; length = c; arr = retval }
-
-let insert_rev_enum darr idx e =
-	if idx < 0 || idx > darr.length then invalid_arg idx "insert_enum" "index";
-	let c = Enum.count e in
-	let oldlen = darr.length in
-	changelength darr c;
-	if idx < oldlen then
-		Array.blit darr.arr idx darr.arr (idx + c) (oldlen - idx);
-	Enum.iteri (fun i x -> (darr.arr.(idx+c-1-i) <- x)) e
-
-let set_rev_enum darr idx e =
-	if idx < 0 || idx > darr.length then invalid_arg idx "set_enum" "index";
-	let c = Enum.count e in
-	let max = idx + c in
-	if max > darr.length then changelength darr (max - darr.length);
-	Enum.iteri (fun i x -> (darr.arr.(idx+c-1-i) <- x)) e
+let of_enum e =
+	if Enum.fast_count e then begin
+		let c = Enum.count e in
+		let arr = imake 0 c in
+		Enum.iteri (fun i x -> iset arr i x) e;
+		{
+			resize = default_resizer;
+			len = c;
+			arr = arr;
+		}
+	end else
+		let d = make 0 in
+		Enum.iter (add d) e;
+		d
