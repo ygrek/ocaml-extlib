@@ -104,6 +104,12 @@ let of_enum e =
 	Enum.iter (fun c -> s.[!i] <- c; incr i) e;
 	s
 
-let 
+let map f s =
+	let len = String.length s in
+	let sc = String.create len in
+	for i = 0 to len - 1 do
+		String.unsafe_set sc i (f (String.unsafe_get s i))
+	done;
+	sc
 
 end
