@@ -1,0 +1,7 @@
+._d
+*.cmi
+*.cmo
+*.cma
+*.cmx
+extlib_test
+extlib_test.exe
