@@ -230,3 +230,10 @@ let concat t =
 	tc.next <- concat_next;
 	tc
 
+let from f =
+	let e = {
+		next = f;
+		count = _dummy;
+	} in
+	e.count <- (fun () -> force e; e.count());
+	e

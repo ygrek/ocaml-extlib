@@ -24,6 +24,8 @@ exception No_more_elements
 
 val make : next:(unit -> 'a) -> count:(unit -> int) -> 'a t
 
+val from : (unit -> 'a) -> 'a t
+
 val count : 'a t -> int
 
 val has_more : 'a t -> bool
