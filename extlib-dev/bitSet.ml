@@ -73,7 +73,7 @@ let unset t x =
 	let pos , delta = x lsr log_int_size , x land int_size in
 	let size = blen !t in
 	if pos < size then
-		bset !t pos ((bget !t pos) land (0xFFFFFFFF lxor (1 lsl delta)))
+		bset !t pos ((bget !t pos) land (0xFF lxor (1 lsl delta)))
 
 let toggle t x =
 	if x < 0 then error "toggle";
