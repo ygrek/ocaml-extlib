@@ -150,16 +150,24 @@ let input_channel ch =
 				End_of_file -> raise No_more_input
 		);
 		in_nread = (fun n ->
-			let s = String.create n in
-			try
-				let nr = input ch s 0 n in
-				if nr <= 0 then raise No_more_input;
-				if nr = n then
-					s
-				else
-					String.sub s 0 nr
-			with
-				End_of_file -> raise No_more_input
+			if n = 0 then
+				""
+			else
+				let s = String.create n in
+				let rec loop pos len =
+					try
+						let nr = input ch s pos len in
+						if nr <= 0 then raise End_of_file;
+						if nr = len then
+							s
+						else
+							loop (pos + nr) (len - nr)
+					with
+						End_of_file -> 
+							if pos = 0 then raise No_more_input;
+							String.sub s 0 pos
+				in
+				loop 0 n
 		);
 		in_available = (fun () ->
 			try
@@ -216,7 +224,7 @@ let output_enum() =
 			DynArray.add elts x
 		);
 		out_nwrite = (fun e ->
-			Enum.iter (DynArray.add elts)  e
+			Enum.iter (DynArray.add elts) e
 		);
 		out_close = (fun () ->
 			DynArray.enum elts
