@@ -24,8 +24,8 @@ type resizer_t = currslots:int -> oldlength:int -> newlength:int -> int
 type 'a intern
 
 external ilen : 'a intern -> int = "%obj_size"
-external idup : 'a intern -> 'a intern = "obj_dup"
-external imake : int -> int -> 'a intern = "obj_block"
+let idup : 'a intern -> 'a intern = Obj.magic Obj.dup
+let imake : int -> int -> 'a intern = Obj.magic Obj.new_block
 external iget : 'a intern -> int -> 'a = "%obj_field"
 external iset : 'a intern -> int -> 'a -> unit = "%obj_set_field"
 

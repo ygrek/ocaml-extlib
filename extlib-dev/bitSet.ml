@@ -20,7 +20,7 @@
 
 type intern
 
-external bcreate : int -> intern = "create_string"
+let bcreate : int -> intern = Obj.magic String.create
 external blen : intern -> int = "%string_length"
 external bget : intern -> int -> int = "%string_unsafe_get"
 external bset : intern -> int -> int -> unit = "%string_unsafe_set"
