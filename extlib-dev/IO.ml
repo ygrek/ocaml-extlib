@@ -22,6 +22,7 @@ type ('a,'b) input = {
 	mutable in_nread : int -> 'b;
 	mutable in_available : unit -> int option;
 	mutable in_close : unit -> unit;
+	mutable in_pos : unit -> int;
 }
 
 type ('a,'b,'c) output = {
@@ -29,6 +30,7 @@ type ('a,'b,'c) output = {
 	mutable out_nwrite : 'b -> unit;
 	mutable out_close : unit -> 'c;
 	mutable out_flush : unit -> unit;
+	mutable out_pos : unit -> int;
 }
 
 type stdin = (char, string) input
@@ -44,20 +46,22 @@ exception Output_closed
 let default_available = (fun () -> None)
 let default_close = (fun () -> ())
 
-let create_in ~read ~nread ~available ~close =
+let create_in ~read ~nread ~pos ~available ~close =
 	{
 		in_read = read;
 		in_nread = nread;
 		in_available = available;
 		in_close = close;
+		in_pos = pos;
 	}
 
-let create_out ~write ~nwrite ~flush ~close =
+let create_out ~write ~nwrite ~pos ~flush ~close =
 	{
 		out_write = write;
 		out_nwrite = nwrite;
 		out_close = close;
 		out_flush = flush;
+		out_pos = pos;
 	}
 
 let read i = i.in_read()
@@ -65,6 +69,7 @@ let nread i n =
 	if n < 0 then raise (Invalid_argument "IO.nread");
 	i.in_nread n
 
+let pos_in i = i.in_pos()
 let available i = i.in_available()
 let close_in i = 
 	let f _ = raise Input_closed in
@@ -76,6 +81,7 @@ let close_in i =
 
 let write o x = o.out_write x
 let nwrite o x = o.out_nwrite x
+let pos_out o = o.out_pos()
 
 let printf o fmt =
 	Printf.kprintf (fun s -> nwrite o s) fmt
@@ -118,6 +124,7 @@ let input_string s =
 			Some (len - !pos)
 		);
 		in_close = (fun () -> ());
+		in_pos = (fun () -> !pos);
 	}
 
 let output_string() =
@@ -131,6 +138,7 @@ let output_string() =
 		);
 		out_close = (fun () -> Buffer.contents b);
 		out_flush = (fun () -> ());
+		out_pos = (fun () -> Buffer.length b);
 	}
 
 let input_channel ch =
@@ -151,11 +159,12 @@ let input_channel ch =
 		);
 		in_available = (fun () ->
 			try
-				Some (in_channel_length ch - pos_in ch)
+				Some (in_channel_length ch - Pervasives.pos_in ch)
 			with
 				_ -> None
 		);
 		in_close = (fun () -> Pervasives.close_in ch);
+		in_pos = (fun () -> Pervasives.pos_in ch);
 	}
 
 let output_channel ch =
@@ -164,29 +173,34 @@ let output_channel ch =
 		out_nwrite = (fun s -> Pervasives.output_string ch s);
 		out_close = (fun () -> Pervasives.close_out ch);
 		out_flush = (fun () -> Pervasives.flush ch);
+		out_pos = (fun () -> Pervasives.pos_out ch);
 	}
 
 let input_enum e =
+	let pos = ref 0 in
 	{
 		in_read = (fun () ->
 			match Enum.get e with
 			| None -> raise No_more_input
-			| Some x -> x
+			| Some x -> 
+				incr pos;
+				x
 		);
 		in_nread = (fun n ->
 			if n = 0 then
 				Enum.empty()
 			else
-				let pos = ref 0 in
+				let p = ref 0 in
 				let elts = DynArray.make n in
 				try
-					ignore(Enum.find (fun x -> DynArray.unsafe_set elts !pos x; incr pos; !pos = n) e);
+					ignore(Enum.find (fun x -> DynArray.unsafe_set elts !p x; incr p; incr pos; !p = n) e);					
 					DynArray.enum elts
 				with
 					Not_found -> raise No_more_input
 		);
 		in_available = (fun () -> if Enum.fast_count e then Some (Enum.count e) else None);
 		in_close = (fun () -> ());
+		in_pos = (fun () -> !pos);
 	}
 
 let output_enum() =
@@ -202,6 +216,7 @@ let output_enum() =
 			DynArray.enum elts
 		);
 		out_flush = (fun () -> ());
+		out_pos = (fun () -> DynArray.length elts);
 	}
 
 (* -------------------------------------------------------------- *)

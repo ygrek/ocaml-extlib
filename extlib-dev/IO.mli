@@ -33,23 +33,27 @@ val default_close : unit -> unit
 val create_in :
   read:(unit -> 'a) ->
   nread:(int -> 'b) ->
+  pos:(unit -> int) ->
   available:(unit -> int option) -> close:(unit -> unit) -> ('a, 'b) input
 
 val create_out :
   write:('a -> unit) ->
   nwrite:('b -> unit) -> 
+  pos:(unit -> int) -> 
   flush:(unit -> unit) -> close:(unit -> 'c) -> ('a, 'b, 'c) output
 
 
 val read : ('a, 'b) input -> 'a
 val nread : ('a, 'b) input -> int -> 'b
 val available : ('a, 'b) input -> int option
+val pos_in : ('a, 'b) input -> int
 val close_in : ('a, 'b) input -> unit
 
 val write : ('a, 'b, 'c) output -> 'a -> unit
 val nwrite : ('a, 'b, 'c) output -> 'b -> unit
 val printf : ('a, string, 'b) output -> ('c, unit, string, unit) format4 -> 'c
 val flush : ('a, 'b, 'c) output -> unit
+val pos_out : ('a, 'b, 'c) output -> int
 val close_out : ('a, 'b, 'c) output -> 'c
 
 val input_string : string -> stdin
