@@ -17,11 +17,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
-open UChar
-
 (** UTF-8 encoded Unicode strings. 
 
-   The Module for UTF-8 encoded Unicode strings. *)
+   The Module for UTF-8 encoded Unicode strings.
+*)
+
+open UChar
 
 (** UTF-8 encoded Unicode strings. the type is normal string. *)
 type t = string
