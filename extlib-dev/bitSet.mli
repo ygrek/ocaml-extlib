@@ -19,8 +19,8 @@
 
 (** Efficient bit sets.
 
- A bitset is a array of boolean values that can be accessed with indexes
- like an array but provide a better memory usage (divided by 32) for a
+ A bitset is an array of boolean values that can be accessed with indexes
+ like an array but provide a better memory usage (divided by 8) for a
  very small speed tradeoff. *)
 
 type t
@@ -36,9 +36,12 @@ val empty : unit ->  t
 val create : int -> t
 (** Create an empty bitset with an initial size (in number of bits). *)
 
+val copy : t -> t
+(** Copy a bitset : further modifications of first one will not affect the
+ copy. *)
+
 val clone : t -> t
-(** Clone a bitset : further modifications of first one will not affect the
- clone. *)
+(** same as [copy] *)
 
 val set : t -> int -> unit
 (** [set s n] set the nth-bit in the bitset [s] to true. *)
@@ -61,7 +64,8 @@ val compare : t -> t -> int
  compared first. *)
 
 val equals : t -> t -> bool
-(** [equals s1 s2] return true if all bits value in s1 are same as s2. *)
+(** [equals s1 s2] return true if, and only if, all bits values in s1 are
+  the same as in s2. *)
 
 val count : t -> int
 (** [count s] returns the number of bits set in the bitset [s]. *)
@@ -69,3 +73,15 @@ val count : t -> int
 val enum : t -> int Enum.t
 (** [enum s] return an enumeration of bit indexed which are set
  in the bitset [s]. *)
+
+val intersect : t -> t -> unit
+(** [intersect s t] sets [s] to the intersection of the sets [s] and [t]. *)
+
+val unite : t -> t -> unit
+(** [intersect s t] sets [s] to the union of the sets [s] and [t]. *)
+
+val differentiate : t -> t -> unit
+(** [intersect s t] removes the elements of [t] from [s]. *)
+
+val differentiate_sym : t -> t -> unit
+(** [intersect s t] sets [s] to the symetrical difference of the sets [s] and [t]. *)
