@@ -196,7 +196,6 @@ let replace_chars f s =
 	loop2 strs;
 	sbuf
 
-
 let replace ~str ~sub ~by =
 	try
 		let i = find str sub in
@@ -204,7 +203,5 @@ let replace ~str ~sub ~by =
                    (slice ~first:(i+(String.length sub)) str))
         with
 		Invalid_string -> (false, String.copy str)
-
-
 
 end

@@ -120,9 +120,10 @@ module String :
 		replaced by the string returned by [f c]. *)
 
         val replace : str:string -> sub:string -> by:string -> bool * string
-        (** [replace ~str ~sub ~by] returns a string where the first
-		occurrence of the string [sub] within [str] has been
-		replaced by the string [by]. *)
+        (** [replace ~str ~sub ~by] returns a tuple constisting of a boolean
+		and a string where the first occurrence of the string [sub]
+		within [str] has been replaced by the string [by]. The boolean
+		is true if a subtitution has taken place. *)
 
 	(** {6 Older Functions} *)
 
