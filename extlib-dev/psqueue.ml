@@ -304,23 +304,6 @@ let balance pricmp a =
 
 			| _ -> assert false
 
-	(* Returns true if the node is either Start or colored black (Start
-	 * nodes are implicitly colored black).  Use in when() clauses to
-	 * simplify the pattern matching.
-	 *)
-	and is_black node =
-		match node with
-			Loser(Red, _, _, _, _, _, _) -> false
-			| _ -> true
-
-	(* Returns false if the node is either Start or colored black (Start
-	 * nodes are implicitly colored black).  Use in when() clauses to
-	 * simplify the pattern matching.
-	 *)
-	and is_red node =
-		match node with
-			Loser(Red, _, _, _, _, _, _) -> true
-			| _ -> false
 	in
 
 	match a with
@@ -344,9 +327,12 @@ let balance pricmp a =
 		 * ?   ? ?   ?     ?   ? ?   ?
 		 *)
 		| Loser(Black, a_dom, a_key, a_data, a_skey,
-		        Loser(Red, b_dom, b_key, b_data, b_skey, d, e),
-		        Loser(Red, c_dom, c_key, c_data, c_skey, f, g))
-		when ((is_red d) || (is_red e) || (is_red f) || (is_red f))
+		        Loser(Red, b_dom, b_key, b_data, b_skey,
+		             (Loser(Red, _, _, _, _, _, _) as d),
+		             (Loser(Red, _, _, _, _, _, _) as e)),
+		        Loser(Red, c_dom, c_key, c_data, c_skey,
+		             (Loser(Red, _, _, _, _, _, _) as f),
+		             (Loser(Red, _, _, _, _, _, _) as g)))
 		->
 			Loser(Red, a_dom, a_key, a_data, a_skey,
 			      Loser(Black, b_dom, b_key, b_data, b_skey, d, e),
@@ -365,8 +351,7 @@ let balance pricmp a =
 		| Loser(Black, _, _, _, _,
 		        (Loser(Red, _, _, _, _,
 		               Loser(Red, _, _, _, _, _, _), _) as b),
-		        c)
-		when (is_black c)
+		        ((Loser(Black,_,_,_,_,_,_)|Start) as c))
 		->
 			rotate_right a b Black
 
@@ -383,11 +368,11 @@ let balance pricmp a =
 		 *      (new root is red)  (new root is black)
 		 *)
 		| Loser(Black, _, _, _, _,
-		        (Loser(Red, _, _, _, _, d,
+		        (Loser(Red, _, _, _, _,
+		               ((Loser(Black,_,_,_,_,_,_)|Start) as d),
 		               (Loser(Red, _, _, _, _, _, _) as e))
 			     as b),
-		        c)
-		when ((is_black d) && (is_black c))
+		        ((Loser(Black,_,_,_,_,_,_)|Start) as c))
 		->
 			rotate_right a (rotate_left b e Red) Black
 
@@ -401,10 +386,10 @@ let balance pricmp a =
 		 *      (rotate root left)
 		 *      (new node is black)
 		 *)
-		| Loser(Black, _, _, _, _, c,
+		| Loser(Black, _, _, _, _,
+		        ((Loser(Black,_,_,_,_,_,_)|Start) as c),
 		        (Loser(Red, _, _, _, _, _,
 		               Loser(Red, _, _, _, _, _, _)) as b))
-		when (is_black c)
 		->
 			rotate_left a b Black
 
@@ -420,10 +405,10 @@ let balance pricmp a =
 		 *  (rotate child right) (rotate root left)
 		 *   (new child is red)  (new root is black)
 		 *)
-		| Loser(Black, _, _, _, _, c,
+		| Loser(Black, _, _, _, _,
+		        ((Loser(Black,_,_,_,_,_,_)|Start) as c),
 		        (Loser(Red, _, _, _, _,
 		               (Loser(Red, _, _, _, _, _, _) as e), _) as b))
-		when (is_black c)
 		->
 			rotate_left a (rotate_right b e Red) Black
 
@@ -759,9 +744,9 @@ let to_pri_list q =
 			| Loser(_, Right, key, elem, _, left, right) ->
 				pri_merge (to_pri_list_int left)
 				          ((key, elem) :: (to_pri_list_int right)) []
-	in
+	in 
 	match q.tree with
 		Void -> []
-		| Winner(k, e, tree, _ ->
+		| Winner(k, e, tree, _) ->
 			(k, e) :: (to_pri_list_int tree)
 
