@@ -43,6 +43,7 @@ let modules = [
 	"unzip";
 	"optParse";
     "dllist";
+	"refList"
 ]
 
 let m_list suffix =
