@@ -196,41 +196,4 @@ let output_enum() =
 		out_flush = (fun () -> ());
 	}
 
-
-type 'a pipe_elt = {
-	mutable next : pipe_elt;
-	elt : 'a;
-}
-
-let pipe() =
-	let n = ref 0 in
-	let elts = ref (Obj.magic None) in
-	let get() =
-		let e = elts.next.elt in
-		elts.next <- elts.next.next
-		e
-	in
-	let rec nget n = 
-		if n = 0 then [] else (get()) :: nget (n-1)
-	in
-	let input = {
-		in_read = (fun () -> 
-			if !n = 0 then raise No_more_input;
-			n := !n - 1;
-			get()
-		):
-		in_nread = (fun nr ->
-			if !n < nr then raise No_more_input;
-			n := !n - nr;
-			nget nr
-		);
-		in_close = (fun () -> ());
-		in_available = (fun () -> Some !n);
-	} in
-	let output = {
-		out_write = (fun x -> put x);
-		out_nwrite = (fun 
-
-	val pipe : unit -> ('a,'a list) input * ('a,'a list,unit) output
-
 (* -------------------------------------------------------------- *)

@@ -57,5 +57,3 @@ val output_channel : out_channel -> (char, string, unit) output
 
 val input_enum : 'a Enum.t -> ('a, 'a Enum.t) input
 val output_enum : unit -> ('a, 'a Enum.t, 'a Enum.t) output
-
-val pipe : unit -> ('a,'b) input * ('a,'b,unit) output
