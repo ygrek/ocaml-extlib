@@ -2,3 +2,4 @@
 *.cmo
 *.cma
 dochtml
+ext-lib.odoc
