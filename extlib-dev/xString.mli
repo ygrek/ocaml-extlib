@@ -37,5 +37,8 @@ module String :
 	(* return the float represented by the given string
 	   raise Invalid_string if the string does not represent a float *)
 	val to_float : string -> float
+
+	val enum : string -> char Enum.t
+	val of_enum : char Enum.t -> string
 	
   end

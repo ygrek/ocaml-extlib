@@ -10,7 +10,6 @@ module List : sig
 	val hd : 'a list -> 'a
 	val tl : 'a list -> 'a list
 	val nth : 'a list -> int -> 'a
-	val duplicate : 'a list -> 'a list * 'a list
 	val append : 'a list -> 'a list -> 'a list
 	val rev_append : 'a list -> 'a list -> 'a list
 	val rev : 'a list -> 'a list
@@ -57,6 +56,11 @@ module List : sig
 	val remove_if : ('a -> bool) -> 'a list -> 'a list
 	val remove_all : 'a list -> 'a -> 'a list
 	val rfind : ('a -> bool) -> 'a list -> 'a
+	val shuffle : 'a list -> 'a list
+
+	val enum : 'a list -> 'a Enum.t
+	val of_enum : 'a Enum.t -> 'a list
+	val append_enum : 'a list -> 'a Enum.t -> 'a list
 
 (*
  * remaining functions to implement (proposals)
@@ -71,12 +75,6 @@ module List : sig
  (* return the list where there is no more duplicated
     elements. default comparator is ( = ) *)
  val unique : ?cmp:('a -> 'a -> bool) -> 'a list -> 'a list 
-
- (* return the list with randomly sorted elements,
-    the algorithm result does not depend of the original list
-	order, and each list element have the same probabilty to
-	be placed at a given position *)
- val shuffle : 'a list -> 'a list
 
  (* find the last element of the given list that match the
 	given predicate *)

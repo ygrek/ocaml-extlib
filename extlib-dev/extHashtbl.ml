@@ -1,0 +1,1 @@
+module XHashtbl = XHashtbl.Hashtbl

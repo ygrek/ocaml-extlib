@@ -7,10 +7,10 @@ module Hashtbl :
 	(* return all the keys of an Hashtable
 	   if the key is several time in the Hashtable, the list will
 	   contain it that many times *)
-	val keys : ('a,'b) t -> 'a list
+	val keys : ('a,'b) t -> 'a Enum.t
 
 	(* return all the values of an Hashtable *)
-	val values : ('a,'b) t -> 'b list
+	val values : ('a,'b) t -> 'b Enum.t
 
 	(* find a binding for the key, and return a default
 	   value if not found *)
