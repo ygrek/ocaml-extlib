@@ -66,11 +66,12 @@ val input : input -> string -> int -> int -> int
   read. It will raise [Invalid_argument] if [p] and [l] do not designate a
   valid substring of [s]. *)
 
-val really_input : input -> string -> int -> int -> unit
+val really_input : input -> string -> int -> int -> int
 (** [really_input i s p l] reads exactly [l] characters from the given input,
-  storing them in the string [s], starting at position [p]. Raises [No_more_input]
-  if at [l] characters are not available. Raises [Invalid_argument] if [p]
-  and [l] do not designate a valid substring of [s]. *)
+  storing them in the string [s], starting at position [p]. For consistency with
+  {!IO.input} it returns [l]. Raises [No_more_input] if at [l] characters are
+  not available. Raises [Invalid_argument] if [p] and [l] do not designate a
+  valid substring of [s]. *)
 
 val close_in : input -> unit
 (** Close the input. It can no longer be read from. *)
@@ -86,10 +87,11 @@ val output : 'a output -> string -> int -> int -> int
   offset [p]. It returns the number of characters written. It will raise
   [Invalid_argument] if [p] and [l] do not designate a valid substring of [s]. *)
 
-val really_output : 'a output -> string -> int -> int -> unit
+val really_output : 'a output -> string -> int -> int -> int
 (** [really_output o s p l] writes exactly [l] characters from string [s] onto
-  the the output, starting with the character at offset [p]. Raises
-  [Invalid_argument] if [p] and [l] do not designate a valid substring of [s]. *)
+  the the output, starting with the character at offset [p]. For consistency with
+  {!IO.output} it returns [l]. Raises [Invalid_argument] if [p] and [l] do not
+  designate a valid substring of [s]. *)
 
 val flush : 'a output -> unit
 (** Flush an output. *)
