@@ -17,12 +17,12 @@ module List : sig
 	val concat : 'a list list -> 'a list
 	val map : ('a -> 'b) -> 'a list -> 'b list
 	val rev_map : ('a -> 'b) -> 'a list -> 'b list
-	val iter : ('a -> 'b) -> 'a list -> unit
+	val iter : ('a -> unit) -> 'a list -> unit
 	val fold_left : ('a -> 'b -> 'a) -> 'a -> 'b list -> 'a
 	val fast_fold_right : ('a -> 'b -> 'b) -> 'a list -> 'b -> 'b
 	val fold_right : ('a -> 'b -> 'b) -> 'a list -> 'b -> 'b
 	val map2 : ('a -> 'b -> 'c) -> 'a list -> 'b list -> 'c list
-	val iter2 : ('a -> 'b -> 'c) -> 'a list -> 'b list -> unit
+	val iter2 : ('a -> 'b -> unit) -> 'a list -> 'b list -> unit
 	val fold_left2 : ('a -> 'b -> 'c -> 'a) -> 'a -> 'b list -> 'c list -> 'a
 	val fast_fold_right2 : ('a -> 'b -> 'c -> 'c) -> 'a list -> 'b list -> 'c -> 'c
 	val fold_right2 : ('a -> 'b -> 'c -> 'c) -> 'a list -> 'b list -> 'c -> 'c
