@@ -340,7 +340,7 @@ let of_enum ?(resizer = exponential_resizer) nullval e =
         retval
     else
         let retval = Array.make (resizer 1 c) nullval in
-        let _ = Enum.fold (fun x i -> (retval.(i) <- x; i+1)) 0 e in
+        Enum.iteri (fun i x -> (retval.(i) <- x)) e;
         { resize = resizer; null = nullval; length = c; arr = retval }
 ;;
 
@@ -350,16 +350,14 @@ let insert_enum xarr idx e =
     else
     let c = Enum.count e in
     if (c <= 0) then
-        let _ = Enum.fold (fun x i -> (insert xarr i x; i+1)) idx e in
-        ()
+        Enum.iteri (fun i x -> (insert xarr (i+idx) x)) e
     else
         let oldlen = xarr.length in
         newlength xarr (c + xarr.length);
         if (idx < oldlen) then
             Array.blit xarr.arr idx xarr.arr (idx + c) (oldlen - idx)
         else ();
-        let _ = Enum.fold (fun x i -> (xarr.arr.(i) <- x; i+1)) idx e in
-        ()
+        Enum.iteri (fun i x -> (xarr.arr.(i+idx) <- x)) e;
 ;;
 
 let set_enum xarr idx e =
@@ -368,15 +366,13 @@ let set_enum xarr idx e =
     else
     let c = Enum.count e in
     if (c <= 0) then
-        let _ = Enum.fold (fun x i -> (set xarr i x; i+1)) idx e in
-        ()
+        Enum.iteri (fun i x -> (set xarr (i+idx) x)) e
     else
         let max = idx + c in
         if (max > xarr.length) then
             newlength xarr max
         else ();
-        let _ = Enum.fold (fun x i -> (xarr.arr.(i) <- x; i+1)) idx e in
-        ()
+        Enum.iteri (fun i x -> (xarr.arr.(i+idx) <- x)) e;
 ;;
 
-    
+
