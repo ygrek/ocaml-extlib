@@ -27,34 +27,6 @@
 type 'a xarray_t (* abstract *)
 (** The abstract type of a resizable array. *)
 
-val exponential_resizer : int -> int -> int
-(** The exponential resizer- [exponential_resizer curr used] returns the
-    array length required to hold [used] items- generally some function of
-    [curr].
-   
-    If [used] is greater than [curr], [exponential_resizer] doubles [curr]
-    until it is greater (or the maximum array length is reached).  If [used]
-    is less than one quarter of [curr], [exponential_resizer] halves the
-    [curr] until [used] is greater than one quarter.  Note that the one
-    quarter limit is necessary to prevent thrashing (where adding and removing
-    a small number of items causes the array to be continually reallocated).
- *)
-
-val step_resizer : int -> int -> int -> int
-(** The stepwise resizer- [step_resizer step curr used] returns the
-    array length required to hold [used] items- a function of [curr] and
-    [step].
-   
-    The function [step_resizer] returns the smallest multiple of [step]
-    larger than [used] if [curr] is less then [used]-[step] or greater than
-    [used].
-
-    This function generally needs to be partially applied to use it as
-    a resizer.  For example, to make an xarray with a step of 10, a length
-    of len, and a null of null, you would do:
-    [make] ~resizer:([step_resizer] 10) len null
- *)
-
 val make : ?resizer:(int -> int -> int) -> int -> 'a -> 'a xarray_t
 (** [make len null] returns an xarray originally capable of holding [len]
     elements, with a null element of [null].  The null element is used to 
@@ -82,7 +54,7 @@ val init : ?resizer:(int -> int -> int) -> int -> int -> 'a -> (int -> 'a) -> 'a
     specified.
  *)
 
-val used : 'a xarray_t -> int
+val length : 'a xarray_t -> int
 (** Return the number of used elements in the xarray- this is effectively
     it's length. *)
 
@@ -99,7 +71,7 @@ val set : 'a xarray_t -> int -> 'a -> unit
     [v].  The previous value is overwritten.  If [idx] is equal to
     [used xarr] (i.e. the index is one past the end of the xarray), the
     xarray is expanded to hold the new element- in this case, the function
-    behaves like [append_element].  Otherwise, the array is not expanded. *)
+    behaves like [add].  Otherwise, the array is not expanded. *)
 
 val insert : 'a xarray_t -> int -> 'a -> unit
 (** [insert xarr idx v] inserts [v] into [xarr] at index [idx].  All elements
@@ -108,8 +80,8 @@ val insert : 'a xarray_t -> int -> 'a -> unit
     element.
 *)
 
-val append_element : 'a xarray_t -> 'a -> unit
-(** [append_element xarr v] appends [v] onto [xarr].  [v] becomes the new 
+val add : 'a xarray_t -> 'a -> unit
+(** [add xarr v] appends [v] onto [xarr].  [v] becomes the new 
     last element of [xarr]. *)
 
 val append : 'a xarray_t -> 'a xarray_t -> 'a xarray_t
@@ -125,20 +97,6 @@ val delete : 'a xarray_t -> int -> unit
 val delete_last : 'a xarray_t -> unit
 (** [delete_last xarr] deletes the last element of [xarr].  This is 
     equivelent to going [delete xarr ((used xarr) - 1)]. *)
-
-val set_length : 'a xarray_t -> int -> unit
-(** [set_length xarr newlen] sets the length of the underlying array of
-    [xarr] to exactly [newlen]- the resizer function of [xarr] is not called.
-    This function can be used to explicitly grow or shrink the underlying 
-    array.  If the number of used elements is greater than [newlen], the 
-    excess used elements with indexes greater than or equal to [newlen] 
-    are implicitly deleted.  
-
-    If the array has reached it's final size, you can do 
-    [set_length xarr (used xarr)] to eliminate excess memory usage.  If
-    a known large number of elements are about to be inserted or deleted, 
-    the array can be "presized" using this function, to minimize copies.
-*)
 
 val blit : 'a xarray_t -> int -> 'a xarray_t -> int -> int -> unit
 (** [blit src srcidx dst dstidx len] copies [len] elements from [src]
@@ -209,4 +167,55 @@ val fold_right : ('a -> 'b -> 'b) -> 'a xarray_t -> 'b -> 'b
 (** [fold_right f xarr x] computes
     [ f (get xarr 0) (f (get xarr 1) ( ... ( f (get xarr n-1) x ) ... ) ) ]
     similiar to [Array.fold_right] or [List.fold_right]. *)
+
+val enum : 'a xarray_t -> 'a Enum.t
+(** [enum xarr] returns the enumeration of [xarr] *)
+
+val sub_enum : 'a xarray_t -> int -> int -> 'a Enum.t
+(** [sub_enum xarr idx len] returns an enumeration of a subset of [len]
+    elements of [xarr], starting with the element at index [idx]. *)
+
+val of_enum : ?resizer:(int -> int -> int) -> 'a -> 'a Enum.t -> 'a xarray_t
+(** [of_enum nullval e] returns an xarray_t that holds, in order, the 
+    elements of [e]. *)
+
+val insert_enum : 'a xarray_t -> int -> 'a Enum.t -> unit
+(** [insert_enum xarr idx e] inserts the elements of [e] into [xarr]
+    so the first element of [e] has index [idx], the second index [idx]+1,
+    etc.   All the elements of [xarr] with index greater than or equal to
+    [idx] are moved up by the number of elements in [e] to make room. *)
+
+val set_enum : 'a xarray_t -> int -> 'a Enum.t -> unit
+(** [set_enum xarr idx e] sets the elements from [e] into [xarr],
+    so the first element of [e] has index [idx], etc.  The elements with
+    indexs [idx], [idx]+1, etc. are overwritten. *)
+
+val exponential_resizer : int -> int -> int
+(** The exponential resizer- [exponential_resizer curr used] returns the
+    array length required to hold [used] items- generally some function of
+    [curr].
+   
+    If [used] is greater than [curr], [exponential_resizer] doubles [curr]
+    until it is greater (or the maximum array length is reached).  If [used]
+    is less than one quarter of [curr], [exponential_resizer] halves the
+    [curr] until [used] is greater than one quarter.  Note that the one
+    quarter limit is necessary to prevent thrashing (where adding and removing
+    a small number of items causes the array to be continually reallocated).
+ *)
+
+val step_resizer : int -> int -> int -> int
+(** The stepwise resizer- [step_resizer step curr used] returns the
+    array length required to hold [used] items- a function of [curr] and
+    [step].
+   
+    The function [step_resizer] returns the smallest multiple of [step]
+    larger than [used] if [curr] is less then [used]-[step] or greater than
+    [used].
+
+    This function generally needs to be partially applied to use it as
+    a resizer.  For example, to make an xarray with a step of 10, a length
+    of len, and a null of null, you would do:
+    [make] ~resizer:([step_resizer] 10) len null
+ *)
+
 

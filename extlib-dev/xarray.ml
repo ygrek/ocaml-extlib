@@ -22,161 +22,146 @@
 type 'a xarray_t = { 
     resize: int -> int -> int ; 
     null : 'a ; 
-    mutable used : int ; 
+    mutable length : int ; 
     mutable arr : 'a array 
 };;
 
-let used xarr = xarr.used;;
+let length xarr = xarr.length;;
 
-let rec exponential_resizer curr used =
-    if (curr < used) then
+let rec exponential_resizer curr length =
+    if (curr < length) then
         if (curr < (Sys.max_array_length/2)) then
-            exponential_resizer (curr * 2) used
+            exponential_resizer (curr * 2) length
         else
             Sys.max_array_length
-    else if (((curr/4) > used) && (curr > 8)) then
-        exponential_resizer (curr / 2) used
+    else if (((curr/4) > length) && (curr > 8)) then
+        exponential_resizer (curr / 2) length
     else
         curr
 ;;
 
-let step_resizer step curr used =
+let step_resizer step curr length =
     if (step <= 0) then
         ( let _ = Invalid_argument "Xarray.step_resize" in 0)
-    else if ((curr < used) || (used < (curr - step))) then
-       (used + step - (used mod step))
+    else if ((curr < length) || (length < (curr - step))) then
+       (length + step - (length mod step))
     else
         curr
 ;;
 
-let newused xarr used =
-    let oldlen = Array.length xarr.arr in
-    let newlen = xarr.resize oldlen used in
-    if (newlen > oldlen) then
-        let newarr = Array.make newlen xarr.null in (
-            Array.blit xarr.arr 0 newarr 0 oldlen ;
+let newlength xarr length =
+    let oldsize = Array.length xarr.arr in
+    let newsize = xarr.resize oldsize length in
+    if (newsize > oldsize) then
+        let newarr = Array.make newsize xarr.null in (
+            Array.blit xarr.arr 0 newarr 0 oldsize ;
             xarr.arr <- newarr
         )
-    else if (newlen < oldlen) then
-        let newarr = Array.sub xarr.arr 0 newlen in
+    else if (newsize < oldsize) then
+        let newarr = Array.sub xarr.arr 0 newsize in
         xarr.arr <- newarr
     else ();
-    xarr.used <- used
+    xarr.length <- length
 ;;
 
-let make ?(resizer = exponential_resizer) initlen nullval = 
-    if (initlen < 0) then
+let make ?(resizer = exponential_resizer) initsize nullval = 
+    if (initsize < 0) then
         invalid_arg "Xarray.make"
-    else if (initlen == 0) then
-        { resize = resizer; used = 0; null = nullval; arr = Array.make 1 nullval }
+    else if (initsize == 0) then
+        { resize = resizer; length = 0; null = nullval; arr = Array.make 1 nullval }
     else 
-        { resize = resizer; used = 0; null = nullval; arr = Array.make initlen nullval }
+        { resize = resizer; length = 0; null = nullval; arr = Array.make initsize nullval }
 ;;
 
-let init ?(resizer = exponential_resizer) initlen initused nullval f =
-    if ((initlen < 0) || (initused < 0) || (initlen < initused)) then
+let init ?(resizer = exponential_resizer) initsize initlength nullval f =
+    if ((initsize < 0) || (initlength < 0) || (initsize < initlength)) then
         invalid_arg "Xarray.init"
-    else if (initlen == 0) then
-        { resize = resizer; used = 0; null = nullval; arr = Array.make 1 nullval }
+    else if (initsize == 0) then
+        { resize = resizer; length = 0; null = nullval; arr = Array.make 1 nullval }
     else 
-        let retarr = Array.make initlen nullval in (
-            for i = 0 to (initused-1) do
+        let retarr = Array.make initsize nullval in (
+            for i = 0 to (initlength-1) do
                 retarr.(i) <- (f i)
             done;
-            { resize = resizer; used = initused; null = nullval; arr = retarr }
+            { resize = resizer; length = initlength; null = nullval; arr = retarr }
         )
 ;;
 
 let get xarr idx = 
-    if ((idx < 0) || (idx >= xarr.used)) then
+    if ((idx < 0) || (idx >= xarr.length)) then
         invalid_arg "Xarray.get"
     else
         xarr.arr.(idx)
 ;;
 
 let last xarr = 
-    if (xarr.used == 0) then
+    if (xarr.length == 0) then
         raise (Failure "Xarray.last")
     else
-        xarr.arr.(xarr.used - 1)
+        xarr.arr.(xarr.length - 1)
 ;;
 
 let set xarr idx v =
-   if ((idx >= 0) && (idx < xarr.used)) then
+   if ((idx >= 0) && (idx < xarr.length)) then
        xarr.arr.(idx) <- v
-   else if (idx == xarr.used) then (
-       newused xarr (xarr.used + 1);
+   else if (idx == xarr.length) then (
+       newlength xarr (xarr.length + 1);
        xarr.arr.(idx) <- v
    ) else
        invalid_arg "Xarray.set"
 ;;
 
 let insert xarr idx v =
-     if ((idx < 0) || (idx > xarr.used)) then
+     if ((idx < 0) || (idx > xarr.length)) then
         invalid_arg "Xarray.insert"
      else
-        newused xarr (xarr.used + 1);
-        if (idx < (xarr.used - 1)) then
-            Array.blit xarr.arr idx xarr.arr (idx+1) (xarr.used - idx - 1)
+        newlength xarr (xarr.length + 1);
+        if (idx < (xarr.length - 1)) then
+            Array.blit xarr.arr idx xarr.arr (idx+1) (xarr.length - idx - 1)
         else ();
         xarr.arr.(idx) <- v
 ;;
 
-let append_element xarr v =
-    newused xarr (xarr.used + 1);
-    xarr.arr.(xarr.used - 1) <- v
+let add xarr v =
+    newlength xarr (xarr.length + 1);
+    xarr.arr.(xarr.length - 1) <- v
 ;;
 
 let append dst src =
-    let oldused = dst.used in (
-        newused dst (oldused + src.used);
-        Array.blit src.arr 0 dst.arr oldused src.used
+    let oldlength = dst.length in (
+        newlength dst (oldlength + src.length);
+        Array.blit src.arr 0 dst.arr oldlength src.length
     );
     dst
 ;;
 
 let delete xarr idx =
-    if ((idx < 0) || (idx >= xarr.used)) then
+    if ((idx < 0) || (idx >= xarr.length)) then
         invalid_arg "Xarray.delete"
     else (
-        if (idx < (xarr.used - 1)) then
-            Array.blit xarr.arr (idx+1) xarr.arr idx (xarr.used - idx - 1)
+        if (idx < (xarr.length - 1)) then
+            Array.blit xarr.arr (idx+1) xarr.arr idx (xarr.length - idx - 1)
         else ();
-        xarr.arr.(xarr.used - 1) <- xarr.null;
-        newused xarr (xarr.used - 1)
+        xarr.arr.(xarr.length - 1) <- xarr.null;
+        newlength xarr (xarr.length - 1)
     )
 ;;
 
 let delete_last xarr = 
-    if (xarr.used < 1) then
+    if (xarr.length < 1) then
         invalid_arg "Xarray.delete_last"
     else
-        xarr.arr.(xarr.used - 1) <- xarr.null;
-        newused xarr (xarr.used - 1)
+        xarr.arr.(xarr.length - 1) <- xarr.null;
+        newlength xarr (xarr.length - 1)
 ;;
  
-let set_length xarr len =
-    if (len < xarr.used) then (
-        Array.fill xarr.arr len (xarr.used - len + 1) xarr.null ;
-    ) else (
-        xarr.used <- len
-    );
-    let oldlen = Array.length xarr.arr in
-    if (len != oldlen) then
-        let newarr = Array.make len xarr.null in (
-            Array.blit xarr.arr 0 newarr 0 (min oldlen len) ;
-            xarr.arr <- newarr
-        )
-    else ();
-;;
-
 let rec blit src srcidx dst dstidx len =
     if ((srcidx < 0) || (dstidx < 0) || (len < 1) 
-        || (dstidx > dst.used) || (srcidx > (src.used - len))) then
+        || (dstidx > dst.length) || (srcidx > (src.length - len))) then
         invalid_arg "Xarray.blit"
     else (
-        if (dstidx > (dst.used - len)) then
-            newused dst (dstidx + len)
+        if (dstidx > (dst.length - len)) then
+            newlength dst (dstidx + len)
         else ();
         Array.blit src.arr srcidx dst.arr dstidx len
     )
@@ -187,11 +172,11 @@ let to_list xarr =
         if (idx < 0) then accum
         else loop (idx - 1) (xarr.arr.(idx) :: accum)
     in
-    loop (xarr.used - 1) []
+    loop (xarr.length - 1) []
 ;;
 
 let to_array xarr =
-    Array.sub xarr.arr 0 xarr.used
+    Array.sub xarr.arr 0 xarr.length
 ;;
 
 let of_list ?(resizer = exponential_resizer) nullval lst =
@@ -200,24 +185,24 @@ let of_list ?(resizer = exponential_resizer) nullval lst =
             (h :: t) -> ( arr.(idx) <- h ; f arr (idx + 1) t )
             | [] -> ()
     in
-    let xlen = List.length lst in
-    if (xlen == 0) then
-        { resize = resizer; used = 0; null = nullval; 
+    let xsize = List.length lst in
+    if (xsize == 0) then
+        { resize = resizer; length = 0; null = nullval; 
           arr = Array.make 1 nullval }
     else  (
-        let retval = { resize = resizer; used = xlen; null = nullval; 
-                       arr = Array.make xlen nullval } in
+        let retval = { resize = resizer; length = xsize; null = nullval; 
+                       arr = Array.make xsize nullval } in
         f retval.arr 0 lst ; retval
     )
 ;;
 
 let of_array ?(resizer = exponential_resizer) nullval arr =
-    let xlen = Array.length arr in
-    if (xlen == 0) then
-        { resize = resizer; used = 0; null = nullval; 
+    let xsize = Array.length arr in
+    if (xsize == 0) then
+        { resize = resizer; length = 0; null = nullval; 
           arr = Array.make 1 nullval }
     else (
-        { resize = resizer; used = xlen; null = nullval; 
+        { resize = resizer; length = xsize; null = nullval; 
           arr = (Array.copy arr) }
     )
 ;;
@@ -227,35 +212,35 @@ let invalid_resizer: int -> int -> int = fun _ -> fun _ -> assert false; 0;;
 let copy ?(resizer = invalid_resizer) src =
     { resize = (
           if (resizer == invalid_resizer) then
-              (* used the same resizing function as before *)
+              (* length the same resizing function as before *)
               src.resize
           else
               resizer
       );
-      used = src.used;
+      length = src.length;
       null = src.null;
       arr = Array.copy src.arr
     }
 ;;
 
 let sub ?(resizer = invalid_resizer) src start len =
-    if ((start < 0) || (len < 0) || (start >= (src.used - len))) then
+    if ((start < 0) || (len < 0) || (start >= (src.length - len))) then
         invalid_arg "Xarray.sub"
     else
     let r = if (resizer == invalid_resizer) then src.resize else resizer in
-    let newlen = r (Array.length src.arr) len in
-    { resize = r; used = len; null = src.null; 
+    let newsize = r (Array.length src.arr) len in
+    { resize = r; length = len; null = src.null; 
       arr = Array.sub src.arr start len }
 ;;
 
 let iter f xarr =
-    for i = 0 to (xarr.used - 1) do
+    for i = 0 to (xarr.length - 1) do
         f xarr.arr.(i)
     done
 ;;
 
 let iteri f xarr =
-    for i = 0 to (xarr.used - 1) do
+    for i = 0 to (xarr.length - 1) do
         f i xarr.arr.(i)
     done
 ;;
@@ -267,10 +252,10 @@ let map ?(resizer = invalid_resizer) f dstnull src =
                     else
                         resizer
                 );
-                used = src.used; 
+                length = src.length; 
                 null = dstnull; 
                 arr = Array.make (Array.length src.arr) dstnull } in
-    for i = 0 to (src.used - 1) do
+    for i = 0 to (src.length - 1) do
         dst.arr.(i) <- f src.arr.(i)
     done ;
     dst
@@ -283,10 +268,10 @@ let mapi ?(resizer = invalid_resizer) f dstnull src =
                     else
                         resizer
                 );
-                used = src.used; 
+                length = src.length; 
                 null = dstnull; 
                 arr = Array.make (Array.length src.arr) dstnull } in
-    for i = 0 to (src.used - 1) do
+    for i = 0 to (src.length - 1) do
         dst.arr.(i) <- f i src.arr.(i)
     done ;
     dst
@@ -294,7 +279,7 @@ let mapi ?(resizer = invalid_resizer) f dstnull src =
 
 let fold_left f x a =
     let rec loop idx x =
-        if (idx >= a.used) then x
+        if (idx >= a.length) then x
         else loop (idx + 1) (f x a.arr.(idx))
     in
     loop 0 x
@@ -305,6 +290,93 @@ let fold_right f a x =
         if (idx < 0) then x
         else loop (idx - 1) (f a.arr.(idx) x)
     in
-    loop (a.used - 1) x
+    loop (a.length - 1) x
 ;;
 
+let enum xarr =
+    let idxref = ref 0 in
+    let next () =
+        if (!idxref) >= xarr.length then
+            raise Enum.No_more_elements
+        else
+            let retval = xarr.arr.( !idxref ) in
+            incr idxref;
+            retval
+    and count () =
+        if (!idxref) >= xarr.length then 0
+        else xarr.length - !idxref
+    in
+    Enum.make ~next:next ~count:count
+;;
+
+let sub_enum xarr initidx len =
+    let idxref = ref 0
+    and lenref = ref len
+    in
+    let next () =
+        if ((!idxref) >= xarr.length) || (!lenref <= 0) then
+            raise Enum.No_more_elements
+        else
+            let retval = xarr.arr.( !idxref ) in
+            incr idxref;
+            decr lenref;
+            retval
+    and count () =
+        if (!idxref) >= xarr.length then 0
+        else if (!idxref + !lenref - 1) >= xarr.length then 
+            xarr.length - !idxref
+        else
+           !lenref
+    in
+    Enum.make ~next:next ~count:count
+;;
+
+let of_enum ?(resizer = exponential_resizer) nullval e =
+    let c = Enum.count e in
+    if (c <= 0) then
+        let retval = { resize = resizer; null = nullval; length = 0;
+                       arr = Array.make 1 nullval } in
+        Enum.iter (add retval) e;
+        retval
+    else
+        let retval = Array.make (resizer 1 c) nullval in
+        let _ = Enum.fold (fun x i -> (retval.(i) <- x; i+1)) 0 e in
+        { resize = resizer; null = nullval; length = c; arr = retval }
+;;
+
+let insert_enum xarr idx e =
+    if ((idx < 0) || (idx > xarr.length)) then
+        invalid_arg "Xarray.insert_enum"
+    else
+    let c = Enum.count e in
+    if (c <= 0) then
+        let _ = Enum.fold (fun x i -> (insert xarr i x; i+1)) idx e in
+        ()
+    else
+        let oldlen = xarr.length in
+        newlength xarr (c + xarr.length);
+        if (idx < oldlen) then
+            Array.blit xarr.arr idx xarr.arr (idx + c) (oldlen - idx)
+        else ();
+        let _ = Enum.fold (fun x i -> (xarr.arr.(i) <- x; i+1)) idx e in
+        ()
+;;
+
+let set_enum xarr idx e =
+    if ((idx < 0) || (idx > xarr.length)) then
+        invalid_arg "Xarray.set_enum"
+    else
+    let c = Enum.count e in
+    if (c <= 0) then
+        let _ = Enum.fold (fun x i -> (set xarr i x; i+1)) idx e in
+        ()
+    else
+        let max = idx + c in
+        if (max > xarr.length) then
+            newlength xarr max
+        else ();
+        let _ = Enum.fold (fun x i -> (xarr.arr.(i) <- x; i+1)) idx e in
+        ()
+;;
+
+    
