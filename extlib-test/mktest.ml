@@ -162,7 +162,7 @@ let exec cmd msg =
 
 
 let ocaml_cmd = function
-    `CompileByte -> "ocamlc"
+    `CompileByte -> "ocamlc -g"
   | `CompileNative -> "ocamlopt"
 
 let compile_file build_type filename =
