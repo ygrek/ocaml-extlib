@@ -236,6 +236,14 @@ let get_bit z =
 	z.zbits <- z.zbits lsr 1;
 	b
 
+let rec get_rev_bits z n =
+	if n = 0 then
+		0
+	else if get_bit z then
+		(1 lsl (n - 1)) lor (get_rev_bits z (n-1))
+	else
+		get_rev_bits z (n-1)
+
 let reset_bits z =
 	z.zbits <- 0;
 	z.znbits <- 0
@@ -386,7 +394,7 @@ let rec inflate_loop z =
 			let extra_bits = Array.unsafe_get len_extra_bits_tbl n in
 			if extra_bits = -1 then error Invalid_data;
 			z.zlen <- (Array.unsafe_get len_base_val_tbl n) + (get_bits z extra_bits);
-			let dist_code = (match z.zhuffdist with None -> get_bits z 5 | Some h -> apply_huffman z h) in
+			let dist_code = (match z.zhuffdist with None -> get_rev_bits z 5 | Some h -> apply_huffman z h) in
 			let extra_bits = Array.unsafe_get dist_extra_bits_tbl dist_code in
 			if extra_bits = -1 then error Invalid_data;
 			z.zdist <- (Array.unsafe_get dist_base_val_tbl dist_code) + (get_bits z extra_bits);
