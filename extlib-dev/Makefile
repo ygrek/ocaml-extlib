@@ -1,18 +1,30 @@
-all:
-	ocamake -a -o ext-lib.cma *.ml *.mli
+# Makefile contributed by Alain Frisch
 
-opt:
-	ocamake -a -o ext-lib.cmxa -opt *.ml *.mli
+MODULES = \
+ enum bitSet dbi dynArray extHashtbl extList extString global IO option \
+ pMap refList std uChar uTF8 base64
+
+# the list is topologically sorted
+
+SRC = $(MODULES:=.mli) $(MODULES:=.ml) extLib.ml
+
+all: 
+	ocamlc -a -o extLib.cma $(SRC)
+opt: 
+	ocamlopt -a -o extLib.cmxa $(SRC)
+doc:
+	ocamlc -c $(MODULES:=.mli)
+	mkdir -p doc/
+	ocamldoc -sort -html -d doc/ $(MODULES:=.mli)
+	cp odoc_style.css doc/style.css
+
+install:
+	cp META.txt META
+	ocamlfind install extlib META *.cmi *.cma $(wildcard *.cmxa) $(wildcard *.a)
+
+uninstall:
+	ocamlfind remove extlib
 
 clean:
-	rm -rf dochtml ext-lib.odoc
-	ocamake -a -o ext-lib.cma *.ml *.mli -clean
-	ocamake -a -o ext-lib.cmxa -opt *.ml *.mli -clean
-
-doc: all
-	-mkdir dochtml
-	ocamldoc -d dochtml -html *.mli
-	cp odoc_style.css dochtml/style.css
-	
-doc-dump: all
-	ocamldoc -dump ext-lib.odoc *.mli
+	rm -f *.cmo *.cmx *.o *.cmi *.cma *.cmxa *.a
+	rm -Rf doc
