@@ -24,6 +24,5 @@
 #
 #
 # DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commit.log
-#
 
 ALL /usr/local/bin/cvs-commitmail %s -f $CVSROOT/CVSROOT/commitlog
