@@ -3,3 +3,5 @@
 *.cma
 dochtml
 ext-lib.odoc
+extLib.lib
+extLib.cmxa
