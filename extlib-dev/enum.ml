@@ -76,7 +76,7 @@ let from f =
 	e.count <- (fun () -> force e; e.count());
 	e
 
-let next t =
+let peek t =
 	try
 		Some (t.next())
 	with

@@ -50,7 +50,7 @@ val force : 'a t -> unit
 
 val clone : 'a t -> 'a t
 
-val next : 'a t -> 'a option
+val peek : 'a t -> 'a option
 
 (* Lazy operations, cost O(1) *)
 
