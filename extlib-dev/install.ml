@@ -59,7 +59,7 @@ let run cmd =
 
 let copy file dest =
 	if dest <> "" && dest <> "." then begin
-		print_endline ("Installing "^file);
+		print_endline ("Installing " ^ file);
 		let path = dest ^ file in
 		(try Sys.remove path with _ -> ());
 		try
@@ -76,13 +76,13 @@ let complete_path p =
 		if c = '/' || c = '\\' then
 			p
 		else
-			p^(match path_type with PathUnix -> "/" | PathDos -> "\\")
+			p ^ (match path_type with PathUnix -> "/" | PathDos -> "\\")
 
 let remove file =	
 	try
 		Sys.remove file
 	with
-		_ -> prerr_endline ("Warning : failed to delete "^file)
+		_ -> prerr_endline ("Warning : failed to delete " ^ file)
 
 let is_findlib() = 
 	let findlib = Sys.command (if Sys.os_type = "Win32" then "ocamlfind printconf 2>NUL" else "ocamlfind printconf") = 0 in
@@ -132,10 +132,10 @@ let install() =
 			    printf "Choose installation directory :\n> ";
 			    let dest = complete_path (read_line()) in
 			    (try
-			      close_out (open_out (dest^"test.file"));
-			      Sys.remove (dest^"test.file");
+			      close_out (open_out (dest ^ "test.file"));
+			      Sys.remove (dest ^ "test.file");
 			    with
-			      _ -> failwith ("Directory "^dest^" does not exists or cannot be written."));
+			      _ -> failwith ("Directory " ^ dest ^ " does not exists or cannot be written."));
 			    Dir dest;
 			  end else Findlib in
 			autobyte := byte;
@@ -163,15 +163,14 @@ let install() =
 	if !autobyte then begin
 		List.iter (fun m -> run (sprintf "ocamlc -c %s.ml" m)) modules;
 		run (sprintf "ocamlc -a -o extLib.cma %s extLib.ml" (m_list ".cmo"));
-		List.iter (fun m -> remove (m^".cmo")) modules;
+		List.iter (fun m -> remove (m ^ ".cmo")) modules;
 		remove "extLib.cmo";
 	end;
 	if !autonative then begin
 		List.iter (fun m -> run (sprintf "ocamlopt -c %s.ml" m)) modules;
 		run (sprintf "ocamlopt -a -o extLib.cmxa %s extLib.ml" (m_list ".cmx"));
-		List.iter (fun m -> remove (m^".cmx"); remove (m^obj_ext)) modules;
-		remove "extLib.cmx";
-		remove ("extLib"^obj_ext);
+		List.iter (fun m -> remove (m ^ obj_ext)) modules;		
+		remove ("extLib" ^ obj_ext);
 	end;
 	if !autodoc then begin 
 		run (sprintf "ocamldoc -sort -html -d %s %s" doc_dir (m_list ".mli"));
@@ -183,25 +182,27 @@ let install() =
 	  Findlib ->
 	    let files = Buffer.create 0 in
 	    List.iter (fun m -> 
-	      Buffer.add_string files (m^".cmi");
+	      Buffer.add_string files (m ^ ".cmi");
 	      Buffer.add_char files ' ')
 	      modules;
 	    Buffer.add_string files "extLib.cmi ";
 	    if !autobyte then Buffer.add_string files "extLib.cma ";
 	    if !autonative then begin
 	      Buffer.add_string files "extLib.cmxa ";
-	      Buffer.add_string files ("extLib"^lib_ext^" ");
+	      Buffer.add_string files ("extLib" ^ lib_ext^ " ");
 	    end;
 	    run (sprintf "%s META.txt META" cp_cmd);
 	    let files = Buffer.contents files in
 	    run (sprintf "ocamlfind install extlib %s META" files);
 	| Dir install_dir ->
-	    List.iter (fun m -> copy (m^".cmi") install_dir) modules;
-	    copy "extLib.cmi" install_dir;
+	    List.iter (fun m -> 
+			copy (m ^ ".cmi") install_dir;
+			if !autonative then copy (m ^ ".cmx") install_dir
+		) ("extLib" :: modules);	    
 	    if !autobyte then copy "extLib.cma"  install_dir;
 	    if !autonative then begin
 	      copy "extLib.cmxa" install_dir;
-	      copy ("extLib"^lib_ext) install_dir;
+	      copy ("extLib" ^ lib_ext) install_dir;
 	    end;
 ;;
 try 
