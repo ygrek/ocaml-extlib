@@ -12,3 +12,4 @@
 #
 # comment lines begin with '#'
 commit.log Cannot get commit log
+commitlog Cannot update commit log file

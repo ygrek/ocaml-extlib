@@ -24,3 +24,4 @@
 #
 #
 # DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commit.log
+#
