@@ -13,9 +13,11 @@
 let extlib_dev_dir = 
   Filename.concat Filename.parent_dir_name "extlib-dev"
 
-
 let build_dir = "build-tmp"
 
+let mtest_filename module_name ext = "mtest_"^module_name^ext
+
+let itest_filename auth mname test ext = "itest_"^auth^"_"^mname^"_"^test^ext
 
 (* PORTABILITY WARNING: this is the only place Unix module is used *)
 let mkdir f = 
@@ -107,8 +109,7 @@ let tests_of dirname =
 
 
 let mtest all_tests mname =
-  let f = open_out (Filename.concat build_dir ("mtest_" ^ mname ^ ".ml")) in
-
+  let f = open_out (Filename.concat build_dir (mtest_filename mname ".ml")) in
   output_string f "let test() = \n";
 
   let tests = Hashtbl.find_all all_tests mname in
@@ -143,7 +144,7 @@ let copy_file fin fout =
 
 let patch_test mname author test =
   let input_filename = "test_" ^ author ^ "_" ^mname^"_"^test^".ml" in
-  let output_filename = Filename.concat build_dir ("itest_" ^ author ^ "_" ^mname^"_"^test^".ml") in
+  let output_filename = Filename.concat build_dir (itest_filename author mname test ".ml") in
   copy_file input_filename output_filename
 
   
@@ -176,7 +177,7 @@ let compile_tests all_modules all_tests =
   (* compile individual tests *)
   Hashtbl.iter
   (fun mname (author,test) ->
-    let filename = Filename.concat build_dir ("itest_" ^ author ^ "_" ^mname^"_"^test^".ml") in
+    let filename = Filename.concat build_dir (itest_filename author mname test ".ml") in
     compile_file filename
   )
   all_tests
@@ -184,7 +185,7 @@ let compile_tests all_modules all_tests =
   (* compile generated module level thunks *)
   List.iter
   (fun s ->
-    let filename = Filename.concat build_dir ("mtest_" ^ s ^ ".ml") in
+    let filename = Filename.concat build_dir (mtest_filename s ".ml") in
     compile_file filename
   )
   all_modules
@@ -205,26 +206,19 @@ let link_tests all_modules all_tests =
     " -o extlib_test extLib.cma util.cmo " 
   )
   in 
-  Hashtbl.iter
-  (fun mname (author,test) ->
-    let filename = "itest_" ^ author ^ "_" ^mname^"_"^test^".cmo" in
-    linkstring := !linkstring ^ " " ^ filename
-  )
-  all_tests
-  ;
-  (* compile generated module level thunks *)
-  List.iter
-  (fun s ->
-    let filename = "mtest_" ^ s ^ ".cmo" in
-    linkstring := !linkstring ^ " " ^ filename
-  )
-  all_modules
-  ;
-  (* compile mainline *)
-  linkstring := !linkstring ^ " " ^ 
-  Filename.concat build_dir "extlib_test.cmo"
-  ;
-  xqt !linkstring "Linking extlib_test"
+  let test_o_files = 
+    String.concat " " 
+      (Hashtbl.fold (fun mname (auth,test) accu ->
+                       itest_filename auth mname test ".cmo"::accu)
+         all_tests []) in
+  let mid_o_files = 
+    String.concat " " 
+      (List.map (fun s -> mtest_filename s ".cmo") all_modules) in
+  (* Compile mainline *)
+  let link_cmd = !linkstring ^ " " ^ test_o_files ^ " " ^ mid_o_files ^ " " ^
+                 (Filename.concat build_dir "extlib_test.cmo") in
+  print_endline link_cmd;
+  xqt link_cmd "Linking extlib_test"
 
 
 (* extract args of the form --xxxx=yyyy *)
