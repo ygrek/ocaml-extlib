@@ -85,10 +85,10 @@ let really_output o s p l =
    	let l = ref l in
 	let p = ref p in
 	while !l > 0 do 
-		let r = o.out_output s !p !l in
-		if r = 0 then raise Sys_blocked_io;
-		p := !p + r;
-		l := !l - r;
+		let w = o.out_output s !p !l in
+		if w = 0 then raise Sys_blocked_io;
+		p := !p + w;
+		l := !l - w;
 	done
 
 let input i s p l =
@@ -134,6 +134,7 @@ let nwrite o s =
 	let l = ref (String.length s) in
 	while !l > 0 do
 		let w = o.out_output s !p !l in
+		if w = 0 then raise Sys_blocked_io;
 		p := !p + w;
 		l := !l - w;
 	done
