@@ -25,7 +25,7 @@ type 'a intern
 
 external ilen : 'a intern -> int = "%obj_size"
 external idup : 'a intern -> 'a intern = "obj_dup"
-external imake : tag:int -> size:int -> 'a intern = "obj_block"
+external imake : int -> int -> 'a intern = "obj_block"
 external iget : 'a intern -> int -> 'a = "%obj_field"
 external iset : 'a intern -> int -> 'a -> unit = "%obj_set_field"
 
