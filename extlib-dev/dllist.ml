@@ -62,22 +62,26 @@ let prepend node elem =
 let promote node =
 	let next = node.next in
 	let prev = node.prev in
-	next.next.prev <- node;
-	node.next <- next.next;
-	node.prev <- next;
-	next.next <- node;
-	next.prev <- prev;
-	prev.next <- next
+	if next != prev then begin
+		next.next.prev <- node;
+		node.next <- next.next;
+		node.prev <- next;
+		next.next <- node;
+		next.prev <- prev;
+		prev.next <- next
+	end
 
 let demote node =
 	let next = node.next in
 	let prev = node.prev in
-	prev.prev.next <- node;
-	node.prev <- prev.prev;
-	node.next <- prev;
-	prev.prev <- node;
-	prev.next <- next;
-	next.prev <- prev
+	if next != prev then begin
+		prev.prev.next <- node;
+		node.prev <- prev.prev;
+		node.next <- prev;
+		prev.prev <- node;
+		prev.next <- next;
+		next.prev <- prev
+	end
 
 let remove node =
 	let next = node.next in
@@ -137,7 +141,7 @@ let rev node =
 			let prev = n.prev in
 			n.next <- prev;
 			n.prev <- next;
-			
+
 			if n != node then
 				loop n prev
 		end
@@ -217,7 +221,7 @@ let enum node =
 			begin
 			let rval = e.curr.data in
 			e.curr <- e.curr.next;
-			
+
 			if (e.curr == node) then
 				e.valid <- false;
 			rval
@@ -249,7 +253,7 @@ let rev_enum node =
 			begin
 			let rval = e.curr.data in
 			e.curr <- e.curr.prev;
-			
+
 			if (e.curr == node) then
 				e.valid <- false;
 			rval
@@ -273,7 +277,7 @@ let rev_enum node =
 	let e = { curr = node; valid = true } in
 	Enum.make ~next:(prev e) ~count:(count e) ~clone:(clone e)
 
-let of_enum enm = 
+let of_enum enm =
 	match Enum.get enm with
 		| None -> raise Empty
 		| Some(d) ->
