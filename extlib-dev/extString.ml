@@ -171,7 +171,7 @@ let map f s =
 	done;
 	sc
 
-let replace f s =
+let replace_chars f s =
 	let len = String.length s in
 	let tlen = ref 0 in
 	let rec loop i acc =
@@ -195,5 +195,16 @@ let replace f s =
 	in
 	loop2 strs;
 	sbuf
+
+
+let replace ~str ~sub ~by =
+	try
+		let i = find str sub in
+		(true, (slice ~last:i str) ^ by ^ 
+                   (slice ~first:(i+(String.length sub)) str))
+        with
+		Invalid_string -> (false, String.copy str)
+
+
 
 end

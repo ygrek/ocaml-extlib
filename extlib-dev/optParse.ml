@@ -540,19 +540,8 @@ module OptParser =
       op_groups : group 
     }
 
-    let replace_substring needle replacement_needle haystack =
-      try
-        let i =
-          String.find haystack needle
-        in
-          (String.slice ~last:i haystack) ^ 
-          replacement_needle ^ 
-          (String.slice ~first:(i+(String.length needle)) haystack)
-      with
-        ExtString.Invalid_string -> String.copy haystack
-
     let unprogify optparser s =
-      replace_substring "%prog" optparser.op_prog s
+      (snd (String.replace ~str:s ~sub:"%prog" ~by:optparser.op_prog))
 
     let add optparser ?(group = optparser.op_groups) ?help ?(hide = false)
       ?short_name ?(short_names = []) ?long_name ?(long_names = []) opt =

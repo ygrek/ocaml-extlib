@@ -115,9 +115,14 @@ module String :
 	(** [exists str sub] returns true if [sub] is a substring of [str] or
 		false otherwise. *)
 
-	val replace : (char -> string) -> string -> string
-	(** [replace f s] returns a string were all chars [c] of [s] have been
+	val replace_chars : (char -> string) -> string -> string
+	(** [replace_chars f s] returns a string where all chars [c] of [s] have been
 		replaced by the string returned by [f c]. *)
+
+        val replace : str:string -> sub:string -> by:string -> bool * string
+        (** [replace ~str ~sub ~by] returns a string where the first
+		occurrence of the string [sub] within [str] has been
+		replaced by the string [by]. *)
 
 	(** {6 Older Functions} *)
 
