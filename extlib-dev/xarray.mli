@@ -27,31 +27,42 @@
 type 'a t (* abstract *)
 (** The abstract type of a resizable array. *)
 
-val make : ?resizer:(int -> int -> int) -> int -> 'a -> 'a t
-(** [make len null] returns an xarray originally capable of holding [len]
+type resizer_t = currslots:int -> oldlength:int -> newlength:int -> int
+(** The type of a resizer function.
+
+	Resizer functions are given as optional arguments when a new xarray
+	is being allocated.  They are called whenever elements are added to
+	or removed from the xarray to determine what the current number of
+	storage spaces in the xarray should be.  The three named arguments
+	passed to a resizer are the current number of storage spaces in
+	the xarray, the length of the xarray before the elements are
+	added or removed, and the length the xarray will be after the
+	elements are added or removed.  If elements are being added, newlength
+	will be larger than oldlength, if elements are being removed,
+	newlength will be smaller than oldlength.
+
+	See [exponential_resizer] and [step_resizer] for example resizer
+	functions.
+*)
+
+val make : ?resizer:resizer_t -> int -> 'a -> 'a t
+(** [make size null] returns an xarray originally capable of holding [size]
 	elements, with a null element of [null].  The null element is used to 
 	fill unused elements of the underlying array.  
 
-	The optional argument [resizer] can be used to set the resizing 
-	behavior- [make ~resiver:foo len null] calls function foo to determine 
-	the new size for the underlying array.  The resizer function is called
-	with two arguments- the first is the current length of the array, and
-	the second is the number of elements used in the array (this can be
-	arbitrarily larger than the current number of elements in the array).
-	It is called when elements are added to or removed from the array.
-	If the returned length is different from the current length of the
-	array, a new array of that length will be allocated and the elements
-	copied over.  By default the function [exponential_resizer] is used-
-	see that function for more details.
+	The default resizer function used is [exponential_resizer].
+
 *)
 
-val init : ?resizer:(int -> int -> int) -> int -> int -> 'a -> (int -> 'a) -> 'a t
-(** [init len used null f] returns an xarray capable of holding [len]
+val init : ?resizer:resizer_t -> int -> int -> 'a -> (int -> 'a) -> 'a t
+(** [init size len null f] returns an xarray capable of holding [size]
 	elements, with a null element of [null].  The null element is used to 
-	fill unused elements of the underlying array.  The first [used] elements
+	fill unused elements of the underlying array.  The first [len] elements
 	are given values returned by the function [f], with element [idx]
-	having the value [f idx].  A resizer function (see [make]) can be
-	specified.
+	having the value [f idx].  
+
+	The default resizer function used is [exponential_resizer].
+
  *)
 
 val length : 'a t -> int
@@ -60,7 +71,7 @@ val length : 'a t -> int
 
 val get : 'a t -> int -> 'a
 (** [get xarr idx] gets the element in [xarr] at index [idx]. If [xarr] has
-	[used] elements in it, then the valid indexs range from [0] to [used-1]. *)
+	[len] elements in it, then the valid indexs range from [0] to [len-1]. *)
 
 val last : 'a t -> 'a
 (** [last xarr] returns the last element of [xarr], or throws 
@@ -69,7 +80,7 @@ val last : 'a t -> 'a
 val set : 'a t -> int -> 'a -> unit
 (** [set xarr idx v] sets the element of [xarr] at index [idx] to value
 	[v].  The previous value is overwritten.  If [idx] is equal to
-	[used xarr] (i.e. the index is one past the end of the xarray), the
+	[length xarr] (i.e. the index is one past the end of the xarray), the
 	xarray is expanded to hold the new element- in this case, the function
 	behaves like [add].  Otherwise, the array is not expanded. *)
 
@@ -96,7 +107,7 @@ val delete : 'a t -> int -> unit
 
 val delete_last : 'a t -> unit
 (** [delete_last xarr] deletes the last element of [xarr].  This is 
-	equivelent to going [delete xarr ((used xarr) - 1)]. *)
+	equivelent to going [delete xarr ((length xarr) - 1)]. *)
 
 val blit : 'a t -> int -> 'a t -> int -> int -> unit
 (** [blit src srcidx dst dstidx len] copies [len] elements from [src]
@@ -111,52 +122,70 @@ val to_list : 'a t -> 'a list
 val to_array : 'a t -> 'a array
 (** [to_array xarr] returns the elements of [xarr] in order as an array. *)
 
-val of_list : ?resizer:(int -> int -> int) -> 'a -> 'a list -> 'a t
+val of_list : ?resizer:resizer_t -> 'a -> 'a list -> 'a t
 (** [of_list null lst] returns an xarray with the elements of [lst] in it
-	in order, and [null] as it's null element.  A resizing strategy can
-	be specified- the default is to use [exponential_resizer]. *)
+	in order, and [null] as it's null element.
 
-val of_array : ?resizer:(int -> int -> int) -> 'a -> 'a array -> 'a t
+	The default resizer function used is [exponential_resizer].
+
+*)
+
+val of_array : ?resizer:resizer_t -> 'a -> 'a array -> 'a t
 (** [of_array null arr] returns an xarray with the elements of [arr] in it
-	in order, and [null] as it's null element.  A resizing strategy can
-	be specified- the default is to use [exponential_resizer]. *)
+	in order, and [null] as it's null element.  
 
-val copy : ?resizer:(int -> int -> int) -> 'a t -> 'a t
+	The default resizer function used is [exponential_resizer].
+
+*)
+
+val copy : ?resizer:resizer_t -> 'a t -> 'a t
 (** [copy src] returns a fresh copy of [src], such that no modification of
 	[src] affects the copy, or vice versa (all new memory is allocated for
-	the copy).  A new resizing strategy can be specified- if no resizing
-	strategy is specified, the copy uses the same function as [src]. *)
+	the copy).  
 
-val sub : ?resizer:(int -> int -> int) -> 'a t -> int -> int -> 'a t
+	The initial size of the returned xarray is the same as the current
+	size of the source xarray.  The default resizer function used is the 
+	resizer of the source xarray.
+
+*)
+
+val sub : ?resizer:resizer_t -> 'a t -> int -> int -> 'a t
 (** [sub xarr start len] returns an xarray holding the subset of [len] 
 	elements from [xarr] starting with the element at index [idx].  A
 	new resizing strategy can be provided- if no strategy is provided,
-	the strategy of [xarr] is used.  The initial size of the returned
-	xarray is calculated by calling it's resize strategy, starting with
-	the current length of the underlying array of [xarr] and [len].
- *)
+	the strategy of [xarr] is used.  
+
+	The initial size of the returned xarray is calculated by calling 
+	[resizer ~currslots:0 ~oldlength:0 ~newlength:len].  The default 
+	resizer function used is the resizer of the source xarray
+
+*)
 
 val iter : ('a -> unit) -> 'a t -> unit
 (** [iter f xarr] calls the function [f] on every element of [xarr].  It
-	is equivelent to for i = 0 to ([used xarr]) do f ([get xarr i]) done; *)
+	is equivelent to for i = 0 to ([length xarr]) do f ([get xarr i]) done; *)
 
 val iteri : (int -> 'a -> unit) -> 'a t -> unit
 (** [iter f xarr] calls the function [f] on every element of [xarr].  It
-	is equivelent to for i = 0 to ([used xarr]) do f i ([get xarr i]) done; *)
+	is equivelent to for i = 0 to ([length xarr]) do f i ([get xarr i]) done; *)
 
-val map : ?resizer:(int -> int -> int) -> ('a -> 'b) -> 'b -> 'a t -> 'b t
+val map : ?resizer:resizer_t -> ('a -> 'b) -> 'b -> 'a t -> 'b t
 (** [map f nulldst xarr] applies the function [f] to every element of [xarr]
 	and creates an xarray from the results- similiar to [List.map] or
 	[Array.map].  [nulldst] is the null element of the returned xarray.
-	A resize strategy for the returned xarray can be specified.  If none is 
-	specified the resize strategy of [xarr] is used. *)
 
-val mapi : ?resizer:(int -> int -> int) -> (int -> 'a -> 'b) -> 'b -> 'a t -> 'b t
+	The initial size of the returned xarray is the same as that of the
+	source xarray.  The default resizer is that of the source xarray.
+*)
+
+val mapi : ?resizer:resizer_t -> (int -> 'a -> 'b) -> 'b -> 'a t -> 'b t
 (** [mapi f nulldst xarr] applies the function [f] to every element of [xarr]
 	and creates an xarray from the results- similiar to [List.mapi] or
 	[Array.mapi].  [nulldst] is the null element of the returned xarray.
-	A resize strategy for the returned xarray can be specified.  If none is 
-	specified the resize strategy of [xarr] is used. *)
+
+	The initial size of the returned xarray is the same as that of the
+	source xarray.  The default resizer is that of the source xarray.
+*)
 
 val fold_left : ('a -> 'b -> 'a) -> 'a -> 'b t -> 'a
 (** [fold_left f x xarr] computes 
@@ -175,9 +204,15 @@ val sub_enum : 'a t -> int -> int -> 'a Enum.t
 (** [sub_enum xarr idx len] returns an enumeration of a subset of [len]
 	elements of [xarr], starting with the element at index [idx]. *)
 
-val of_enum : ?resizer:(int -> int -> int) -> 'a -> 'a Enum.t -> 'a t
+val of_enum : ?resizer:resizer_t -> 'a -> 'a Enum.t -> 'a t
 (** [of_enum nullval e] returns an t that holds, in order, the 
-	elements of [e]. *)
+	elements of [e]. 
+
+	The initial size of the returned xarray is calculated by calling
+	[resizer ~currslots:1 ~oldlength:0 ~newlength:(Enum.count e)].
+	The default resizer is exponential_resizer.
+
+*)
 
 val insert_enum : 'a t -> int -> 'a Enum.t -> unit
 (** [insert_enum xarr idx e] inserts the elements of [e] into [xarr]
@@ -203,52 +238,93 @@ val sub_rev_enum : 'a t -> int -> int -> 'a Enum.t
 	lowest index.  So the last element returned from [e] becomes the
 	element at index [idx]. *)
 
-val of_rev_enum : ?resizer:(int -> int -> int) -> 'a -> 'a Enum.t -> 'a t
+val of_rev_enum : ?resizer:resizer_t -> 'a -> 'a Enum.t -> 'a t
 (** [of_rev_enum nullval e] returns an Xarray.t that holds, in reverse order, 
 	the elements of [e].  The first element returned from [e] becomes the
-	highest indexed element of the returned Xarray.t, and so on. *)
+	highest indexed element of the returned Xarray.t, and so on.  Otherwise
+	it acts like [of_enum].
+*)
 
 val insert_rev_enum : 'a t -> int -> 'a Enum.t -> unit
 (** [insert_rev_enum xarr idx e] inserts the elements of [e] into [xarr]
 	so the first element of [e] has index [idx]+[len]-1, the second index 
 	[idx]+[len]-2, etc, where [len] is the count of elements initially in 
 	[e].   The last element from [e] becomes the element at index [idx].  
-	All the elements of [xarr] with index greater than or equal to [idx] 
-	are moved up by the number of elements in [e] to make room. *)
+	Otherwise it acts like [insert_enum].
+*)
 
 val set_rev_enum : 'a t -> int -> 'a Enum.t -> unit
 (** [set_rev_enum xarr idx e] sets the elements from [e] into [xarr],
 	so the first element of [e] has index [idx]+[len]-1, etc, where [len]
 	is the count of elements initially in [e].  The last element of [e]
-	has index [idx].  The elements with indexes [idx], [idx]+1, etc. are 
-	overwritten. *)
+	has index [idx].  Otherwise it acts like [set_enum].
+*)
 
-val exponential_resizer : int -> int -> int
-(** The exponential resizer- [exponential_resizer curr used] returns the
-	array length required to hold [used] items- generally some function of
-	[curr].
-   
-	If [used] is greater than [curr], [exponential_resizer] doubles [curr]
-	until it is greater (or the maximum array length is reached).  If [used]
-	is less than one quarter of [curr], [exponential_resizer] halves the
-	[curr] until [used] is greater than one quarter.  Note that the one
-	quarter limit is necessary to prevent thrashing (where adding and removing
-	a small number of items causes the array to be continually reallocated).
+val exponential_resizer : resizer_t
+(** The exponential resizer- The default resizer except when the resizer
+	is being copied from some other xarray.
+
+	[exponential_resizer] works by doubling or halving the number of
+	slots until they "fit".  If the number of slots is less than the
+	new length, the number of slots is doubled until it is greater
+	than the new length (or Sys.max_array_size is reached).  
+
+	If the number of slots is more than four times the new length,
+	the number of slots is halved until it is less than four times the
+	new length.
+
+	Allowing xarrays to fall below 25% utilization before shrinking them
+	prevents "thrashing".  Consider the case where the caller is constantly
+	adding a few elements, and then removing a few elements, causing
+	the length to constantly cross above and below a power of two.
+	Shrinking the array when it falls below 50% would causing the
+	underlying array to be constantly allocated and deallocated.
+	A few elements would be added, causing the array to be reallocated
+	and have a usage of just above 50%.  Then a few elements would be
+	remove, and the array would fall below 50% utilization and be
+	reallocated yet again.  The bulk of the array, untouched, would be
+	copied and copied again.  By setting the threshold at 25% instead,
+	such "thrashing" only occurs with wild swings- adding and removing
+	huge numbers of elements (more than half of the elements in the array).
+
+	[exponential_resizer] is a good performing resizer for most 
+	applications.  A list allocates 2 words for every element, while an
+	array (with large numbers of elements) allocates only 1 word per
+	element (ignoring unboxed floats).  On insert, [exponential_resizer]
+	keeps the amount of wasted "extra" array elements below 50%, meaning
+	that less than 2 words per element are used.  Even on removals
+	where the amount of wasted space is allowed to rise to 75%, that
+	only means that xarray is using 4 words per element.  This is
+	generally not a signifigant overhead.
+
+	Furthermore, [exponential_resizer] minimizes the number of copies
+	needed- appending n elements into an empty xarray with initial size
+	0 requires between n and 2n elements of the array be copied- O(n)
+	work, or O(1) work per element (on average).  A similiar argument
+	can be made that deletes from the end of the array are O(1) as
+	well (obviously deletes from anywhere else are O(n) work- you
+	have to move the n or so elements above the deleted element down).
+
  *)
 
-val step_resizer : int -> int -> int -> int
-(** The stepwise resizer- [step_resizer step curr used] returns the
-	array length required to hold [used] items- a function of [curr] and
-	[step].
+val step_resizer : int -> resizer_t
+(** The stepwise resizer- another example of a resizer function, this
+	time of a parameterized resizer.
    
-	The function [step_resizer] returns the smallest multiple of [step]
-	larger than [used] if [curr] is less then [used]-[step] or greater than
-	[used].
+	The resizer returned by [step_resizer step] returns the smallest 
+	multiple of [step] larger than [newlength] if [currslots] is less 
+	then [newlength]-[step] or greater than [newlength].
 
-	This function generally needs to be partially applied to use it as
-	a resizer.  For example, to make an xarray with a step of 10, a length
+	For example, to make an xarray with a step of 10, a length
 	of len, and a null of null, you would do:
 	[make] ~resizer:([step_resizer] 10) len null
  *)
 
+val conservative_exponential_resizer : resizer_t
+(** [conservative_exponential_resizer] is an example resizer function
+	which uses the oldlength parameter.  It only shrinks the array
+	on inserts- no deletes shrink the array, only inserts.  It does
+	this by comparing the oldlength and newlength parameters.  Other
+	than that, it acts like [exponential_resizer].
+*)
 

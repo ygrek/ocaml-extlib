@@ -18,8 +18,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
+type resizer_t = currslots:int -> oldlength:int -> newlength:int -> int
+
 type 'a t = { 
-	resize: int -> int -> int ; 
+	resize: resizer_t ; 
 	null : 'a ; 
 	mutable length : int ; 
 	mutable arr : 'a array 
@@ -27,31 +29,60 @@ type 'a t = {
 
 let length xarr = xarr.length
 
-let rec exponential_resizer curr length =
-	if curr < length then begin
-		if curr < (Sys.max_array_length/2) then
-			exponential_resizer (curr * 2) length
-		else
-			Sys.max_array_length
-	end else if ((curr/4) > length) && (curr > 8) then
-		exponential_resizer (curr / 2) length
-	else
-		curr
-
+let exponential_resizer ~currslots ~oldlength ~newlength =
+	let rec doubler x =
+		if (x > newlength) then x
+		else if (x >= (Sys.max_array_length/2)) then Sys.max_array_length
+		else doubler (x * 2)
+	in
+	let rec halfer x =
+		if (x < 8) || ((x / 4) < newlength) then x
+		else halfer (x/2)
+	in
+	if (currslots < newlength) then
+		doubler currslots
+	else 
+		halfer currslots
 
 let step_resizer step =
 	if step <= 0 then invalid_arg "Xarray.step_resizer";
-	(fun curr length ->
-		if step <= 0 then
-			assert false
-		else if (curr < length) || (length < (curr - step)) then
-		   (length + step - (length mod step))
+	(fun ~currslots ~oldlength ~newlength ->
+		if (currslots < newlength) || (newlength < (currslots - step)) 
+		then
+		   (newlength + step - (newlength mod step))
 		else
-			curr)
+			currslots)
 
-let newlength xarr length =
+let conservative_exponential_resizer ~currslots ~oldlength ~newlength =
+	let rec doubler x =
+		if (x > newlength) then x
+		else if (x >= (Sys.max_array_length/2)) then Sys.max_array_length
+		else doubler (x * 2)
+	in
+	let rec halfer x =
+		if (x < 8) || ((x / 4) < newlength) then x
+		else halfer (x/2)
+	in
+	if (currslots < newlength) then
+		doubler currslots
+	else if oldlength < newlength then
+		halfer currslots
+	else
+		currslots
+
+let changelength xarr step =
+	let t = xarr.length + step in
+	let newlength = if (t < 0) then 0 else t in
 	let oldsize = Array.length xarr.arr in
-	let newsize = xarr.resize oldsize length in
+	let r = xarr.resize 
+				~currslots:oldsize
+				~oldlength:xarr.length
+				~newlength:newlength
+	in
+	(* We require the size to be at least large enough to hold the number
+	 * of elements we know we need!
+	 *)
+	let newsize = if r < newlength then newlength else r in
 	if newsize > oldsize then begin
 		let newarr = Array.make newsize xarr.null in
 		Array.blit xarr.arr 0 newarr 0 oldsize ;
@@ -60,15 +91,12 @@ let newlength xarr length =
 		let newarr = Array.sub xarr.arr 0 newsize in
 		xarr.arr <- newarr;
 	end;
-	xarr.length <- length
+	xarr.length <- newlength
 
 
 let make ?(resizer = exponential_resizer) initsize nullval = 
 	if initsize < 0 then
 		invalid_arg "Xarray.make"
-	else if initsize = 0 then
-		{ resize = resizer; length = 0; null = nullval; 
-		  arr = Array.make 1 nullval }
 	else 
 		{ resize = resizer; length = 0; null = nullval; 
 		  arr = Array.make initsize nullval }
@@ -79,7 +107,7 @@ let init ?(resizer = exponential_resizer) initsize initlength nullval f =
 		invalid_arg "Xarray.init"
 	else if initsize = 0 then
 		{ resize = resizer; length = 0; null = nullval; 
-		  arr = Array.make 1 nullval }
+		  arr = Array.make 0 nullval }
 	else 
 		let retarr = Array.make initsize nullval in begin
 			for i = 0 to (initlength-1) do
@@ -108,7 +136,7 @@ let set xarr idx v =
    if (idx >= 0) && (idx < xarr.length) then
 	   xarr.arr.(idx) <- v
    else if idx = xarr.length then begin
-	   newlength xarr (xarr.length + 1);
+	   changelength xarr 1;
 	   xarr.arr.(idx) <- v
    end else
 	   invalid_arg "Xarray.set"
@@ -118,20 +146,20 @@ let insert xarr idx v =
 	 if (idx < 0) || (idx > xarr.length) then
 		invalid_arg "Xarray.insert"
 	 else
-		newlength xarr (xarr.length + 1);
+		changelength xarr 1;
 		if idx < (xarr.length - 1) then
 			Array.blit xarr.arr idx xarr.arr (idx+1) (xarr.length - idx - 1);
 		xarr.arr.(idx) <- v
 
 
 let add xarr v =
-	newlength xarr (xarr.length + 1);
+	changelength xarr 1;
 	xarr.arr.(xarr.length - 1) <- v
 
 
 let append dst src =
 	let oldlength = dst.length in
-	newlength dst (oldlength + src.length);
+	changelength dst src.length;
 	Array.blit src.arr 0 dst.arr oldlength src.length;
 	dst
 
@@ -142,7 +170,7 @@ let delete xarr idx =
 		if (idx < (xarr.length - 1)) then
 			Array.blit xarr.arr (idx+1) xarr.arr idx (xarr.length - idx - 1);
 		xarr.arr.(xarr.length - 1) <- xarr.null;
-		newlength xarr (xarr.length - 1)
+		changelength xarr (-1)
 	end
 
 
@@ -151,7 +179,7 @@ let delete_last xarr =
 		invalid_arg "Xarray.delete_last"
 	else
 		xarr.arr.(xarr.length - 1) <- xarr.null;
-		newlength xarr (xarr.length - 1)
+		changelength xarr (-1)
 
  
 let rec blit src srcidx dst dstidx len =
@@ -160,7 +188,7 @@ let rec blit src srcidx dst dstidx len =
 		invalid_arg "Xarray.blit"
 	else begin
 		if (dstidx > (dst.length - len)) then
-			newlength dst (dstidx + len);
+			changelength dst (dstidx + len - dst.length);
 		Array.blit src.arr srcidx dst.arr dstidx len
 	end
 
@@ -188,7 +216,7 @@ let of_list ?(resizer = exponential_resizer) nullval lst =
 	let xsize = List.length lst in
 	if xsize = 0 then
 		{ resize = resizer; length = 0; null = nullval; 
-		  arr = Array.make 1 nullval }
+		  arr = Array.make 0 nullval }
 	else
 		let retval = { resize = resizer; length = xsize; null = nullval; 
 					   arr = Array.make xsize nullval } in
@@ -199,7 +227,7 @@ let of_array ?(resizer = exponential_resizer) nullval arr =
 	let xsize = Array.length arr in
 	if xsize = 0 then
 		{ resize = resizer; length = 0; null = nullval; 
-		  arr = Array.make 1 nullval }
+		  arr = Array.make 0 nullval }
 	else
 		{ resize = resizer; length = xsize; null = nullval; 
 		  arr = (Array.copy arr) }
@@ -221,7 +249,11 @@ let sub ?resizer src start len =
 		invalid_arg "Xarray.sub"
 	else
 	let r = (match resizer with None -> src.resize | Some f -> f) in
-	let newsize = r (Array.length src.arr) len in
+	let newsize = r 
+					~currslots:0 
+					~oldlength:0
+					~newlength:len 
+	in
 	{ resize = r; length = len; null = src.null; 
 	  arr = Array.sub src.arr start len }
 
@@ -323,7 +355,10 @@ let sub_enum xarr initidx len =
 
 let of_enum ?(resizer = exponential_resizer) nullval e =
 	let c = Enum.count e in
-	let retval = Array.make (resizer 1 c) nullval in
+	let retval = Array.make 
+					(resizer ~currslots:1 ~oldlength:0 ~newlength:c) 
+					nullval 
+	in
 	Enum.iteri (fun i x -> (retval.(i) <- x)) e;
 	{ resize = resizer; null = nullval; length = c; arr = retval }
 
@@ -334,7 +369,7 @@ let insert_enum xarr idx e =
 	else
 	let c = Enum.count e in
 	let oldlen = xarr.length in
-	newlength xarr (c + xarr.length);
+	changelength xarr c ;
 	if idx < oldlen then
 		Array.blit xarr.arr idx xarr.arr (idx + c) (oldlen - idx);
 	Enum.iteri (fun i x -> (xarr.arr.(i+idx) <- x)) e
@@ -348,7 +383,7 @@ let set_enum xarr idx e =
 		Enum.iteri (fun i x -> (set xarr (i+idx) x)) e
 	else
 		let max = idx + c in
-		if max > xarr.length then newlength xarr max;
+		if max > xarr.length then changelength xarr (max - xarr.length);
 		Enum.iteri (fun i x -> (xarr.arr.(i+idx) <- x)) e
 
 
@@ -389,7 +424,10 @@ let sub_rev_enum xarr initidx len =
 
 let of_rev_enum ?(resizer = exponential_resizer) nullval e =
 	let c = Enum.count e in
-	let retval = Array.make (resizer 1 c) nullval in
+	let retval = Array.make 
+					(resizer ~currslots:1 ~oldlength:0 ~newlength:c) 
+					nullval 
+	in
 	Enum.iteri (fun i x -> (retval.(c - 1 - i) <- x)) e;
 	{ resize = resizer; null = nullval; length = c; arr = retval }
 
@@ -400,7 +438,7 @@ let insert_rev_enum xarr idx e =
 	else
 	let c = Enum.count e in
 	let oldlen = xarr.length in
-	newlength xarr (c + xarr.length);
+	changelength xarr c;
 	if idx < oldlen then
 		Array.blit xarr.arr idx xarr.arr (idx + c) (oldlen - idx);
 	Enum.iteri (fun i x -> (xarr.arr.(idx+c-1-i) <- x)) e
@@ -411,6 +449,6 @@ let set_rev_enum xarr idx e =
 	else
 	let c = Enum.count e in
 	let max = idx + c in
-	if max > xarr.length then newlength xarr max;
+	if max > xarr.length then changelength xarr (max - xarr.length);
 	Enum.iteri (fun i x -> (xarr.arr.(idx+c-1-i) <- x)) e
 
