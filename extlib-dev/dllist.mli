@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
-(** A mutable, imperitive, circular, doubly linked list library
+(** A mutable, imperative, circular, doubly linked list library
 
     This module implements a doubly linked list in a mutable or imperitive
     style (changes to the list are visible to all copies of the list).
