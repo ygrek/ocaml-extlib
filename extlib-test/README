@@ -1,0 +1,29 @@
+
+ExtLib Testing Suite
+====================
+
+Copyright (c) Janne Hellsten, 2004.
+
+Automated testing suite for ExtLib.
+
+
+Compiling
+---------
+
+To compile and run bytecode version:
+
+make all
+make run
+
+To compile and run native code version:
+
+make opt
+make run
+
+
+TODO
+----
+
+- Rewrite Makefile
+- Enable tests for new BitSet API (diff, inter & union)
+- Add more tests
