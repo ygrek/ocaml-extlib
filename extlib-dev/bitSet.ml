@@ -21,11 +21,28 @@
 type intern
 
 let bcreate : int -> intern = Obj.magic String.create
-external bget : intern -> int -> int = "%string_unsafe_get"
-external bset : intern -> int -> int -> unit = "%string_unsafe_set"
+external fast_get : intern -> int -> int = "%string_unsafe_get"
+external fast_set : intern -> int -> int -> unit = "%string_unsafe_set"
 external fast_bool : int -> bool = "%identity"
-let bblit : intern -> int -> intern -> int -> int -> unit = Obj.magic String.blit
-let bfill : intern -> int -> int -> int -> unit = Obj.magic String.fill
+let fast_blit : intern -> int -> intern -> int -> int -> unit = Obj.magic String.blit
+let fast_fill : intern -> int -> int -> int -> unit = Obj.magic String.fill
+let fast_length : intern -> int= Obj.magic String.length
+
+let bget s ndx =
+  assert (ndx >= 0 && ndx < fast_length s);
+  fast_get s ndx
+
+let bset s ndx v =
+  assert (ndx >= 0 && ndx < fast_length s);
+  fast_set s ndx v
+
+let bblit src srcoff dst dstoff len = 
+  assert (srcoff >= 0 && dstoff >= 0 && len >= 0);
+  fast_blit src srcoff dst dstoff len
+
+let bfill dst start len c = 
+  assert (start >= 0 && len >= 0);
+  fast_fill dst start len c
 
 exception Negative_index of string
 
@@ -102,12 +119,13 @@ let put t = function
 	| false -> unset t
 
 let is_set t x =
-	let pos = x lsr log_int_size and delta = x land int_size in
-	let size = t.len in
-	if pos < size then
-		fast_bool (((bget t.data pos) lsr delta) land 1)
-	else
-		false
+  if x < 0 then error "is_set";
+  let pos = x lsr log_int_size and delta = x land int_size in
+  let size = t.len in
+  if pos < size then
+	fast_bool (((bget t.data pos) lsr delta) land 1)
+  else
+	false
 
 
 exception Break_int of int
@@ -216,44 +234,6 @@ let enum t =
 	in
 	make 0
 
-let intersect t t' =
-	for i = 0 to t.len - 1 do
-		bset t.data i ((bget t.data i) land (bget t'.data i))
-	done
-
-let unite t t' =
-	let size = t.len and size' = t'.len in
-	let rec unite_loop = function
-		| -1 -> ()
-		| i -> bset t.data i ((bget t.data i) lor (bget t'.data i));
-				unite_loop (i-1) in
-	if size < size' then begin
-		let b = bcreate size' in
-		unite_loop (size'- 1);
-		t.len <- size';
-		t.data <- b;
-	end else
-		unite_loop (size - 1)
-
-let differentiate t t' =
-	for i = 0 to t.len - 1 do
-		bset t.data i ((bget t.data i) land (lnot (bget t'.data i)))
-	done
-
-let differentiate_sym t t' =
-	let size = t.len and size' = t'.len in
-	let rec diff_sym_loop = function
-		| -1 -> ()
-		| i -> bset t.data i ((bget t.data i) lxor (bget t'.data i));
-				diff_sym_loop (i-1) in
-	if size < size' then begin
-		let b = bcreate size' in
-		diff_sym_loop (size'- 1);
-		t.len <- size';
-		t.data <- b;
-	end else
-		diff_sym_loop (size - 1)
-
 let raw_create size = 
   let b = bcreate size in
   bfill b 0 size 0;
@@ -263,9 +243,11 @@ let inter a b =
   let max_size = max a.len b.len in
   let d = raw_create max_size in
   let sl = min a.len b.len in
+  let abuf = a.data
+  and bbuf = b.data in
   (* Note: rest of the array is set to zero automatically *)
   for i = 0 to sl-1 do
-    bset d.data i ((bget a.data i) land (bget b.data i))
+    bset d.data i ((bget abuf i) land (bget bbuf i))
   done;
   d
 
@@ -274,8 +256,10 @@ let inter a b =
 let union a b = 
   let d = if a.len > b.len then copy a else copy b in
   let sl = min a.len b.len in
+  let abuf = a.data
+  and bbuf = b.data in
   for i = 0 to sl-1 do
-    bset d.data i ((bget a.data i) lor (bget b.data i))
+    bset d.data i ((bget abuf i) lor (bget bbuf i))
   done;
   d
 
@@ -284,8 +268,10 @@ let diff a b =
   let buf = bcreate maxlen in
   bblit a.data 0 buf 0 a.len;
   let sl = min a.len b.len in
+  let abuf = a.data
+  and bbuf = b.data in
   for i = 0 to sl-1 do
-    bset buf i ((bget a.data i) land (lnot (bget b.data i)))
+    bset buf i ((bget abuf i) land (lnot (bget bbuf i)))
   done;
   { data = buf; len = maxlen }
 
@@ -295,7 +281,32 @@ let sym_diff a b =
   (* Copy larger (assumes missing bits are zero) *)
   bblit (if a.len > b.len then a.data else b.data) 0 buf 0 maxlen;
   let sl = min a.len b.len in
+  let abuf = a.data
+  and bbuf = b.data in
   for i = 0 to sl-1 do
-    bset buf i ((bget a.data i) lxor (bget b.data i))
+    bset buf i ((bget abuf i) lxor (bget bbuf i))
   done;
   { data = buf; len = maxlen }
+
+(* TODO the following set operations can be made faster if you do the
+   set operation in-place instead of taking a copy.  But be careful
+   when the sizes of the bitvector strings differ. *)
+let intersect t t' =
+  let d = inter t t' in
+  t.data <- d.data;
+  t.len <- d.len
+
+let differentiate t t' =
+  let d = diff t t' in
+  t.data <- d.data;
+  t.len <- d.len
+
+let unite t t' =
+  let d = union t t' in
+  t.data <- d.data;
+  t.len <- d.len
+
+let differentiate_sym t t' =
+  let d = sym_diff t t' in
+  t.data <- d.data;
+  t.len <- d.len
