@@ -103,6 +103,15 @@ module Hashtbl =
 		let pos = (hash key) mod (Array.length (h_conv h).data) in
 		loop (Array.unsafe_get (h_conv h).data pos)
 
+	let find_option h key =
+		let rec loop = function
+			| Empty -> None
+			| Cons (k,v,next) ->
+				if k = key then Some v else loop next
+		in
+		let pos = (hash key) mod (Array.length (h_conv h).data) in
+		loop (Array.unsafe_get (h_conv h).data pos)
+
 	let of_enum e =
 		let h = create (if Enum.fast_count e then Enum.count e else 0) in
 		Enum.iter (fun (k,v) -> add h k v) e;
