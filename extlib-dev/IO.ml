@@ -384,6 +384,7 @@ let read_real_i32 ch =
 let read_double ch =
 	let i1 = Int64.of_int32 (read_real_i32 ch) in
 	let i2 = Int64.of_int32 (read_real_i32 ch) in
+	let i2 = (if i2 < Int64.zero then Int64.add i2 (Int64.shift_left Int64.one 32) else i2) in
 	Int64.float_of_bits (Int64.logor i2 (Int64.shift_left i1 32))
 
 let write_byte o n =
@@ -426,7 +427,7 @@ let write_real_i32 ch n =
 
 let write_double ch f =
 	let i64 = Int64.bits_of_float f in
-	write_real_i32 ch (Int64.to_int32 (Int64.shift_right i64 32));
+	write_real_i32 ch (Int64.to_int32 (Int64.shift_right_logical i64 32));
 	write_real_i32 ch (Int64.to_int32 i64)
 
 (* -------------------------------------------------------------- *)
