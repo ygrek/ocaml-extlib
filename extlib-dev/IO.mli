@@ -209,30 +209,3 @@ val output_bits : (char,'a,'b) output -> (bool,(int * int),'b) output
 	Don't forget to call [flush] if you want to write to the original channel
 	after you're done with bits-writing.
 *)
-	
-(**/**)
-
-class ['a,'b] o_input : ('a,'b) input ->
-  object
-
-	method read : 'a
-	method nread : int -> 'b
-	method pos : int
-	method available : int
-	method close : unit
-
-  end
-
-class ['a,'b,'c] o_output : ('a,'b,'c) output ->
-  object
-
-	method write : 'a -> unit
-	method nwrite : 'b -> unit
-	method pos : int
-	method flush : unit
-	method close : 'c
-
-  end
-
-val from_in : ('a,'b) #o_input -> ('a,'b) input
-val from_out : ('a,'b,'c) #o_output -> ('a,'b,'c) output
