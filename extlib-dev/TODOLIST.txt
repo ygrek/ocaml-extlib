@@ -1,0 +1,8 @@
+EXTLIB TODO LIST
+----------------
+
+Here's a list of things/idea that have been discussed on the extlib mailling
+list and should be added in a near future :
+
+- Unit test + Benchmark module
+
