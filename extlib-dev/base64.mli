@@ -35,7 +35,7 @@ val str_encode : string -> string
 val str_decode : string -> string
 
 (** Generic base64 encoding over an output. *)
-val encode : (char, 'a, 'b) IO.output -> (char, string, 'b) IO.output
+val encode : 'a IO.output -> 'a IO.output
 
 (** Generic base64 decoding over an input. *)
-val decode : (char, 'a) IO.input -> (char, string) IO.input
+val decode : IO.input -> IO.input

@@ -55,20 +55,13 @@ let encode ch =
 			IO.write ch (Array.unsafe_get chars d)
 		done;
 	in
-	let nwrite s =
-		let l = String.length s - 1 in
-		for i = 0 to l do
+	let output s p l =
+		for i = p to p + l - 1 do
 			write (String.unsafe_get s i)
 		done;
+		l
 	in
-	let pos() =
-		let p = IO.pos_out ch in
-		if p = -1 then
-			-1
-		else
-			((p * 6) + !count) / 8
-	in
-	IO.create_out ~write ~nwrite ~pos
+	IO.create_out ~write ~output
 		~flush:(fun () -> flush(); IO.flush ch)
 		~close:(fun() -> flush(); IO.close_out ch)
 
@@ -89,34 +82,23 @@ let decode ch =
 			fetch()
 	in
 	let read = fetch in
-	let nread n =
-		let s = String.create n in
+	let input s p l =
 		let i = ref 0 in
 		try
-			while !i < n do
-				String.unsafe_set s !i (fetch());
+			while !i < l do
+				String.unsafe_set s (p + !i) (fetch());
 				incr i;
 			done;
-			s
+			l
 		with
 			IO.No_more_input when !i > 0 ->
-				String.sub s 0 !i
-	in
-	let pos() =
-		let p = IO.pos_in ch in
-		if p = -1 then
-			-1 
-		else
-			((p * 6) - !count) / 8
-	in
-	let available() =
-		((IO.available ch * 6) + !count) / 8
+				!i
 	in
 	let close() =
 		count := 0;
 		IO.close_in ch
 	in
-	IO.create_in ~read ~nread ~pos ~available ~close
+	IO.create_in ~read ~input ~close
 
 let str_encode s =
 	let ch = encode (IO.output_string()) in

@@ -18,24 +18,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
-type ('a,'b) input = {
-	mutable in_read : unit -> 'a;
-	mutable in_nread : int -> 'b;
-	mutable in_available : unit -> int;
+type input = {
+	mutable in_read : unit -> char;
+	mutable in_input : string -> int -> int -> int;
 	mutable in_close : unit -> unit;
-	mutable in_pos : unit -> int;
 }
 
-type ('a,'b,'c) output = {
-	mutable out_write : 'a -> unit;
-	mutable out_nwrite : 'b -> unit;
-	mutable out_close : unit -> 'c;
+type 'a output = {
+	mutable out_write : char -> unit;
+	mutable out_output : string -> int -> int -> int;
+	mutable out_close : unit -> 'a;
 	mutable out_flush : unit -> unit;
-	mutable out_pos : unit -> int;
 }
-
-type stdin = (char, string) input
-type 'a stdout = (char, string,'a) output
 
 exception No_more_input
 exception Input_closed
@@ -45,45 +39,75 @@ exception Not_implemented
 (* -------------------------------------------------------------- *)
 (* API *)
 
-let default_available = (fun () -> raise Not_implemented)
 let default_close = (fun () -> ())
 
-let create_in ~read ~nread ~pos ~available ~close =
+let create_in ~read ~input ~close =
 	{
 		in_read = read;
-		in_nread = nread;
-		in_available = available;
+		in_input = input;
 		in_close = close;
-		in_pos = pos;
 	}
 
-let create_out ~write ~nwrite ~pos ~flush ~close =
+let create_out ~write ~output ~flush ~close =
 	{
 		out_write = write;
-		out_nwrite = nwrite;
+		out_output = output;
 		out_close = close;
-		out_flush = flush;
-		out_pos = pos;
+		out_flush = flush;		
 	}
 
 let read i = i.in_read()
+
 let nread i n = 
 	if n < 0 then raise (Invalid_argument "IO.nread");
-	i.in_nread n
+	if n = 0 then
+		""
+	else
+	let s = String.create n in
+	let l = ref n in
+	let p = ref 0 in
+	try
+		while !l > 0 do
+			let r = i.in_input s !p !l in
+			p := !p + r;
+			l := !l - r;
+		done;
+		s
+	with
+		No_more_input as e ->
+			if !p = 0 then raise e;
+			String.sub s 0 !p 
 
-let pos_in i = i.in_pos()
-let available i = i.in_available()
+let input i s p l =
+	let sl = String.length s in
+	if p + l > sl || p < 0 || l < 0 then raise (Invalid_argument "IO.input");
+	if l = 0 then
+		0
+	else
+		i.in_input s p l
+
 let close_in i = 
 	let f _ = raise Input_closed in
 	i.in_close();
 	i.in_read <- f;
-	i.in_nread <- f;
-	i.in_available <- (fun () -> 0);
+	i.in_input <- f;
 	i.in_close <- f
 
 let write o x = o.out_write x
-let nwrite o x = o.out_nwrite x
-let pos_out o = o.out_pos()
+
+let nwrite o s =
+	let p = ref 0 in
+	let l = ref (String.length s) in
+	while !l > 0 do
+		let w = o.out_output s !p !l in
+		p := !p + w;
+		l := !l - w;
+	done
+
+let output o s p l =
+	let sl = String.length s in
+	if p + l > sl || p < 0 || l < 0 then raise (Invalid_argument "IO.output");
+	o.out_output s p l
 
 let printf o fmt =
 	Printf.kprintf (fun s -> nwrite o s) fmt
@@ -91,10 +115,10 @@ let printf o fmt =
 let flush o = o.out_flush()
 
 let close_out o =
-	let r = o.out_close() in
 	let f _ = raise Output_closed in
+	let r = o.out_close() in
 	o.out_write <- f;
-	o.out_nwrite <- f;
+	o.out_output <- f;
 	o.out_close <- f;
 	o.out_flush <- f;
 	r
@@ -132,20 +156,14 @@ let input_string s =
 			incr pos;
 			c
 		);
-		in_nread = (fun n ->
-			if n = 0 then
-				""
-			else begin
-				if !pos >= len then raise No_more_input;
-				let n = (if !pos + n > len then len - !pos else n) in
-				let s = String.sub s !pos n in
-				pos := !pos + n;
-				s
-			end;
+		in_input = (fun sout p l ->
+			if !pos >= len then raise No_more_input;
+			let n = (if !pos + l > len then len - !pos else l) in
+			String.unsafe_blit s !pos sout p n;
+			pos := !pos + n;
+			n			
 		);
-		in_available = (fun () -> len - !pos);		
 		in_close = (fun () -> ());
-		in_pos = (fun () -> !pos);
 	}
 
 let output_string() =
@@ -154,12 +172,12 @@ let output_string() =
 		out_write = (fun c ->
 			Buffer.add_char b c
 		);
-		out_nwrite = (fun s ->
-			Buffer.add_string b s;
+		out_output = (fun s p l ->
+			Buffer.add_substring b s p l;
+			l
 		);
 		out_close = (fun () -> Buffer.contents b);
 		out_flush = (fun () -> ());
-		out_pos = (fun () -> Buffer.length b);
 	}
 
 let input_channel ch =
@@ -170,43 +188,20 @@ let input_channel ch =
 			with
 				End_of_file -> raise No_more_input
 		);
-		in_nread = (fun n ->
-			if n = 0 then
-				""
-			else
-				let s = String.create n in
-				let rec loop pos len =
-					try
-						let nr = input ch s pos len in
-						if nr <= 0 then raise End_of_file;
-						if nr = len then
-							s
-						else
-							loop (pos + nr) (len - nr)
-					with
-						End_of_file -> 
-							if pos = 0 then raise No_more_input;
-							String.sub s 0 pos
-				in
-				loop 0 n
-		);
-		in_available = (fun () ->
-			try
-				in_channel_length ch - Pervasives.pos_in ch
-			with
-				_ -> raise Not_implemented
+		in_input = (fun s p l ->
+			let n = Pervasives.input ch s p l in
+			if n = 0 then raise No_more_input;
+			n
 		);
 		in_close = (fun () -> Pervasives.close_in ch);
-		in_pos = (fun () -> Pervasives.pos_in ch);
 	}
 
 let output_channel ch =
 	{
 		out_write = (fun c -> output_char ch c);
-		out_nwrite = (fun s -> Pervasives.output_string ch s);
+		out_output = (fun s p l -> Pervasives.output ch s p l; l);
 		out_close = (fun () -> Pervasives.close_out ch);
 		out_flush = (fun () -> Pervasives.flush ch);
-		out_pos = (fun () -> Pervasives.pos_out ch);
 	}
 
 let input_enum e =
@@ -215,106 +210,84 @@ let input_enum e =
 		in_read = (fun () ->
 			match Enum.get e with
 			| None -> raise No_more_input
-			| Some x -> 
+			| Some c -> 
 				incr pos;
-				x
+				c
 		);
-		in_nread = (fun n ->
-			if n = 0 then
-				Enum.empty()
-			else
-				let p = ref 0 in
-				let elts = DynArray.make n in
-				try
-					ignore(Enum.find (fun x -> DynArray.unsafe_set elts !p x; incr p; incr pos; !p = n) e);					
-					DynArray.enum elts
-				with
-					Not_found -> 
-						if !p = 0 then raise No_more_input;
-						DynArray.enum elts
+		in_input = (fun s p l ->
+			let rec loop p l =
+				if l = 0 then
+					0
+				else
+					match Enum.get e with
+					| None -> l
+					| Some c ->
+						String.unsafe_set s p c;
+						loop (p + 1) (l - 1)
+			in
+			let k = loop p l in
+			if k = l then raise No_more_input;
+			l - k
 		);
-		in_available = (fun () -> Enum.count e);
 		in_close = (fun () -> ());
-		in_pos = (fun () -> !pos);
 	}
 
 let output_enum() =
-	let elts = DynArray.create() in
+	let b = Buffer.create 0 in
 	{
 		out_write = (fun x ->
-			DynArray.add elts x
+			Buffer.add_char b x
 		);
-		out_nwrite = (fun e ->
-			Enum.iter (DynArray.add elts) e
+		out_output = (fun s p l ->
+			Buffer.add_substring b s p l;
+			l
 		);
 		out_close = (fun () ->
-			DynArray.enum elts
+			let s = Buffer.contents b in
+			ExtString.String.enum s
 		);
 		out_flush = (fun () -> ());
-		out_pos = (fun () -> DynArray.length elts);
 	}
 
-type 'a queue = {
-	cur : 'a;
-	mutable next : 'a queue;
-}
-
 let pipe() =
-	let read = ref 0 in
-	let written = ref 0 in
-	let n = ref 0 in
-	let empty = ((Obj.magic None) : 'a queue) in
-	let head = ref empty in
-	let tail = ref empty in
-	let get() =	
-		let q = !head in
-		head := q.next;
-		incr read;		
-		q.cur
+	let input = ref "" in
+	let inpos = ref 0 in
+	let output = Buffer.create 0 in
+	let flush() =
+		input := Buffer.contents output;
+		inpos := 0;
+		Buffer.reset output;
+		if String.length !input = 0 then raise No_more_input
 	in
-	let rec nget n = 
-		if n = 0 then [] else (get()) :: nget (n-1)
+	let read() =	
+		if !inpos = String.length !input then flush();
+		let c = String.unsafe_get !input !inpos in
+		incr inpos;
+		c
 	in
-	let put x =
-		let q = { cur = x; next = empty } in
-		if !n = 0 then begin
-			head := q;
-			tail := q;
-		end else begin
-			(!tail).next <- q;
-			tail := q;
-		end;
-		incr n;
-		incr written;
+	let input s p l = 
+		if !inpos = String.length !input then flush();
+		let r = (if !inpos + l > String.length !input then String.length !input - !inpos else l) in
+		String.unsafe_blit !input !inpos s p r;
+		r
+	in
+	let write c =
+		Buffer.add_char output c
+	in
+	let output s p l =
+		Buffer.add_substring output s p l;
+		l
 	in
 	let input = {
-		in_read = (fun () -> 
-			if !n = 0 then raise No_more_input;
-			n := !n - 1;
-			get()
-		);
-		in_nread = (fun nr ->
-			if !n = 0 then raise No_more_input;
-			let nr = (if !n > nr then nr else !n) in
-			n := !n - nr;
-			nget nr
-		);
-		in_pos = (fun () -> !read);
+		in_read = read;
+		in_input = input;
 		in_close = (fun () -> ());
-		in_available = (fun () -> !n);
 	} in
 	let output = {
-		out_write = (fun x -> put x);
-		out_nwrite = (fun xl -> List.iter put xl);
-		out_close = (fun () -> 
-			let ret = ((Obj.magic !head) : 'a list) in
-			head := empty;
-			tail := empty;
-			n := 0;
-			ret
-		);
-		out_flush = (fun () -> ());
-		out_pos = (fun () -> !written);
+		out_write = write;
+		out_output = output;
+		out_close = (fun () -> ());
+		out_flush = (fun () -> ());		
 	} in
 	input , output
 
@@ -450,61 +423,93 @@ let write_double ch f =
 	write_real_i32 ch (Int64.to_int32 (Int64.shift_right_logical i64 32));
 	write_real_i32 ch (Int64.to_int32 i64)
 
-(* -------------------------------------------------------------- *)
-(* BITS APIS *)
+(* Generic IO *)
 
-let input_bits ch =
-	let data = ref 0 in
-	let count = ref 0 in
-	let rec read n =
-		if !count >= n then begin
-			let c = !count - n in
-			let k = (!data asr c) land ((1 lsl n) - 1) in
-			count := c;
-			k
-		end else begin
-			let k = read_byte ch in
-			if !count >= 24 then begin
-				if n >= 32 then raise (Overflow "input_bits");
-				let c = 8 + !count - n in
-				let d = !data land ((1 lsl !count) - 1) in
-				let d = (d lsl (8 - c)) lor (k lsr c) in
-				data := k;
-				count := c;
-				d
-			end else begin			
-				data := (!data lsl 8) lor k;
-				count := !count + 8;
-				read n
-			end
-		end
-	in
-	create_in 
-		~read:(fun () -> read 1 = 1)
-		~nread:read
-		~pos:(fun () -> pos_in ch * 8 - !count)
-		~available:(fun () -> (available ch) * 8 + !count)
-		~close:(fun () -> close_in ch)
+class in_channel ch =
+  object
+	method input s pos len = input ch s pos len
+	method close_in() = close_in ch
+  end
 
-let output_bits ch =
-	let data = ref 0 in
-	let count = ref 0 in
-	let write (nbits,value) =
-		if nbits < 0 then raise (Invalid_argument "write bits");
-		if nbits + !count >= 32 then raise (Overflow "write bits");
-		data := (!data lsl nbits) lor (value land ((1 lsl nbits)-1));
-		count := !count + nbits;
-		while !count >= 8 do
-			count := !count - 8;
-			write_byte ch (!data asr !count)
-		done
+class out_channel ch =
+  object
+	method output s pos len = output ch s pos len
+	method flush() = flush ch
+	method close_out() = ignore(close_out ch)
+  end
+
+class in_chars ch =
+  object
+	method get() = try read ch with No_more_input -> raise End_of_file
+	method close_in() = close_in ch
+  end
+
+class out_chars ch =
+  object
+	method put t = write ch t
+	method flush() = flush ch
+	method close_out() = ignore(close_out ch)
+  end
+
+let from_in_channel ch =
+	let cbuf = String.create 1 in
+	let read() =
+		try
+			if ch#input cbuf 0 1 = 0 then raise Sys_blocked_io;
+			String.unsafe_get cbuf 0
+		with
+			End_of_file -> raise No_more_input
 	in
-	let flush_bits() =
-		if !count > 0 then write (8 - !count,0)
+	let input s p l =
+		ch#input s p l
+	in
+	create_in
+		~read
+		~input
+		~close:ch#close_in
+
+let from_out_channel ch =
+	let cbuf = String.create 1 in
+	let write c =
+		String.unsafe_set cbuf 0 c;
+		if ch#output cbuf 0 1 = 0 then raise Sys_blocked_io;
+	in
+	let output s p l =
+		ch#output s p l
 	in
 	create_out
-		~write:(fun b -> if b then write (1,1) else write (1,0))
-		~nwrite:write
-		~pos:(fun () -> pos_out ch * 8 + !count)
-		~flush:(fun () -> flush_bits(); flush ch)
-		~close:(fun () -> flush_bits(); close_out ch)
+		~write
+		~output
+		~flush:ch#flush
+		~close:ch#close_out
+
+let from_in_chars ch =	
+	let input s p l =
+		let i = ref 0 in
+		try
+			while !i < l do		
+				String.unsafe_set s (p + !i) (ch#get());
+				incr i
+			done;
+			l
+		with
+			End_of_file when !i > 0 ->
+				!i
+	in
+	create_in
+		~read:ch#get
+		~input
+		~close:ch#close_in
+
+let from_out_chars ch =
+	let output s p l =
+		for i = p to p + l - 1 do
+			ch#put (String.unsafe_get s i)
+		done;
+		l
+	in
+	create_out
+		~write:ch#put
+		~output
+		~flush:ch#flush
+		~close:ch#close_out

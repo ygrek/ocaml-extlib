@@ -58,7 +58,7 @@ type t = {
 	mutable zneeded : int;
 	mutable zoutput : string;
 	mutable zoutpos : int;
-	zinput : (char,string) IO.input;
+	zinput : IO.input;
 	zlengths : int array;
 	zwindow : window;
 }
@@ -431,15 +431,11 @@ let inflate ?(header=true) ch =
 			let l = inflate_data z s 0 1 in
 			if l = 1 then String.unsafe_get s 0 else raise IO.No_more_input
 		)
-		~nread:(fun n ->
-			let s = String.create n in
-			let l = inflate_data z s 0 n in
-			if l = n then s else if l = 0 then raise IO.No_more_input else String.sub s 0 l
+		~input:(fun s p l ->
+			let n = inflate_data z s p l in
+			if n = 0 then raise IO.No_more_input;
+			n
 		)
-		~pos:(fun () ->
-			IO.pos_in ch
-		)
-		~available:(fun () -> raise IO.Not_implemented)
 		~close:(fun () ->
 			IO.close_in ch
 		)

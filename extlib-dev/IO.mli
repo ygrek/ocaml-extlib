@@ -23,33 +23,15 @@
 	IO module simply deals with abstract inputs/outputs. It provides a
 	set of methods for working with these IO as well as several
 	constructors that enable to write to an underlying channel, buffer,
-	or enum. 
-
-	Each input and output can read/write two kinds of tokens: single 
-	token (such as a [char]) and token-buffer (such as a [string]).
-	A single token has a size of 1 and a token-buffer has a variable
-	size. The size of a token-buffer can be fully determined by itself 
-	(for example, the size of the string can be determined using the
-	[String.length] function on itself).
+	or enum.
 *)
 
-type ('a, 'b) input
-(** The abstract input type, ['a] is the type for the single-token which
-  can be read using the [read] function, ['b] is the type for the 
-  token-buffer which can be read using the [nread] function. *)
+type input
+(** The abstract input type. *)
 
-type ('a, 'b, 'c) output
-(** The abstract output type, ['a] is the type for the single-token which
-  can be written using the [write] function, ['b] is the type for the
-  token-buffer which can be written using the [nwrite] function.
-  ['c] is the accumulator data, it is returned when the [close_out]
-  function is called. *)
-
-type stdin = (char, string) input
-(** A standard input can read [char] and [string]. *)
-
-type 'a stdout = (char, string,'a) output
-(** A standard ouput can write [char] and [string]. *)
+type 'a output
+(** The abstract output type, ['a] is the accumulator data, it is returned
+	when the [close_out] function is called. *)
 
 exception No_more_input
 (** This exception is raised when reading on an input with the [read] or
@@ -61,95 +43,89 @@ exception Input_closed
 exception Output_closed
 (** This exception is raised when reading on a closed output. *)
 
-exception Not_implemented
-(** This exception is raised when using [available] [pos_in] or [pos_out]
-  on a IO that does not support them. *)
-
 (** {6 Standard API} *)
 
-val read : ('a, 'b) input -> 'a
-(** Read a single token from an input or raise [No_more_input] if
-  no token available. *)
+val read : input -> char
+(** Read a single char from an input or raise [No_more_input] if
+  no input available. *)
 
-val nread : ('a, 'b) input -> int -> 'b
-(** [nread i n] reads a token-buffer of size up to [n] from an input.
-  The function will raise No_more_input if no token is available and
-  if [n] > 0. It will raise [Invalid_argument] is [n] < 0. *)
+val nread : input -> int -> string
+(** [nread i n] reads a string of size up to [n] from an input.
+  The function will raise No_more_input if no input is available.
+  It will raise [Invalid_argument] is [n] < 0. *)
 
-val close_in : ('a, 'b) input -> unit
-  (** Close the input. It can no longer be read from. *)
+val input : input -> string -> int -> int -> int
+(** [input i s p l] reads up to [l] characters from the given input, storing
+  them in string [s], starting at character number [p]. It returns the actual
+  number of characters read or raise [No_more_input] if no character can be
+  read. It will raise [Invalid_argument] if [p] and [l] do not designate a
+  valid substring of [s]. *)
 
-val available : ('a, 'b) input -> int
-(** returns the number of available single tokens, or raise
-  [Not_implemented] if the IO can't deal with it. *)
+val close_in : input -> unit
+(** Close the input. It can no longer be read from. *)
 
-val pos_in : ('a, 'b) input -> int
-(** Returns the number of tokens read, or raise
-  [Not_implemented] if the IO can't deal with it. *)
+val write : 'a output -> char -> unit
+(** Write a single char to an output. *)
 
-val write : ('a, 'b, 'c) output -> 'a -> unit
-(** Write a single token to an output. *)
+val nwrite : 'a output -> string -> unit
+(** Write a string to an output. *)
 
-val nwrite : ('a, 'b, 'c) output -> 'b -> unit
-(** Write a token-buffer to an output. *)
-										 
-val flush : ('a, 'b, 'c) output -> unit
+val output : 'a output -> string -> int -> int -> int
+(** [output o s p l] writes up to [l] characters from string [s], starting at
+  offset [p]. It returns the number of characters written. It will raise
+  [Invalid_argument] if [p] and [l] do not designate a valid substring of [s]. *)
+							 
+val flush : 'a output -> unit
 (** Flush an output. *)
 
-val close_out : ('a, 'b, 'c) output -> 'c
+val close_out : 'a output -> 'a
 (** Close the output and return its accumulator data.
   It can no longer be written. *)
 
-val pos_out : ('a, 'b, 'c) output -> int
-(** Return the number of tokens written, or raise
-  [Not_implemented] if the IO can't deal with it. *)
-
-val printf : ('a, string, 'b) output -> ('c, unit, string, unit) format4 -> 'c
-(** The printf function works for any output where token-buffer is string. *)
-
-val read_all : ('a,string) input -> string
-(** read all the contents of the input until [No_more_input] is raised. *)
-
 (** {6 Creation of IO Inputs/Outputs} *)
 
-val input_string : string -> stdin
+val input_string : string -> input
 (** Create an input that will read from a string. *)
 
-val output_string : unit -> string stdout
+val output_string : unit -> string output
 (** Create an output that will write into a string in an efficient way.
   When closed, the output returns all the data written into it. *)
 
-val input_channel : in_channel -> stdin
+val input_channel : in_channel -> input
 (** Create an input that will read from a channel. *)
 
-val output_channel : out_channel -> unit stdout
+val output_channel : out_channel -> unit output
 (** Create an output that will write into a channel. *) 
 
-val input_enum : 'a Enum.t -> ('a, 'a Enum.t) input
+val input_enum : char Enum.t -> input
 (** Create an input that will read from an [enum]. *)
 
-val output_enum : unit -> ('a, 'a Enum.t, 'a Enum.t) output
+val output_enum : unit -> char Enum.t output
 (** Create an output that will write into an [enum]. The 
   final enum is returned when the output is closed. *)
 
 val create_in :
-  read:(unit -> 'a) ->
-  nread:(int -> 'b) ->
-  pos:(unit -> int) ->
-  available:(unit -> int) -> close:(unit -> unit) -> ('a, 'b) input
+  read:(unit -> char) ->
+  input:(string -> int -> int -> int) -> close:(unit -> unit) -> input
 (** Fully create an input by giving all the needed functions. *)
 
 val create_out :
-  write:('a -> unit) ->
-  nwrite:('b -> unit) -> 
-  pos:(unit -> int) -> 
-  flush:(unit -> unit) -> close:(unit -> 'c) -> ('a, 'b, 'c) output
+  write:(char -> unit) ->
+  output:(string -> int -> int -> int) ->   
+  flush:(unit -> unit) -> close:(unit -> 'a) -> 'a output
 (** Fully create an output by giving all the needed functions. *)
 
-val pipe : unit -> ('a, 'a list) input * ('a, 'a list,'a list) output
+(** {6 Utilities} *)
+
+val printf : 'a output -> ('b, unit, string, unit) format4 -> 'b
+(** The printf function works for any output. *)
+
+val read_all : input -> string
+(** read all the contents of the input until [No_more_input] is raised. *)
+
+val pipe : unit -> input * unit output
 (** Create a pipe between an input and an ouput. Data written from
-  the output can be read from the input. [pos_in], [pos_out] and
-  [available] are implemented. *)
+  the output can be read from the input. *)
 
 (** {6 Binary files API}
 
@@ -160,67 +136,95 @@ val pipe : unit -> ('a, 'a list) input * ('a, 'a list,'a list) output
 exception Overflow of string
 (** Exception raised when a read or write operation cannot be completed. *)
 
-val read_byte : (char,'a) input -> int
+val read_byte : input -> int
 (** Read an unsigned 8-bit byte. *)
 
-val read_ui16 : (char,'a) input -> int
+val read_ui16 : input -> int
 (** Read an unsigned 16-bit word. *)
 
-val read_i16 : (char,'a) input -> int
+val read_i16 : input -> int
 (** Read a signed 16-bit word. *)
 
-val read_i32 : (char,'a) input -> int
+val read_i32 : input -> int
 (** Read a signed 32-bit integer. Raise [Overflow] if the
   read integer cannot be represented as a Caml 31-bit integer. *)
 
-val read_real_i32 : (char,'a) input -> int32
+val read_real_i32 : input -> int32
 (** Read a signed 32-bit integer as an OCaml int32. *)
 
-val read_double : (char,'a) input -> float
+val read_double : input -> float
 (** Read an IEEE double precision floating point value. *)
 
-val read_string : (char,'a) input -> string
+val read_string : input -> string
 (** Read a null-terminated string. *)
 
-val read_line : (char,'a) input -> string
+val read_line : input -> string
 (** Read a LF or CRLF terminated string. *)
 
-val write_byte : (char,'a,'b) output -> int -> unit
+val write_byte : 'a output -> int -> unit
 (** Write an unsigned 8-bit byte. *)
 
-val write_ui16 : (char,'a,'b) output -> int -> unit
+val write_ui16 : 'a output -> int -> unit
 (** Write an unsigned 16-bit word. *)
 
-val write_i16 : (char,'a,'b) output -> int -> unit
+val write_i16 : 'a output -> int -> unit
 (** Write a signed 16-bit word. *)
 
-val write_i32 : (char,'a,'b) output -> int -> unit
+val write_i32 : 'a output -> int -> unit
 (** Write a signed 32-bit integer. *) 
 
-val write_real_i32 : (char,'a,'b) output -> int32 -> unit
+val write_real_i32 : 'a output -> int32 -> unit
 (** Write an OCaml int32. *)
 
-val write_double : (char,'a,'b) output -> float -> unit
+val write_double : 'a output -> float -> unit
 (** Write an IEEE double precision floating point value. *)
 
-val write_string : 'a stdout -> string -> unit
+val write_string : 'a output -> string -> unit
 (** Write a string and append an null character. *)
 
-val write_line : 'a stdout -> string -> unit
+val write_line : 'a output -> string -> unit
 (** Write a line and append a LF (it might be converted
 	to CRLF on some systems depending on the underlying IO). *)
 
-val input_bits : (char,'a) input -> (bool,int) input
-(** Enable read from an input on a bit-basis.
-	[read ch] will return a bit.
-	[nread ch n] will return an n-bit integer.
+(** {6 Generic IO Object Wrappers}
+
+	Theses OO Wrappers have been written to provide easy support of ExtLib
+	IO by external librairies. If you want your library to support ExtLib
+	IO without actually requiring ExtLib to compile, you can should implement
+	the classes [in_channel], [out_channel], [poly_in_channel] and/or
+	[poly_out_channel] which are the common IO specifications established
+	for ExtLib, OCamlNet and Camomile.
+
+	(see http://www.ocaml-programming.de/tmp/IO-Classes.html for more details).
 *)
 
-val output_bits : (char,'a,'b) output -> (bool,(int * int),'b) output
-(** Enable writing to an output on a bit-basis.
-	[write ch false] will write the bit 0.
-	[write ch true] will write the bit 1.
-	[nwrite ch (n,v)] will write the unsigned integer [v] using exactly [n] bits.
-	Don't forget to call [flush] if you want to write to the original channel
-	after you're done with bits-writing.
-*)
+class in_channel : input ->
+  object
+	method input : string -> int -> int -> int
+	method close_in : unit -> unit
+  end
+
+class out_channel : 'a output ->
+  object
+	method output : string -> int -> int -> int
+	method flush : unit -> unit
+	method close_out : unit -> unit
+  end
+
+class in_chars : input ->
+  object
+	method get : unit -> char
+	method close_in : unit -> unit
+  end
+
+class out_chars : 'a output ->
+  object
+	method put : char -> unit
+	method flush : unit -> unit
+	method close_out : unit -> unit
+  end
+
+val from_in_channel : #in_channel -> input
+val from_out_channel : #out_channel -> unit output
+val from_in_chars : #in_chars -> input
+val from_out_chars : #out_chars -> unit output
