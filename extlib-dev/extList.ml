@@ -544,12 +544,14 @@ let enum l =
 		)
 
 let of_enum e =
-	let dum = [ Obj.magic () ] in
-	let _ = Enum.fold (fun x acc ->
-		let r = [ x ] in
-		_setcdr acc r;
-		r) dum e in
-	tl dum
+	try
+		let h = [ Enum.next e ] in
+		let _ = Enum.fold (fun x acc ->
+			let r = [ x ] in
+			_setcdr acc r;
+			r) h e in
+		h
+	with Enum.No_more_elements -> []
 
 let append_enum l e =
 	append l (of_enum e)
