@@ -104,4 +104,6 @@ let of_enum e =
 	Enum.iter (fun c -> s.[!i] <- c; incr i) e;
 	s
 
+let 
+
 end
