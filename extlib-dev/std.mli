@@ -55,6 +55,11 @@ external identity : 'a -> 'a = "%identity"
 val unique : unit -> int
 (** returns an unique identifier every time it is called. *)
 
+val dump : 'a -> string
+(** reprensent a runtime value as a string. *)
+
+val print : 'a -> unit
+(** print the representation of a runtime value on stdout. *)
 
 val finally : (unit -> unit) -> ('a -> 'b) -> 'a -> 'b 
 (** finally [fend f x] calls [f x] and then [fend()] even if [f x] raised
