@@ -11,6 +11,9 @@
 module F = Filename
 module P = Printf
 
+module SSet = Set.Make (String)
+module SMap = Map.Make (String)
+
 (* Step 1: find a list of all ExtLib modules *)
 
 let extlib_dev_dir = 
@@ -110,7 +113,6 @@ let tests_of dirname =
 let mtest all_tests mname =
   let f = open_out (build_dir_name (mtest_filename mname ".ml")) in
   P.fprintf f "let test() = \n";
-
   let tests = Hashtbl.find_all all_tests mname in
   P.fprintf f "  Util.test_module \"%s\"\n    (fun () ->\n" mname;
   List.iter
@@ -187,7 +189,6 @@ let compile_tests build_type all_modules all_tests =
 
 
 
-
 let link_tests build_type all_modules all_tests =
   let (obj_ext,lib_ext) = 
     match build_type with
@@ -213,7 +214,9 @@ let link_tests build_type all_modules all_tests =
   exec link_cmd "Linking extlib_test"
 
 exception InvalidArg of string
-(* Extract args of the form --foobar or --foo=bar *)
+
+(* Extract args of the form --foobar or --foo=bar.  Returns result as
+   a mapping from strings to string sets *)
 let parse_options () =
   let options = 
     [(`OptArg, "author", "Use only tests made by the specified author");
@@ -258,27 +261,24 @@ let parse_options () =
       print_usage ();
       exit 1
   done;
-  List.rev !args
-  
-module SSet = Set.Make (String)
-
+  List.fold_left
+    (fun accu (opt_name,v) ->
+       let set = 
+         try SMap.find opt_name accu with Not_found -> SSet.empty in
+       SMap.add opt_name (SSet.add v set) (SMap.remove opt_name accu))
+    SMap.empty !args
+    
 let main =
-  let option_list = parse_options () in
-  let make_name_set opt = 
-    List.fold_left (fun accu (_,a) -> SSet.add a accu) SSet.empty 
-      (List.filter (function (o,_) when o = opt -> true | _ -> false) option_list) in
-  (* Author mask.  If empty, include all authors. *)
-  let authors = make_name_set "author" in
-  (* Module mask.  If empty, include all modules. *)
-  let modules = make_name_set "module" in
-  let make_inclusion_test set =
-    if not (SSet.is_empty set) then
-      (fun name -> SSet.mem name set)
-    else (fun _ -> true) in
-  let include_author = make_inclusion_test authors
-  and include_module = make_inclusion_test modules in
+  let options = parse_options () in
+  let make_inclusion_test s =
+    try 
+      let set = SMap.find s options in
+      (fun n -> SSet.mem n set)
+    with Not_found -> (fun _ -> true) in
+  let include_author = make_inclusion_test "author"
+  and include_module = make_inclusion_test "module" in
   let build_type = 
-    if List.mem_assoc "opt" option_list then `CompileNative else `CompileByte in
+    if SMap.mem "opt" options then `CompileNative else `CompileByte in
 
   mkdir build_dir;
 
@@ -286,23 +286,13 @@ let main =
   let all_modules = 
     List.filter include_module (modules_of extlib_dev_dir) in
   let all_tests =
-    let make_hash lst = 
-      let h = Hashtbl.create 10 in
-      List.iter 
-        (fun (mname, auth, tst) -> Hashtbl.add h mname (auth,tst)) lst;
-      h in
-    let all_tests = 
-      make_hash
-        (List.filter
-           (fun (mname,_,_) -> include_module mname)
-           (tests_of Filename.current_dir_name)) in
-    let selected_tests = Hashtbl.create 97 in
-    Hashtbl.iter
-      (fun mname (author,test) ->
-         if include_author author && (include_module mname) then
-           Hashtbl.add selected_tests mname (author,test)) all_tests;
-    selected_tests
-  in
+    let scanned_tests = (tests_of Filename.current_dir_name) in
+    let h = Hashtbl.create 55 in
+    List.iter
+      (fun (mname,author,test) ->
+         if include_author author && include_module mname then
+           Hashtbl.add h mname (author,test)) scanned_tests;
+    h in
 
   print_endline "Modules:";
   print_endline (String.concat "\n" (List.map ((^) "  ") all_modules));
