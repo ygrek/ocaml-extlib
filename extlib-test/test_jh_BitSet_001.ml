@@ -116,6 +116,7 @@ let test_sym_diff () =
   done
 
 let test_compare () =
+  assert (B.compare (B.empty ()) (B.empty ()) = 0);
   for i = 0 to 255 do
     let r1 = biased_rnd_28 () in
     let r2 = biased_rnd_28 () in
@@ -123,7 +124,9 @@ let test_compare () =
     and s2 = bitset_of_int r2 in
     let sr = B.compare s1 s2
     and ir = compare r1 r2 in
-    assert (sr = ir)
+    assert (sr = ir);
+    assert (B.compare s1 s1 = 0);
+    assert (B.compare s2 s2 = 0)
   done;
   for i = 0 to 255 do
     let scl = (Random.int 15)+1 in
