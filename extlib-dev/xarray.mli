@@ -24,6 +24,8 @@
 	are added or removed from the array.
   *)
 
+(** {6 Types} *)
+
 type 'a t (* abstract *)
 (** The abstract type of a resizable array. *)
 
@@ -45,7 +47,18 @@ type resizer_t = currslots:int -> oldlength:int -> newlength:int -> int
 	functions.
 *)
 
-val make : ?resizer:resizer_t -> int -> 'a -> 'a t
+exception Invalid_arg of int * string * string
+(** Exception on array operation
+
+	When an operation on an xarray fails, [Invalid_arg] is raised. The
+	integer is the value that made the operation fail, the first string
+	contains the function name that has been called and the second string
+	contains the paramater name that made the operation fail.
+*)
+
+(** {6 Array creation} *)
+
+val make : int -> 'a -> 'a t
 (** [make size null] returns an xarray originally capable of holding [size]
 	elements, with a null element of [null].  The null element is used to 
 	fill unused elements of the underlying array.  
@@ -54,7 +67,7 @@ val make : ?resizer:resizer_t -> int -> 'a -> 'a t
 
 *)
 
-val init : ?resizer:resizer_t -> int -> int -> 'a -> (int -> 'a) -> 'a t
+val init : int -> int -> 'a -> (int -> 'a) -> 'a t
 (** [init size len null f] returns an xarray capable of holding [size]
 	elements, with a null element of [null].  The null element is used to 
 	fill unused elements of the underlying array.  The first [len] elements
@@ -65,8 +78,19 @@ val init : ?resizer:resizer_t -> int -> int -> 'a -> (int -> 'a) -> 'a t
 
  *)
 
+val set_resizer : 'a t -> resizer_t -> unit
+(** 
+	Change the resizer for this array. When an is copied, the same resizer
+	will be used for the copy.
+*)	
+
+(** {6 Array manipulation functions} *)
+
+val empty : 'a t -> bool
+(** Return true if the number of used elements in the xarray is 0. *)
+
 val length : 'a t -> int
-(** Return the number of used elements in the xarray- this is effectively
+(** Return the number of used elements in the xarray - this is effectively
 	it's length. *)
 
 val get : 'a t -> int -> 'a
@@ -75,7 +99,7 @@ val get : 'a t -> int -> 'a
 
 val last : 'a t -> 'a
 (** [last xarr] returns the last element of [xarr], or throws 
-	[Failure "Xarray.last"] *)
+	[Invalid_arg 0 "Xarray.last"] *)
 
 val set : 'a t -> int -> 'a -> unit
 (** [set xarr idx v] sets the element of [xarr] at index [idx] to value
@@ -116,13 +140,15 @@ val blit : 'a t -> int -> 'a t -> int -> int -> unit
 	fast way to move blocks of elements around.
  *)
 
+(** {6 Array copy and conversion} *)
+
 val to_list : 'a t -> 'a list
 (** [to_list xarr] returns the elements of [xarr] in order as a list. *)
 
 val to_array : 'a t -> 'a array
 (** [to_array xarr] returns the elements of [xarr] in order as an array. *)
 
-val of_list : ?resizer:resizer_t -> 'a -> 'a list -> 'a t
+val of_list : 'a -> 'a list -> 'a t
 (** [of_list null lst] returns an xarray with the elements of [lst] in it
 	in order, and [null] as it's null element.
 
@@ -130,7 +156,7 @@ val of_list : ?resizer:resizer_t -> 'a -> 'a list -> 'a t
 
 *)
 
-val of_array : ?resizer:resizer_t -> 'a -> 'a array -> 'a t
+val of_array : 'a -> 'a array -> 'a t
 (** [of_array null arr] returns an xarray with the elements of [arr] in it
 	in order, and [null] as it's null element.  
 
@@ -138,7 +164,7 @@ val of_array : ?resizer:resizer_t -> 'a -> 'a array -> 'a t
 
 *)
 
-val copy : ?resizer:resizer_t -> 'a t -> 'a t
+val copy : 'a t -> 'a t
 (** [copy src] returns a fresh copy of [src], such that no modification of
 	[src] affects the copy, or vice versa (all new memory is allocated for
 	the copy).  
@@ -149,7 +175,7 @@ val copy : ?resizer:resizer_t -> 'a t -> 'a t
 
 *)
 
-val sub : ?resizer:resizer_t -> 'a t -> int -> int -> 'a t
+val sub : 'a t -> int -> int -> 'a t
 (** [sub xarr start len] returns an xarray holding the subset of [len] 
 	elements from [xarr] starting with the element at index [idx].  A
 	new resizing strategy can be provided- if no strategy is provided,
@@ -161,6 +187,8 @@ val sub : ?resizer:resizer_t -> 'a t -> int -> int -> 'a t
 
 *)
 
+(** {6 Array functional support} *)
+
 val iter : ('a -> unit) -> 'a t -> unit
 (** [iter f xarr] calls the function [f] on every element of [xarr].  It
 	is equivelent to for i = 0 to ([length xarr]) do f ([get xarr i]) done; *)
@@ -169,7 +197,7 @@ val iteri : (int -> 'a -> unit) -> 'a t -> unit
 (** [iter f xarr] calls the function [f] on every element of [xarr].  It
 	is equivelent to for i = 0 to ([length xarr]) do f i ([get xarr i]) done; *)
 
-val map : ?resizer:resizer_t -> ('a -> 'b) -> 'b -> 'a t -> 'b t
+val map : ('a -> 'b) -> 'b -> 'a t -> 'b t
 (** [map f nulldst xarr] applies the function [f] to every element of [xarr]
 	and creates an xarray from the results- similiar to [List.map] or
 	[Array.map].  [nulldst] is the null element of the returned xarray.
@@ -178,7 +206,7 @@ val map : ?resizer:resizer_t -> ('a -> 'b) -> 'b -> 'a t -> 'b t
 	source xarray.  The default resizer is that of the source xarray.
 *)
 
-val mapi : ?resizer:resizer_t -> (int -> 'a -> 'b) -> 'b -> 'a t -> 'b t
+val mapi : (int -> 'a -> 'b) -> 'b -> 'a t -> 'b t
 (** [mapi f nulldst xarr] applies the function [f] to every element of [xarr]
 	and creates an xarray from the results- similiar to [List.mapi] or
 	[Array.mapi].  [nulldst] is the null element of the returned xarray.
@@ -197,6 +225,8 @@ val fold_right : ('a -> 'b -> 'b) -> 'a t -> 'b -> 'b
 	[ f (get xarr 0) (f (get xarr 1) ( ... ( f (get xarr n-1) x ) ... ) ) ]
 	similiar to [Array.fold_right] or [List.fold_right]. *)
 
+(** {6 Array enumerations} *)
+
 val enum : 'a t -> 'a Enum.t
 (** [enum xarr] returns the enumeration of [xarr] *)
 
@@ -204,7 +234,7 @@ val sub_enum : 'a t -> int -> int -> 'a Enum.t
 (** [sub_enum xarr idx len] returns an enumeration of a subset of [len]
 	elements of [xarr], starting with the element at index [idx]. *)
 
-val of_enum : ?resizer:resizer_t -> 'a -> 'a Enum.t -> 'a t
+val of_enum : 'a -> 'a Enum.t -> 'a t
 (** [of_enum nullval e] returns an t that holds, in order, the 
 	elements of [e]. 
 
@@ -238,7 +268,7 @@ val sub_rev_enum : 'a t -> int -> int -> 'a Enum.t
 	lowest index.  So the last element returned from [e] becomes the
 	element at index [idx]. *)
 
-val of_rev_enum : ?resizer:resizer_t -> 'a -> 'a Enum.t -> 'a t
+val of_rev_enum : 'a -> 'a Enum.t -> 'a t
 (** [of_rev_enum nullval e] returns an Xarray.t that holds, in reverse order, 
 	the elements of [e].  The first element returned from [e] becomes the
 	highest indexed element of the returned Xarray.t, and so on.  Otherwise
@@ -259,6 +289,8 @@ val set_rev_enum : 'a t -> int -> 'a Enum.t -> unit
 	is the count of elements initially in [e].  The last element of [e]
 	has index [idx].  Otherwise it acts like [set_enum].
 *)
+
+(** {6 Array default resizers} *)
 
 val exponential_resizer : resizer_t
 (** The exponential resizer- The default resizer except when the resizer
