@@ -5,7 +5,7 @@
     make handling options easier.
 *)
 
-exception NoValue
+exception No_value
 
 val may : ('a -> unit) -> 'a option -> unit
 (** [may f x] will call the function [f] if [x] contains some value. *)
@@ -29,5 +29,5 @@ val is_some : 'a option -> bool
 
 val get : 'a option -> 'a
 (** [get x] will get the value inside x.  If x contains None, 
-    it will raise NoValue
+    it will raise No_value
 *)
