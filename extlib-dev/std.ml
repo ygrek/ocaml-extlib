@@ -1,7 +1,7 @@
 (*
  * Std - Additional functions
- * Copyright (C) 2003 Nicolas Cannasse
- * 
+ * Copyright (C) 2003 Nicolas Cannasse and Markus Mottl
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -18,46 +18,53 @@
  *)
 
 let input_lines ch =
-	Enum.from (fun () -> try input_line ch with End_of_file -> raise Enum.No_more_elements)
+  Enum.from (fun () ->
+    try input_line ch with End_of_file -> raise Enum.No_more_elements)
 
 let input_chars ch =
-	Enum.from (fun () -> try input_char ch with End_of_file -> raise Enum.No_more_elements)
+  Enum.from (fun () ->
+    try input_char ch with End_of_file -> raise Enum.No_more_elements)
 
 let input_list ch =
-	let rec loop dst =
-		let r = [ input_line ch ] in
-		Obj.magic (Obj.repr dst) 1 (Obj.repr r);
-		loop r
-	in
-	let r = [ Obj.magic () ] in
-	try
-		loop r
-	with
-		End_of_file ->
-			match r with
-			| x :: l -> l
-			| [] -> assert false
-
+  let rec loop dst =
+    let r = [ input_line ch ] in
+    Obj.magic (Obj.repr dst) 1 (Obj.repr r);
+    loop r in
+  let r = [ Obj.magic () ] in
+  try loop r
+  with
+    End_of_file ->
+      match r with
+      | _ :: l -> l
+      | [] -> assert false
 
 let buf_len = 8192
-let static_buf = String.create buf_len
 
-let input_all ch =
-	let buf = Buffer.create 0 in
-	let rec loop() =
-		match input ch static_buf 0 buf_len with
-		| 0 -> Buffer.contents buf
-		| len ->
-			Buffer.add_substring buf static_buf 0 len;
-			loop()
-	in
-	loop()
+let input_all ic =
+  let rec loop acc total buf ofs =
+    let n = input ic buf ofs (buf_len - ofs) in
+    if n = 0 then
+      let res = String.create total in
+      let pos = total - ofs in
+      let _ = String.blit buf 0 res pos ofs in
+      let coll pos buf =
+        let new_pos = pos - buf_len in
+        String.blit buf 0 res new_pos buf_len;
+        new_pos in
+      let _ = List.fold_left coll pos acc in
+      res
+    else
+      let new_ofs = ofs + n in
+      let new_total = total + n in
+      if new_ofs = buf_len then
+        loop (buf :: acc) new_total (String.create buf_len) 0
+      else loop acc new_total buf new_ofs in
+  loop [] 0 (String.create buf_len) 0
 
 let print_bool = function
-	| true -> print_string "true"
-	| false -> print_string "false"
+  | true -> print_string "true"
+  | false -> print_string "false"
 
 let prerr_bool = function
-	| true -> prerr_string "true"
-	| false -> prerr_string "false"
-
+  | true -> prerr_string "true"
+  | false -> prerr_string "false"
