@@ -52,11 +52,11 @@ val printf : ('a, string, 'b) output -> ('c, unit, string, unit) format4 -> 'c
 val flush : ('a, 'b, 'c) output -> unit
 val close_out : ('a, 'b, 'c) output -> 'c
 
-val input_string : string -> (char, string) input
-val output_string : unit -> (char, string, string) output
+val input_string : string -> stdin
+val output_string : unit -> string stdout
 
-val input_channel : in_channel -> (char, string) input
-val output_channel : out_channel -> (char, string, unit) output
+val input_channel : in_channel -> stdin
+val output_channel : out_channel -> unit stdout
 
 val input_enum : 'a Enum.t -> ('a, 'a Enum.t) input
 val output_enum : unit -> ('a, 'a Enum.t, 'a Enum.t) output
@@ -74,4 +74,4 @@ val write_byte : (char,'a,'b) output -> int -> unit
 val write_ui32 : (char,'a,'b) output -> int -> unit
 val write_ui16 : (char,'a,'b) output -> int -> unit
 val write_i16 : (char,'a,'b) output -> int -> unit
-val write_string : (char,string,'a) output -> string -> unit
+val write_string : 'a stdout -> string -> unit
