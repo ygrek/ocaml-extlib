@@ -51,8 +51,13 @@ val read : input -> char
 
 val nread : input -> int -> string
 (** [nread i n] reads a string of size up to [n] from an input.
-  The function will raise No_more_input if no input is available.
-  It will raise [Invalid_argument] is [n] < 0. *)
+  The function will raise [No_more_input] if no input is available.
+  It will raise [Invalid_argument] if [n] < 0. *)
+
+val really_nread : input -> int -> string
+(** [really_nread i n] reads a string of exactly [n] characters
+  from the input. Raises [No_more_input] if at least [n] characters are
+  not available. Raises [Invalid_argument] if [n] < 0. *)
 
 val input : input -> string -> int -> int -> int
 (** [input i s p l] reads up to [l] characters from the given input, storing
@@ -60,6 +65,12 @@ val input : input -> string -> int -> int -> int
   number of characters read or raise [No_more_input] if no character can be
   read. It will raise [Invalid_argument] if [p] and [l] do not designate a
   valid substring of [s]. *)
+
+val really_input : input -> string -> int -> int -> unit
+(** [really_input i s p l] reads exactly [l] characters from the given input,
+  storing them in the string [s], starting at position [p]. Raises [No_more_input]
+  if at [l] characters are not available. Raises [Invalid_argument] if [p]
+  and [l] do not designate a valid substring of [s]. *)
 
 val close_in : input -> unit
 (** Close the input. It can no longer be read from. *)
@@ -74,7 +85,12 @@ val output : 'a output -> string -> int -> int -> int
 (** [output o s p l] writes up to [l] characters from string [s], starting at
   offset [p]. It returns the number of characters written. It will raise
   [Invalid_argument] if [p] and [l] do not designate a valid substring of [s]. *)
-							 
+
+val really_output : 'a output -> string -> int -> int -> unit
+(** [really_output o s p l] writes exactly [l] characters from string [s] onto
+  the the output, starting with the character at offset [p]. Raises
+  [Invalid_argument] if [p] and [l] do not designate a valid substring of [s]. *)
+
 val flush : 'a output -> unit
 (** Flush an output. *)
 

@@ -69,6 +69,7 @@ let nread i n =
 	try
 		while !l > 0 do
 			let r = i.in_input s !p !l in
+			if r = 0 then raise No_more_input;
 			p := !p + r;
 			l := !l - r;
 		done;
@@ -78,6 +79,18 @@ let nread i n =
 			if !p = 0 then raise e;
 			String.sub s 0 !p
 
+let really_output o s p l =
+	let sl = String.length s in
+	if p + l > sl || p < 0 || l < 0 then raise (Invalid_argument "IO.really_output");
+   	let l = ref l in
+	let p = ref p in
+	while !l > 0 do 
+		let r = o.out_output s !p !l in
+		if r = 0 then raise Sys_blocked_io;
+		p := !p + r;
+		l := !l - r;
+	done
+
 let input i s p l =
 	let sl = String.length s in
 	if p + l > sl || p < 0 || l < 0 then raise (Invalid_argument "IO.input");
@@ -85,6 +98,27 @@ let input i s p l =
 		0
 	else
 		i.in_input s p l
+
+let really_input i s p l =
+	let sl = String.length s in
+	if p + l > sl || p < 0 || l < 0 then raise (Invalid_argument "IO.really_input");
+	let l = ref l in
+	let p = ref p in
+	while !l > 0 do
+		let r = i.in_input s !p !l in
+		if r = 0 then raise Sys_blocked_io;
+		p := !p + r;
+		l := !l - r;
+	done
+
+let really_nread i n =
+	if n < 0 then raise (Invalid_argument "IO.really_nread");
+	if n = 0 then ""
+	else
+	let s = String.create n 
+	in
+	really_input i s 0 n;
+	s
 
 let close_in i =
 	let f _ = raise Input_closed in
