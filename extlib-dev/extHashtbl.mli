@@ -85,6 +85,5 @@ module Hashtbl :
 	val iter : ('a -> 'b -> unit) -> ('a, 'b) t -> unit
 	val fold : ('a -> 'b -> 'c -> 'c) -> ('a, 'b) t -> 'c -> 'c
 	val hash : 'a -> int
-	external hash_param : int -> int -> 'a -> int = "hash_univ_param" "noalloc"
 
   end
