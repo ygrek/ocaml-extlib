@@ -64,17 +64,39 @@ let find str sub =
 		with
 			Exit -> !found
 
+let strip ?(chars=" \t\r\n") s =
+	let p = ref 0 in
+	let l = length s in
+	while !p < l && contains chars (unsafe_get s !p) do
+		incr p;
+	done;
+	let p = !p in
+	let l = ref (l - 1) in
+	while !l >= p && contains chars (unsafe_get s !l) do
+		decr l;
+	done;
+	sub s p (!l - p + 1)
+
 let split str sep =
 	let p = find str sep in
 	let len = length sep in
 	let slen = length str in
 	sub str 0 p, sub str (p + len) (slen - p - len)
 
+let rec nsplit str sep =
+	try
+		let s1 , s2 = split str sep in
+		s1 :: nsplit s2 sep
+	with
+		Invalid_string -> [str]
+
+let join = concat
+
 let lchop s =
-	sub s 1 (length s - 1)
+	if s = "" then "" else sub s 1 (length s - 1)
 
 let rchop s =
-	sub s 0 (length s - 1)
+	if s = "" then "" else sub s 0 (length s - 1)
 
 let of_int = string_of_int
 

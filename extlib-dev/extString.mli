@@ -40,6 +40,13 @@ module String :
 	    separator [sep].
 	    raises [Invalid_string] if the separator is not found. *)
 
+	val nsplit : string -> string -> string list
+	(** [nsplit s sep] splits the string [s] into a list of strings
+		which are separated by [sep]. *)
+
+	val join : string -> string list -> string
+	(** same as [concat] *)
+
 	val lchop : string -> string
 	(** returns the same string but without the first character.
 	    does nothing if the string is empty. *)
@@ -80,6 +87,10 @@ module String :
 	val map : (char -> char) -> string -> string
 	(** [map f s] returns a string where all characters [c] in [s] have beeen
 		replaced by [f c]. **)
+
+	val strip : ?chars:string -> string -> string
+	(** returns the string without the chars if they are at the beginning or
+		at the end of the string. By default chars are " \t\r\n". *)
 
 	(** {6 Older Functions} *)
 
