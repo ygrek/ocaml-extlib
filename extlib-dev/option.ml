@@ -42,3 +42,7 @@ let is_none = function
 let get = function
 	| None -> raise No_value
 	| Some v -> v
+
+let map_default f v = function
+	| None -> v
+	| Some v2 -> f v2
