@@ -20,8 +20,8 @@
 
 (** Dynamic arrays.
 
-   An dynamic array is equivalent to a OCaml array the will resize itself
-   when elements are added ore removed, except that floats are boxed and
+   A dynamic array is equivalent to a OCaml array that will resize itself
+   when elements are added or removed, except that floats are boxed and
    that no initialization element is required.
 *)
 
@@ -57,7 +57,7 @@ val length : 'a t -> int
 
 val get : 'a t -> int -> 'a
 (** [get darr idx] gets the element in [darr] at index [idx]. If [darr] has
-	[len] elements in it, then the valid indexs range from [0] to [len-1]. *)
+	[len] elements in it, then the valid indexes range from [0] to [len-1]. *)
 
 val last : 'a t -> 'a
 (** [last darr] returns the last element of [darr]. *)

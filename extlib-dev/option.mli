@@ -22,12 +22,12 @@
     Options are an Ocaml standard type that can be either [None] (undefined)
 	or [Some x] where x can be any value. Options are widely used in Ocaml
 	to represent undefined values (a little like NULL in C, but in a type
-	and memory safe way). This module add few functions for working with
+	and memory safe way). This module adds some functions for working with
 	options.
 *)
 
 val may : ('a -> unit) -> 'a option -> unit
-(** [may f (Some x)] will call [f x] and [may f None] will no nothing. *)
+(** [may f (Some x)] calls [f x] and [may f None] does nothing. *)
 
 val map : ('a -> 'b) -> 'a option -> 'b option
 (** [map f (Some x)] returns [Some (f x)] and [map None] returns [None]. *)
@@ -49,4 +49,4 @@ val get : 'a option -> 'a
 (** [get (Some x)] returns [x] and [get None] raises [No_value]. *)
 
 exception No_value
-(** raised when calling [get None]. *)
+(** Raised when calling [get None]. *)

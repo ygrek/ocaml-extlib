@@ -107,7 +107,7 @@ val force : 'a t -> unit
 
 (** {6 Lazy constructors}
 
- Theses functions are lazy which means that they will create a new modified
+ These functions are lazy which means that they will create a new modified
  enumeration without actually enumerating any element until they are asked
  to do so by the programmer (using one of the functions above).
  
@@ -180,7 +180,7 @@ val from : (unit -> 'a) -> 'a t
  return a correct value. *)
 
 val init : int -> (int -> 'a) -> 'a t
-(** [init n f] create a new enumeration over elements
+(** [init n f] creates a new enumeration over elements
   [f 0, f 1, ..., f (n-1)] *)
 
 (** {6 Counting} *)

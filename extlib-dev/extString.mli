@@ -36,8 +36,8 @@ module String :
 	    is not a substring of [s]. *)
 
 	val split : string -> string -> string * string
-	(** [split s sep] splits the string [s] among each part of the
-	    separator [sep].
+	(** [split s sep] splits the string [s] between the first
+		occurence of [sep].
 	    raises [Invalid_string] if the separator is not found. *)
 
 	val nsplit : string -> string -> string list
@@ -45,31 +45,31 @@ module String :
 		which are separated by [sep]. *)
 
 	val join : string -> string list -> string
-	(** same as [concat] *)
+	(** Same as [concat] *)
 
 	val lchop : string -> string
-	(** returns the same string but without the first character.
+	(** Returns the same string but without the first character.
 	    does nothing if the string is empty. *)
 
 	val rchop : string -> string
-	(** returns the same string but without the last character.
+	(** Returns the same string but without the last character.
 	   does nothing if the string is empty. *)
 
 	val of_int : int -> string
-	(** returns the string representation of an int. *)
+	(** Returns the string representation of an int. *)
 
 	val of_float : float -> string
-	(** returns the string representation of an float. *)
+	(** Returns the string representation of an float. *)
 
 	val of_char : char -> string
-	(** returns a string containing one given character. *)
+	(** Returns a string containing one given character. *)
 
 	val to_int : string -> int
-	(** returns the integer represented by the given string or
+	(** Returns the integer represented by the given string or
 	    raises [Invalid_string] if the string does not represent an integer.*)
 
 	val to_float : string -> float
-	(** returns the float represented by the given string or
+	(** Returns the float represented by the given string or
 	    raises Invalid_string if the string does not represent a float. *)
 
 	val ends_with : string -> string -> bool
@@ -89,12 +89,12 @@ module String :
 		replaced by [f c]. **)
 
 	val strip : ?chars:string -> string -> string
-	(** returns the string without the chars if they are at the beginning or
+	(** Returns the string without the chars if they are at the beginning or
 		at the end of the string. By default chars are " \t\r\n". *)
 
 	(** {6 Older Functions} *)
 
-	(** Please refer to the Ocaml Manual for documentation of theses
+	(** Please refer to the Ocaml Manual for documentation of these
 		functions. *)
 
 	val length : string -> int

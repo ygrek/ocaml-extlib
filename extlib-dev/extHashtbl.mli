@@ -33,29 +33,29 @@ module Hashtbl :
 		found in the hashtable. *)
 
 	val keys : ('a,'b) t -> 'a Enum.t
-	(** returns an enumeration of all the keys of an hashtable.
+	(** Return an enumeration of all the keys of a hashtable.
 	    If the key is in the Hashtable multiple times, all occuransces
-	    will be returned  *)
+	    will be returned.  *)
 
 	val values : ('a,'b) t -> 'b Enum.t
-	(** returns an enumeration of all the values of an hashtable. *)
+	(** Return an enumeration of all the values of a hashtable. *)
 
 	val enum : ('a, 'b) t -> ('a * 'b) Enum.t
-	(** returns an enumeration of (key,value) pairs of an hashtable. *)
+	(** Return an enumeration of (key,value) pairs of a hashtable. *)
 
 	val of_enum : ('a * 'b) Enum.t -> ('a, 'b) t
-	(** create an hashtable from a (key,value) enumeration. *)
+	(** Create a hashtable from a (key,value) enumeration. *)
 
 	val find_default : ('a,'b) t -> 'a -> 'b -> 'b
-	(** find a binding for the key, and return a default
+	  (** Find a binding for the key, and return a default
 	    value if not found *)
 
 	val find_option : ('a,'b) Hashtbl.t -> 'a -> 'b option
-	(** find a binding for the key, or return [None] if no
+	(** Find a binding for the key, or return [None] if no
 		value is found *)
 
 	val remove_all : ('a,'b) t -> 'a -> unit
-	(** remove all bindings for the given key *)
+	(** Remove all bindings for the given key *)
 
 	val map : ('b -> 'c) -> ('a,'b) t -> ('a,'c) t
 	(** [map f x] creates a new hashtable with the same
@@ -63,12 +63,12 @@ module Hashtbl :
 		all the values *)
 
 	val length : ('a,'b) t -> int
-	(** return the number of elements inserted into the Hashtbl 
+	(** Return the number of elements inserted into the Hashtbl 
 		(including duplicates) *)
 	
 	(** {6 Older Functions} *)
 
-	(** Please refer to the Ocaml Manual for documentation of theses
+	(** Please refer to the Ocaml Manual for documentation of these
 		functions. (note : functor support removed to avoid code
 		duplication). *)
 

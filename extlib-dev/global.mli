@@ -21,7 +21,7 @@
  
 	Often in OCaml you want to have a global variable, which is mutable 
     and uninitialized when declared. You can use a ['a option ref] but
-	this is not very convenient. The Global module is providing few functions
+	this is not very convenient. The Global module provides functions
 	to easily create and manipulate such variables.
 *)
 
@@ -33,25 +33,25 @@ exception Global_not_initialized of string
  assigned a value. The parameter contains the name of the global. *)
 
 val empty : string -> 'a t
-(** returns an new named empty global. The name of the global can be any
- string. It identify the global and make debugging easier. *)
+(** Returns an new named empty global. The name of the global can be any
+ string. It identifies the global and makes debugging easier. *)
 
 val name : 'a t -> string
-(** retrieve the name of a global. *)
+(** Retrieve the name of a global. *)
 
 val set : 'a t -> 'a -> unit
-(** set the global value contents. *)
+(** Set the global value contents. *)
 
 val get : 'a t -> 'a
-(** get the global value contents - raise Global_not_initialized if not
+(** Get the global value contents - raise Global_not_initialized if not
  defined. *)
 
 val undef : 'a t -> unit 
-(** reset the global value contents to undefined. *)
+(** Reset the global value contents to undefined. *)
 
 val isdef : 'a t -> bool 
-(** tell if the global value has been set. *)
+  (** Return [true] if the global value has been set. *)
 
 val opt : 'a t -> 'a option 
-(** return [None] if the global is undefined, or [Some v] where v is the
-  current global value contents either. *)
+  (** Return [None] if the global is undefined, else [Some v] where v is the
+  current global value contents. *)

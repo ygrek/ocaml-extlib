@@ -23,7 +23,7 @@
    31-bit code points are allowed.
 *)
 
-(** Unicode characters. All 31bit code points are allowed.*) 
+(** Unicode characters. All 31-bit code points are allowed.*) 
 type t
 
 exception Out_of_range
@@ -45,14 +45,14 @@ val code : t -> int
 val chr : int -> t
 
 (** [uint_code u] returns the Unicode code number of [u].
-   The returned int is unsigned, that is, on 32-bits platforms,
+   The returned int is unsigned, that is, on 32-bit platforms,
    the sign bit is used for storing the 31-th bit of the code number. *)
 external uint_code : t -> int = "%identity"
 
 (** [chr_of_uint n] returns the Unicode character of the code number [n].
-   [n] is interpreted as unsigned, that is, on 32-bits platforms,
+   [n] is interpreted as unsigned, that is, on 32-bit platforms,
    the sign bit is treated as the 31-th bit of the code number.
-   If n exceed 31-bits values, then raise [invalid_arg]. *)
+   If n exceeds 31-bit values, then raise [Invalid_arg]. *)
 val chr_of_uint : int -> t
 
 (** Unsafe version of {!UChar.chr_of_uint}.

@@ -30,7 +30,7 @@ type t = string
 exception Malformed_code
 
 (** [validate s]
-   successes if s is valid UTF-8, otherwise raises Malformed_code.
+   Succeeds if s is valid UTF-8, otherwise raises Malformed_code.
    Other functions assume strings are valid UTF-8, so it is prudent
    to test their validity for strings from untrusted origins. *)
 val validate : t -> unit
@@ -117,7 +117,7 @@ module Buf : sig
   (** Buffers for UTF-8 strings. *) 
   type buf
 
-  (** [create n] creates the buffer with the initial size [n]-bytes. *)   
+  (** [create n] creates a buffer with the initial size [n]-bytes. *)   
   val create : int -> buf
 
   (* The rest of functions is similar to the ones of Buffer in stdlib. *)

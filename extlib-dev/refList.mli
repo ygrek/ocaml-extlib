@@ -29,110 +29,110 @@ exception Invalid_index of int
 type 'a t
 
 val empty : unit -> 'a t
-(** returns a new empty ref list *)
-
+(** Returns a new empty ref list *)
+  
 val is_empty : 'a t -> bool
-(** tells if a ref list is empty *)
+(** Return [true] if a ref list is empty *)
 
 val clear : 'a t -> unit
-(** removes all elements *)
+(** Removes all elements *)
 
 val length : 'a t -> int
-(** returns the number of elements - O(n) *)
+(** Returns the number of elements - O(n) *)
 
 val copy : dst:'a t -> src:'a t -> unit
-(** makes a copy of a ref list - O(1) *)
+(** Makes a copy of a ref list - O(1) *)
 
 val copy_list : dst:'a t -> src:'a list -> unit
-(** makes a copy of a list - O(1) *)
+(** Makes a copy of a list - O(1) *)
 
 val copy_enum : dst:'a t -> src:'a Enum.t -> unit
-(** makes a copy of a enum *)
+(** Makes a copy of a enum *)
 
 val of_list : 'a list -> 'a t
-(** creates a ref list from a list - O(1) *)
+(** Creates a ref list from a list - O(1) *)
 
 val to_list : 'a t -> 'a list
-(** returns the current elements as a list - O(1) *)
+(** Returns the current elements as a list - O(1) *)
 
 val of_enum : 'a Enum.t -> 'a t
-(** creates a ref list from an enumeration *)
+(** Creates a ref list from an enumeration *)
 
 val enum : 'a t -> 'a Enum.t
-(** returns an enumeration of current elements in the ref list *)
+(** Returns an enumeration of current elements in the ref list *)
 
 val add : 'a t -> 'a -> unit
-(** adds an element at the end - O(n) *)
+(** Adds an element at the end - O(n) *)
 
 val push : 'a t -> 'a -> unit
-(** adds an element at the head - O(1) *)
+(** Adds an element at the head - O(1) *)
 
 val add_sort : ?cmp:('a -> 'a -> int) -> 'a t -> 'a -> unit
-(** adds an element in a sorted list, using optional comparator
+(** Adds an element in a sorted list, using optional comparator
     or 'compare' as default. *)
 
 val first : 'a t -> 'a
-(** returns the first element or
+(** Returns the first element or
     raises [Empty_list] if the ref list is empty *)
 
 val last : 'a t -> 'a
-(** returns the last element - O(n) or
+(** Returns the last element - O(n) or
     raises Empty_list if the ref list is empty *)
 
 val pop : 'a t -> 'a
-(** removes and returns the first element or
+(** Removes and returns the first element or
    raises [Empty_list] if the ref list is empty *)
 
 val npop : 'a t -> int -> 'a list
-(** removes and returns the n first elements or
-   raises [Empty_list] if the ref list doed not
+(** Removes and returns the n first elements or
+   raises [Empty_list] if the ref list does not
    containes enough elements *)
 
 val hd : 'a t -> 'a
 (** same as [first] *)
 
 val tl : 'a t -> 'a t
-(** returns a ref list containing the same elements
+(** Returns a ref list containing the same elements
     but without the first one or
     raises [Empty_list] if the ref list is empty *)
 
 val shuffle : 'a t -> unit
-(** randomly shuffles the elements 
+(** Randomly shuffles the elements 
     using the module Random - O(n^2) *)
 
 val rev : 'a t -> unit
-(** reverses the ref list *)
+(** Reverses the ref list - O(n) *)
 
 (** {6 Functional Operations} *)
 
 val iter : ('a -> unit) -> 'a t -> unit
-(** apply the given function to all elements of the
+(** Apply the given function to all elements of the
     ref list, in respect with the order of the list *)
 
 val find : ('a -> bool) -> 'a t -> 'a
-(** find the first element that match
+(** Find the first element matching
     the specified predicate
-    raise Not_found if no element is found *)
+    raise [Not_found] if no element is found *)
 
 val rfind : ('a -> bool) -> 'a t -> 'a
-(** find the first element in the reversed ref list that
-    match the specified predicate
-    raise Not_found if no element is found *)
+(** Find the first element in the reversed ref list matching
+    the specified predicate
+    raise [Not_found] if no element is found *)
 
 val find_exc : ('a -> bool) -> exn -> 'a t -> 'a
-(** same as find but take an exception to be raised when
+(** Same as find but takes an exception to be raised when
     no element is found as additional parameter *)
 
 val exists : ('a -> bool) -> 'a t -> bool
-(** tells if an element match the specified
+(** Return [true] if an element matches the specified
     predicate *)
 
 val for_all : ('a -> bool) -> 'a t -> bool
-(** tells if all elements are matching the specified
+(** Return [true] if all elements match the specified
     predicate *)
 
 val map : ('a -> 'b) -> 'a t -> 'b t
-(** apply a function to all elements
+(** Apply a function to all elements
     and return the ref list constructed with
     the function returned values *)
 
@@ -141,29 +141,29 @@ val transform : ('a -> 'a) -> 'a t -> unit
     using a function. *)
 
 val map_list : ('a -> 'b) -> 'a t -> 'b list
-(** apply a function to all elements
+(** Apply a function to all elements
     and return the list constructed with
     the function returned values *)
 
 val sort : ?cmp:('a -> 'a -> int) -> 'a t -> unit
-(** sort elements using the specified comparator
+(** Sort elements using the specified comparator
     or compare as default comparator *)
 
 val filter : ('a -> bool) -> 'a t -> unit
-(** remove all elements that does not match the
+(** Remove all elements that do not match the
     specified predicate *)
 
 val remove : 'a t -> 'a -> unit
-(** remove an element from the ref list
-    raise Not_found if the element is not found *)
+(** Remove an element from the ref list
+    raise [Not_found] if the element is not found *)
 
 val remove_if : ('a -> bool) -> 'a t -> unit
-(** remove the first element that does match the
+(** Remove the first element matching the
     specified predicate
-    raise Not_found if no element have been removed *)
+    raise [Not_found] if no element has been removed *)
 
 val remove_all : 'a t -> 'a -> unit
-(** remove all elements equals to the specified
+(** Remove all elements equal to the specified
     element from the ref list *)
 
 
@@ -180,25 +180,25 @@ val remove_all : 'a t -> 'a -> unit
 module Index : sig
 
 	val index_of : 'a t -> 'a -> int
-	(** return the index (position : 0 starting) of an element in
+	(** Return the index (position : 0 starting) of an element in
 	    a ref list, using ( = ) for testing element equality
-	    raise Not_found if no element was found *)
+	    raise [Not_found] if no element was found *)
 
 	val index : ('a -> bool) -> 'a t -> int
-	(** return the index (position : 0 starting) of an element in
+	(** Return the index (position : 0 starting) of an element in
 	    a ref list, using the specified comparator
-	    raise Not_found if no element was found *)
+	    raise [Not_found] if no element was found *)
 
 	val at_index : 'a t -> int -> 'a
-	(** return the element of ref list at the specified index
-	    raise Invalid_index if the index is outside [0 ; length-1] *)
+	(** Return the element of ref list at the specified index
+	    raise [Invalid_index] if the index is outside [0 ; length-1] *)
 
 	val set : 'a t -> int -> 'a -> unit
-	(** change the element at the specified index
-	    raise Invalid_index if the index is outside [0 ; length-1] *)
+	(** Change the element at the specified index
+	    raise [Invalid_index] if the index is outside [0 ; length-1] *)
 
 	val remove_at : 'a t -> int -> unit
-	(** remove the element at the specified index
-	    raise Invalid_index if the index is outside [0 ; length-1] *)
+	(** Remove the element at the specified index
+	    raise [Invalid_index] if the index is outside [0 ; length-1] *)
 
 end

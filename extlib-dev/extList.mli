@@ -20,7 +20,7 @@
 
 (** Additional and modified functions for lists. 
  
-	OCaml standard library provide a module for list functions.
+	The OCaml standard library provides a module for list functions.
 	This ExtList module can be used to override the List module or
 	as a standalone module. It provides new functions and modify
 	the behavior of some other ones (in particular all functions
@@ -43,7 +43,7 @@ module List :
 
 	val last : 'a list -> 'a
 	(** Returns the last element of the list, or raise [Empty_list] if
-	 the list is empty. This function takes a linear time. *)
+	 the list is empty. This function takes linear time. *)
 
 	val iteri : (int -> 'a -> 'b) -> 'a list -> unit
 	(** [iteri f l] will call [(f 0 a0);(f 1 a1) ... (f n an)] where
@@ -88,7 +88,7 @@ module List :
 
 	val remove_all : 'a list -> 'a -> 'a list
 	(** [remove_all l x] is similar to [remove] but removes all elements that
-	 are equals to [x] and not only the first one. *)
+	 are equal to [x] and not only the first one. *)
 
 	val shuffle : 'a list -> 'a list
 	(** Returns the shuffled list, using [Random] module. *)
@@ -108,10 +108,10 @@ module List :
 	(** {6 Modified functions} *)
 
 	(** Some minor modifications have been made to the specificiation of some
-	 functions, especially concerning exception raised. *)
+	 functions, especially concerning exceptions raised. *)
 
 	val hd : 'a list -> 'a
-	(** Returns the first element of the list are raise [Empty_list] if the
+	(** Returns the first element of the list or raise [Empty_list] if the
 	 list is empty. *)
 
 	val tl : 'a list -> 'a list
@@ -123,11 +123,11 @@ module List :
 	 [Invalid_index] is the index is outside of [l] bounds. *)
 
 	val sort : ?cmp:('a -> 'a -> int) -> 'a list -> 'a list
-	(** sort the list using optional comparator (by default [compare]). *)
+	(** Sort the list using optional comparator (by default [compare]). *)
 
 	(** The following functions have been improved so all of them are
-	 tail-recursives. They have also been modified so they're no longer
-	 raising [Invalid_arg] but [Different_list_size] when used on two
+	 tail-recursive. They have also been modified so they no longer
+	 raise [Invalid_arg] but [Different_list_size] when used on two
 	 lists having a different number of elements. *)
 
 	val map2 : ('a -> 'b -> 'c) -> 'a list -> 'b list -> 'c list

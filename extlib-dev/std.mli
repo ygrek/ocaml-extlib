@@ -20,21 +20,21 @@
 (** Additional functions. *)
 
 val input_lines : in_channel -> string Enum.t
-(** returns an enumeration over lines of a input channel, as read by the
+(** Returns an enumeration over lines of an input channel, as read by the
  [input_line] function. *)
 
 val input_chars : in_channel -> char Enum.t
-(** returns an enumeration over characters of a input channel. *)
+(** Returns an enumeration over characters of an input channel. *)
 
 val input_list : in_channel -> string list
-(** returns the list of lines read from an input channel. *)
+(** Returns the list of lines read from an input channel. *)
 
 val input_all : in_channel -> string
-(** return the whole contents of an input channel as a single
+(** Return the whole contents of an input channel as a single
  string. *)
 
 val print_bool : bool -> unit
-(** print a boolean to stdout. *)
+(** Print a boolean to stdout. *)
 
 val prerr_bool : bool -> unit
-(** print a boolean to stderr. *)
+(** Print a boolean to stderr. *)

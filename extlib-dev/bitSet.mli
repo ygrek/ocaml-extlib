@@ -20,7 +20,7 @@
 (** Efficient bit sets.
 
  A bitset is an array of boolean values that can be accessed with indexes
- like an array but provide a better memory usage (divided by 8) for a
+ like an array but provides a better memory usage (divided by 8) for a
  very small speed tradeoff. *)
 
 type t
@@ -30,7 +30,7 @@ exception Negative_index of string
  this exception is raised with the name of the function. *)
 
 val empty : unit ->  t
-(** Create an empty bitset of size 0, the bitset will automaticaly expands
+(** Create an empty bitset of size 0, the bitset will automaticaly expand
  when needed. *)
 
 val create : int -> t
@@ -41,38 +41,38 @@ val copy : t -> t
  copy. *)
 
 val clone : t -> t
-(** same as [copy] *)
+(** Same as [copy] *)
 
 val set : t -> int -> unit
-(** [set s n] set the nth-bit in the bitset [s] to true. *)
+(** [set s n] sets the nth-bit in the bitset [s] to true. *)
  
 val unset : t -> int -> unit
-(** [unset s n] set the nth-bit in the bitset [s] to false. *) 
+(** [unset s n] sets the nth-bit in the bitset [s] to false. *) 
 
 val put : t -> bool -> int -> unit
-(** [put s v n] set the nth-bit in the bitset [s] to [v]. *)
+(** [put s v n] sets the nth-bit in the bitset [s] to [v]. *)
 
 val toggle : t -> int -> unit
-(** [toggle s n] change the nth-bit value in the bitset [s]. *)
+(** [toggle s n] changes the nth-bit value in the bitset [s]. *)
 
 val is_set : t -> int -> bool
-(** [is_set s n] return true if nth-bit it the bitset [s] is set,
+(** [is_set s n] returns true if nth-bit in the bitset [s] is set,
  or false otherwise. *)
 
 val compare : t -> t -> int
-(** [compare s1 s2] compare two bitsets. Highest bit indexes are
+(** [compare s1 s2] compares two bitsets. Highest bit indexes are
  compared first. *)
 
 val equals : t -> t -> bool
-(** [equals s1 s2] return true if, and only if, all bits values in s1 are
+(** [equals s1 s2] returns true if, and only if, all bits values in s1 are
   the same as in s2. *)
 
 val count : t -> int
 (** [count s] returns the number of bits set in the bitset [s]. *)
 
 val enum : t -> int Enum.t
-(** [enum s] return an enumeration of bit indexed which are set
- in the bitset [s]. *)
+(** [enum s] returns an enumeration of bits which are set
+  in the bitset [s]. *)
 
 val intersect : t -> t -> unit
 (** [intersect s t] sets [s] to the intersection of the sets [s] and [t]. *)
