@@ -32,6 +32,19 @@ let make ~next ~count =
 		next = next;
 	}
 
+let init n f =
+	if n < 0 then invalid_arg "Enum.init";
+	let count = ref n in
+	{
+		count = (fun () -> !count);
+		next = (fun () ->
+			match !count with
+			| 0 -> raise No_more_elements
+			| _ ->
+				decr count;
+				f (n - 1 - !count))
+	}			
+
 let force t =
 	let count = ref 1 in
 	let rec loop dst =

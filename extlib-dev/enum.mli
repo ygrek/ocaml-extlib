@@ -26,6 +26,8 @@ val make : next:(unit -> 'a) -> count:(unit -> int) -> 'a t
 
 val from : (unit -> 'a) -> 'a t
 
+val init : int -> (int -> 'a) -> 'a t
+
 val iter : ('a -> unit) -> 'a t -> unit
 
 val iteri : (int -> 'a -> unit) -> 'a t -> unit
