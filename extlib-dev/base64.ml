@@ -90,9 +90,7 @@ let decode ch =
 			((p * 6) - !count) / 8
 	in
 	let available() =
-		match IO.available ch with
-		| None -> None
-		| Some n -> Some (((n * 6) + !count) / 8)
+		((IO.available ch * 6) + !count) / 8
 	in
 	let close() =
 		count := 0;

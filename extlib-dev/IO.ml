@@ -20,7 +20,7 @@
 type ('a,'b) input = {
 	mutable in_read : unit -> 'a;
 	mutable in_nread : int -> 'b;
-	mutable in_available : unit -> int option;
+	mutable in_available : unit -> int;
 	mutable in_close : unit -> unit;
 	mutable in_pos : unit -> int;
 }
@@ -39,11 +39,12 @@ type 'a stdout = (char, string,'a) output
 exception No_more_input
 exception Input_closed
 exception Output_closed
+exception Not_implemented
 
 (* -------------------------------------------------------------- *)
 (* API *)
 
-let default_available = (fun () -> None)
+let default_available = (fun () -> raise Not_implemented)
 let default_close = (fun () -> ())
 
 let create_in ~read ~nread ~pos ~available ~close =
@@ -76,7 +77,7 @@ let close_in i =
 	i.in_close();
 	i.in_read <- f;
 	i.in_nread <- f;
-	i.in_available <- (fun () -> Some 0);
+	i.in_available <- (fun () -> 0);
 	i.in_close <- f
 
 let write o x = o.out_write x
@@ -121,9 +122,7 @@ let input_string s =
 				s
 			end;
 		);
-		in_available = (fun () ->
-			Some (len - !pos)
-		);
+		in_available = (fun () -> len - !pos);		
 		in_close = (fun () -> ());
 		in_pos = (fun () -> !pos);
 	}
@@ -164,9 +163,9 @@ let input_channel ch =
 		);
 		in_available = (fun () ->
 			try
-				Some (in_channel_length ch - Pervasives.pos_in ch)
+				in_channel_length ch - Pervasives.pos_in ch
 			with
-				_ -> None
+				_ -> raise Not_implemented
 		);
 		in_close = (fun () -> Pervasives.close_in ch);
 		in_pos = (fun () -> Pervasives.pos_in ch);
@@ -205,7 +204,7 @@ let input_enum e =
 						if !p = 0 then raise No_more_input;
 						DynArray.enum elts
 		);
-		in_available = (fun () -> if Enum.fast_count e then Some (Enum.count e) else None);
+		in_available = (fun () -> Enum.count e);
 		in_close = (fun () -> ());
 		in_pos = (fun () -> !pos);
 	}
@@ -273,7 +272,7 @@ let pipe() =
 		);
 		in_pos = (fun () -> !readed);
 		in_close = (fun () -> ());
-		in_available = (fun () -> Some !n);
+		in_available = (fun () -> !n);
 	} in
 	let output = {
 		out_write = (fun x -> put x);
@@ -419,7 +418,7 @@ let input_bits ch =
 		~read:(fun () -> read 1 = 1)
 		~nread:read
 		~pos:(fun () -> pos_in ch * 8 - !count)
-		~available:(fun () -> match available ch with None -> None | Some n -> Some (n * 8 + !count))
+		~available:(fun () -> (available ch) * 8 + !count)
 		~close:(fun () -> close_in ch)
 
 let output_bits ch =
@@ -444,3 +443,43 @@ let output_bits ch =
 		~pos:(fun () -> pos_out ch * 8 + !count)
 		~flush:(fun () -> flush_bits(); flush ch)
 		~close:(fun () -> flush_bits(); close_out ch)
+
+(** OO layer **)
+
+class ['a,'b] o_input (ch:('a,'b) input) =
+  object
+
+	method read = read ch
+	method nread n = nread ch n
+	method pos = pos_in ch
+	method available = available ch
+	method close = close_in ch
+
+  end
+
+class ['a,'b,'c] o_output (ch:('a,'b,'c) output) =
+  object
+
+	method write x = write ch x
+	method nwrite x = nwrite ch x
+	method pos = pos_out ch
+	method flush = flush ch
+	method close = close_out ch
+
+  end
+
+let from_in ch =
+	create_in
+		~read:(fun () -> ch#read)
+		~nread:ch#nread
+		~pos:(fun () -> ch#pos)
+		~available:(fun () -> ch#available)
+		~close:(fun () -> ch#close)
+
+let from_out ch =
+	create_out
+		~write:ch#write
+		~nwrite:ch#nwrite
+		~pos:(fun () -> ch#pos)
+		~flush:(fun () -> ch#flush)
+		~close:(fun () -> ch#close)
