@@ -34,7 +34,6 @@ type 'a output = {
 exception No_more_input
 exception Input_closed
 exception Output_closed
-exception Not_implemented
 
 (* -------------------------------------------------------------- *)
 (* API *)
@@ -59,7 +58,7 @@ let create_out ~write ~output ~flush ~close =
 let read i = i.in_read()
 
 let nread i n =
-	if n < 0 then raise (Invalid_argument "IO.nread");
+	if n < 0 then invalid_arg "IO.nread";
 	if n = 0 then
 		""
 	else
@@ -81,7 +80,7 @@ let nread i n =
 
 let really_output o s p l' =
 	let sl = String.length s in
-	if p + l' > sl || p < 0 || l' < 0 then raise (Invalid_argument "IO.really_output");
+	if p + l' > sl || p < 0 || l' < 0 then invalid_arg "IO.really_output";
    	let l = ref l' in
 	let p = ref p in
 	while !l > 0 do 
@@ -94,7 +93,7 @@ let really_output o s p l' =
 
 let input i s p l =
 	let sl = String.length s in
-	if p + l > sl || p < 0 || l < 0 then raise (Invalid_argument "IO.input");
+	if p + l > sl || p < 0 || l < 0 then invalid_arg "IO.input";
 	if l = 0 then
 		0
 	else
@@ -102,7 +101,7 @@ let input i s p l =
 
 let really_input i s p l' =
 	let sl = String.length s in
-	if p + l' > sl || p < 0 || l' < 0 then raise (Invalid_argument "IO.really_input");
+	if p + l' > sl || p < 0 || l' < 0 then invalid_arg "IO.really_input";
 	let l = ref l' in
 	let p = ref p in
 	while !l > 0 do
@@ -114,7 +113,7 @@ let really_input i s p l' =
 	l'
 
 let really_nread i n =
-	if n < 0 then raise (Invalid_argument "IO.really_nread");
+	if n < 0 then invalid_arg "IO.really_nread";
 	if n = 0 then ""
 	else
 	let s = String.create n 
@@ -143,7 +142,7 @@ let nwrite o s =
 
 let output o s p l =
 	let sl = String.length s in
-	if p + l > sl || p < 0 || l < 0 then raise (Invalid_argument "IO.output");
+	if p + l > sl || p < 0 || l < 0 then invalid_arg "IO.output";
 	o.out_output s p l
 
 let printf o fmt =
@@ -438,7 +437,7 @@ let read_i32 ch =
 	let ch4 = read_byte ch in
 	if ch4 land 128 <> 0 then begin
 		if ch4 land 64 = 0 then raise (Overflow "read_i32");
-		ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor (((ch4 land 63) lor 64) lsl 24)
+		ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor ((ch4 land 64) lsl 24)
 	end else begin
 		if ch4 land 64 <> 0 then raise (Overflow "read_i32");
 		ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor (ch4 lsl 24)
