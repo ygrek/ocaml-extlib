@@ -107,6 +107,9 @@ val pos_out : ('a, 'b, 'c) output -> int
 val printf : ('a, string, 'b) output -> ('c, unit, string, unit) format4 -> 'c
 (** The printf function works for any output where token-buffer is string. *)
 
+val read_all : ('a,string) input -> string
+(** read all the contents of the input until [No_more_input] is raised. *)
+
 (** {6 Creation of IO Inputs/Outputs} *)
 
 val input_string : string -> stdin

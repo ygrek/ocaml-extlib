@@ -99,6 +99,26 @@ let close_out o =
 	o.out_flush <- f;
 	r
 
+let read_all i =
+	let maxlen = 1024 in
+	let str = ref [] in
+	let pos = ref 0 in
+	let rec loop() =
+		let s = nread i maxlen in		
+		str := (s,!pos) :: !str;
+		pos := !pos + String.length s;
+		loop()
+	in
+	try
+		loop()
+	with
+		No_more_input ->
+			let buf = String.create !pos in
+			List.iter (fun (s,p) ->
+				String.unsafe_blit s 0 buf p (String.length s)
+			) !str;
+			buf
+
 (* -------------------------------------------------------------- *)
 (* Standard IO *)
 
@@ -443,11 +463,20 @@ let input_bits ch =
 			count := c;
 			k
 		end else begin
-			if !count >= 24 then raise (Overflow "read bits");
 			let k = read_byte ch in
-			data := (!data lsl 8) lor k;
-			count := !count + 8;
-			read n
+			if !count >= 24 then begin
+				if n >= 32 then raise (Overflow "input_bits");
+				let c = 8 + !count - n in
+				let d = !data land ((1 lsl !count) - 1) in
+				let d = (d lsl (8 - c)) lor (k lsr c) in
+				data := k;
+				count := c;
+				d
+			end else begin			
+				data := (!data lsl 8) lor k;
+				count := !count + 8;
+				read n
+			end
 		end
 	in
 	create_in 
