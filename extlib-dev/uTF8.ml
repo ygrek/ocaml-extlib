@@ -1,4 +1,4 @@
-(* $Id: uTF8.ml,v 1.1 2003-06-27 18:34:30 yori Exp $ *)
+(* $Id: uTF8.ml,v 1.2 2003-06-28 15:53:39 yori Exp $ *)
 (* Copyright 2002, 2003 Yamagata Yoriyuki *)
 
 open UChar
@@ -139,10 +139,16 @@ let init len f =
 let rec length_aux s c i =
   if i >= String.length s then c else
   let n = Char.code (String.unsafe_get s i) in
-  if n < 0x80 || n >= 0xc2 then
-    length_aux s (c + 1) (i + 1)
-  else
-    length_aux s c (i + 1)
+  let k =
+    if n < 0x80 then 1 else
+    if n < 0xc0 then invalid_arg "UTF8.length" else
+    if n < 0xe0 then 2 else
+    if n < 0xf0 then 3 else
+    if n < 0xf8 then 4 else
+    if n < 0xfc then 5 else
+    if n < 0xfe then 6 else
+    invalid_arg "UTF8.length" in
+  length_aux s (c + 1) (i + k)
 
 let length s = length_aux s 0 0
 
