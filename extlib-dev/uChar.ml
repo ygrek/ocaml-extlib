@@ -21,6 +21,9 @@ type t = int
 
 exception Out_of_range
 
+external unsafe_chr_of_uint : int -> t = "%identity"
+external uint_code : t -> int = "%identity"
+
 let char_of c = 
   if c >= 0 && c < 0x100 then Char.chr c else raise Out_of_range
 
@@ -31,9 +34,7 @@ let code c = if c >= 0 then c else raise Out_of_range
 let chr n =
   if n >= 0 && n lsr 31 = 0 then n else invalid_arg "UChar.chr"
 
-let uint_code c = c
 let chr_of_uint n = if n lsr 31 = 0 then n else invalid_arg "UChar.uint_chr"
-let unsafe_chr_of_uint n = n
   
 let eq (u1 : t) (u2 : t) = u1 = u2
 let compare u1 u2 =

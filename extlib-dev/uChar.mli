@@ -47,7 +47,7 @@ val chr : int -> t
 (** [uint_code u] returns the Unicode code number of [u].
    The returned int is unsigned, that is, on 32-bits platforms,
    the sign bit is used for storing the 31-th bit of the code number. *)
-val uint_code : t -> int
+external uint_code : t -> int = "%identity"
 
 (** [chr_of_uint n] returns the Unicode character of the code number [n].
    [n] is interpreted as unsigned, that is, on 32-bits platforms,
@@ -57,7 +57,7 @@ val chr_of_uint : int -> t
 
 (** Unsafe version of {!UChar.chr_of_uint}.
    No check of its argument is performed. *)
-val unsafe_chr_of_uint : int -> t
+external unsafe_chr_of_uint : int -> t = "%identity"
 
 (** Equality by code point comparison *)
 val eq : t -> t -> bool
