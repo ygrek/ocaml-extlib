@@ -163,11 +163,34 @@ let foldi f { cmp = cmp; map = map } acc =
        loop (f k v (loop acc l)) r in
   loop acc map
 
-let enum m =
-  let rec to_list acc = function
-    | Empty -> acc
-    | Node (l, k, v, r, _) -> to_list ((k, v) :: to_list acc r) l in
-  ExtList.List.enum (to_list [] m.map)
+let rec enum m =
+  let rec make l =
+    let l = ref l in
+    let rec next() =
+      match !l with
+      | [] -> raise Enum.No_more_elements
+      | Empty :: tl -> l := tl; next()
+      | Node (m1, key, data, m2, h) :: tl ->
+        l := m1 :: m2 :: tl;
+        (key, data)
+    in
+    let count() =
+      let n = ref 0 in
+      let r = !l in
+      try
+        while true do
+          ignore (next());
+          incr n
+        done;
+        assert false
+      with
+		Enum.No_more_elements -> l := r; !n
+    in
+    let clone() = make !l in
+	Enum.make ~next ~count ~clone
+  in
+  make [m.map]
+
 
 let uncurry_add (k, v) m = add k v m
 let of_enum ?(cmp = compare) e = Enum.fold uncurry_add (create cmp) e
