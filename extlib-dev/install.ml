@@ -34,6 +34,7 @@ let modules = [
 	"extString";
 	"global";	
 	"IO";
+	"IOO";
 	"option";
 	"pMap";
 	"refList";
