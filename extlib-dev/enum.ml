@@ -24,7 +24,7 @@ type 'a t = {
 	mutable fast : bool;
 }
 
-(* raised by 'next' functions, should NOT goes outside the API *)
+(* raised by 'next' functions, should NOT go outside the API *)
 exception No_more_elements
 
 let _dummy () = assert false
@@ -301,20 +301,25 @@ let rec filter_map f t =
 	from2 next (fun () -> filter_map f (t.clone()))
 
 let rec append ta tb = 
-	let append_next = ref _dummy in
-	append_next := (fun () ->
+	let t = {
+		count = (fun () -> ta.count() + tb.count());
+		next = _dummy;
+		clone = (fun () -> append (ta.clone()) (tb.clone()));
+		fast = ta.fast && tb.fast;
+	} in
+	t.next <- (fun () ->
 		try
 			ta.next()
 		with
 			No_more_elements ->
-				append_next := tb.next;
-				!append_next ());
-	{
-		count = (fun () -> ta.count() + tb.count());
-		next = (fun () -> !append_next ());
-		clone = (fun () -> append (ta.clone()) (tb.clone()));
-		fast = ta.fast && tb.fast;
-	}
+				(* add one indirection because tb can mute *)
+				t.next <- (fun () -> tb.next());
+				t.count <- (fun () -> tb.count());
+				t.clone <- (fun () -> tb.clone());
+				t.fast <- tb.fast;
+				t.next()
+	);
+	t
 
 let rec concat t =
 	let concat_ref = ref _dummy in
