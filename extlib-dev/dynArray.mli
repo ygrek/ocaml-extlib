@@ -65,19 +65,16 @@ val last : 'a t -> 'a
 
 val set : 'a t -> int -> 'a -> unit
 (** [set darr idx v] sets the element of [darr] at index [idx] to value
-	[v].  The previous value is overwritten.  If [idx] is equal to
-	[length darr] (i.e. the index is one past the end of the array), the
-	array is expanded to hold the new element - in this case, the function
-	behaves like [add].  Otherwise, the array is not expanded. *)
+	[v].  The previous value is overwritten. *)
 
 val insert : 'a t -> int -> 'a -> unit
 (** [insert darr idx v] inserts [v] into [darr] at index [idx].  All elements
 	of [darr] with an index greater than or equal to [idx] have their
-	index incremented (are moved up one place) to make room for the new 
+	index incremented (are moved up one place) to make room for the new
 	element. *)
 
 val add : 'a t -> 'a -> unit
-(** [add darr v] appends [v] onto [darr].  [v] becomes the new 
+(** [add darr v] appends [v] onto [darr].  [v] becomes the new
 	last element of [darr]. *)
 
 val append : 'a t -> 'a t -> unit
@@ -127,7 +124,7 @@ val copy : 'a t -> 'a t
 	the copy).   *)
 
 val sub : 'a t -> int -> int -> 'a t
-(** [sub darr start len] returns an array holding the subset of [len] 
+(** [sub darr start len] returns an array holding the subset of [len]
 	elements from [darr] starting with the element at index [idx]. *)
 
 (** {6 Array functional support} *)
@@ -151,7 +148,7 @@ val mapi : (int -> 'a -> 'b) -> 'a t -> 'b t
 	[Array.mapi]. *)
 
 val fold_left : ('a -> 'b -> 'a) -> 'a -> 'b t -> 'a
-(** [fold_left f x darr] computes 
+(** [fold_left f x darr] computes
 	[f ( ... ( f ( f (get darr 0) x) (get darr 1) ) ... ) (get darr n-1)],
 	similar to [Array.fold_left] or [List.fold_left]. *)
 
@@ -189,7 +186,7 @@ type resizer_t = currslots:int -> oldlength:int -> newlength:int -> int
 *)
 
 val set_resizer : 'a t -> resizer_t -> unit
-(** Change the resizer for this array. *)	
+(** Change the resizer for this array. *)
 
 val get_resizer : 'a t -> resizer_t
 (** Get the current resizer function for a given array *)
@@ -206,7 +203,7 @@ val exponential_resizer : resizer_t
 	[exponential_resizer] works by doubling or halving the number of
 	slots until they "fit".  If the number of slots is less than the
 	new length, the number of slots is doubled until it is greater
-	than the new length (or Sys.max_array_size is reached).  
+	than the new length (or Sys.max_array_size is reached).
 
 	If the number of slots is more than four times the new length,
 	the number of slots is halved until it is less than four times the
@@ -226,7 +223,7 @@ val exponential_resizer : resizer_t
 	such "thrashing" only occurs with wild swings- adding and removing
 	huge numbers of elements (more than half of the elements in the array).
 
-	[exponential_resizer] is a good performing resizer for most 
+	[exponential_resizer] is a good performing resizer for most
 	applications.  A list allocates 2 words for every element, while an
 	array (with large numbers of elements) allocates only 1 word per
 	element (ignoring unboxed floats).  On insert, [exponential_resizer]
@@ -249,9 +246,9 @@ val exponential_resizer : resizer_t
 val step_resizer : int -> resizer_t
 (** The stepwise resizer- another example of a resizer function, this
 	time of a parameterized resizer.
-   
-	The resizer returned by [step_resizer step] returns the smallest 
-	multiple of [step] larger than [newlength] if [currslots] is less 
+
+	The resizer returned by [step_resizer step] returns the smallest
+	multiple of [step] larger than [newlength] if [currslots] is less
 	then [newlength]-[step] or greater than [newlength].
 
 	For example, to make an darray with a step of 10, a length
