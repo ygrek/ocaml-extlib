@@ -28,7 +28,7 @@ let input_chars ch =
 let input_list ch =
   let rec loop dst =
     let r = [ input_line ch ] in
-    Obj.magic (Obj.repr dst) 1 (Obj.repr r);
+    Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
     loop r in
   let r = [ Obj.magic () ] in
   try loop r
