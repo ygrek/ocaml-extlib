@@ -34,6 +34,6 @@ let get (r,name) =
 
 let undef (r,_) = r := None
 
-let isdef (r,_) = !r = None
+let isdef (r,_) = !r <> None
 
 let opt (r,_) = !r
