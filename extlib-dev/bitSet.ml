@@ -57,7 +57,7 @@ let clone = copy
 
 let set t x =
 	if x < 0 then error "set";
-	let pos , delta = x lsr log_int_size , x land int_size in
+	let pos = x lsr log_int_size and delta = x land int_size in
 	let size = blen !t in
 	if pos >= size then begin
 		let b = bcreate (pos+1) in
@@ -69,14 +69,14 @@ let set t x =
 
 let unset t x =
 	if x < 0 then error "unset";
-	let pos , delta = x lsr log_int_size , x land int_size in
+	let pos = x lsr log_int_size and delta = x land int_size in
 	let size = blen !t in
 	if pos < size then
 		bset !t pos ((bget !t pos) land (0xFF lxor (1 lsl delta)))
 
 let toggle t x =
 	if x < 0 then error "toggle";
-	let pos , delta = x lsr log_int_size , x land int_size in
+	let pos = x lsr log_int_size and delta = x land int_size in
 	let size = blen !t in
 	if pos >= size then begin
 		let b = bcreate (pos+1) in
@@ -91,7 +91,7 @@ let put t = function
 	| false -> unset t
 
 let is_set t x =
-	let pos , delta = x lsr log_int_size , x land int_size in
+	let pos = x lsr log_int_size and delta = x land int_size in
 	let size = blen !t in
 	if pos < size then
 		fast_bool (((bget !t pos) lsr delta) land 1)
@@ -101,7 +101,7 @@ let is_set t x =
 (* we can't use Pervasives.compare because bitsets might be of different
    sizes but are actually the same integer *)
 let compare t1 t2 =
-	let size1 , size2 = blen !t1 , blen !t2 in
+	let size1 = blen !t1 and size2 = blen !t2 in
 	let size = (if size1 < size2 then size1 else size2) in
 	let rec loop2 n =
 		if n >= size2 then
@@ -146,7 +146,7 @@ let partial_count t x =
 			nbits (x lsr 1)
 	in
 	let size = blen !t in
-	let pos , delta = x lsr log_int_size, x land int_size in
+	let pos = x lsr log_int_size and delta = x land int_size in
 	let rec loop n acc =
 		if n = size then
 			acc
@@ -166,7 +166,7 @@ let enum t =
 	let rec make n =
 		let cur = ref n in
 		let rec next() =
-			let pos , delta = !cur lsr log_int_size, !cur land int_size in
+			let pos = !cur lsr log_int_size and delta = !cur land int_size in
 			if pos >= blen !t then raise Enum.No_more_elements;
 			let x = bget !t pos in
 			let rec loop i =
