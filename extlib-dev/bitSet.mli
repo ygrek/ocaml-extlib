@@ -46,9 +46,9 @@ val clone : t -> t
 
 val set : t -> int -> unit
 (** [set s n] sets the nth-bit in the bitset [s] to true. *)
- 
+
 val unset : t -> int -> unit
-(** [unset s n] sets the nth-bit in the bitset [s] to false. *) 
+(** [unset s n] sets the nth-bit in the bitset [s] to false. *)
 
 val put : t -> bool -> int -> unit
 (** [put s v n] sets the nth-bit in the bitset [s] to [v]. *)
@@ -79,10 +79,11 @@ val intersect : t -> t -> unit
 (** [intersect s t] sets [s] to the intersection of the sets [s] and [t]. *)
 
 val unite : t -> t -> unit
-(** [intersect s t] sets [s] to the union of the sets [s] and [t]. *)
+(** [unite s t] sets [s] to the union of the sets [s] and [t]. *)
 
 val differentiate : t -> t -> unit
-(** [intersect s t] removes the elements of [t] from [s]. *)
+(** [differentiate s t] removes the elements of [t] from [s]. *)
 
 val differentiate_sym : t -> t -> unit
-(** [intersect s t] sets [s] to the symmetrical difference of the sets [s] and [t]. *)
+(** [differentiate_sym s t] sets [s] to the symmetrical difference of the
+  sets [s] and [t]. *)
