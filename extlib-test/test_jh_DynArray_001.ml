@@ -33,6 +33,14 @@ let test_triv () =
   assert (length b == 0);
   Gc.major ()
 
+(* Failure reported by Jeff Henrikson.  Should be fixed in CVS
+   already? JH 2005/Mar/01 *)
+let test_regr_1 () = 
+  for i = 0 to 30 do
+    ignore (DynArray.of_array [||])
+  done
+
 let test () = 
-  Util.run_test ~test_name:"jh_DynArray.triv" test_triv
+  Util.run_test ~test_name:"jh_DynArray.triv" test_triv;
+  Util.run_test ~test_name:"jh_DynArray.regr_1" test_regr_1
 
