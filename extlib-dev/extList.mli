@@ -1,4 +1,4 @@
-
+	
 module List : sig
 
 	exception Empty_list
@@ -54,7 +54,9 @@ module List : sig
 	val split_nth : int -> 'a list -> 'a list * 'a list
 	val find_exc : ('a -> bool) -> exn -> 'a list -> 'a
 	val remove : 'a list -> 'a -> 'a list
+	val remove_if : ('a -> bool) -> 'a list -> 'a list
 	val remove_all : 'a list -> 'a -> 'a list
+	val rfind : ('a -> bool) -> 'a list -> 'a
 
 (*
  * remaining functions to implement (proposals)
@@ -78,12 +80,6 @@ module List : sig
 
  (* find the last element of the given list that match the
 	given predicate *)
- val rfind : ('a -> bool) -> 'a list -> 'a
-
- (* return the list without the first element
-    that does match the specified predicate
-    raise Not_found if no element matched *)
- val filter_one : ('a -> bool) -> 'a list -> 'a list
 
 ---- commented out ends here -- *)
 

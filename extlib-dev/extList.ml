@@ -290,6 +290,8 @@ let rec find p = function
    | [] -> raise Not_found
    | h :: t -> if p h then h else find p t
 
+let rfind p l = find p (List.rev l)
+
 let find_all p l = 
     let rec findnext dst = function
         | [] -> ()
@@ -542,6 +544,12 @@ let remove l x =
 			let r = [ h ] in
 			loop r t;
 			r
+
+let rec remove_if f = function
+	| x::l when (f x) -> l
+	| x::l -> x::(remove_if f l)
+	| [] -> raise Not_found
+
 
 let rec remove_all l x =
 	let rec loop dst = function

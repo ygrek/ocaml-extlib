@@ -1,3 +1,6 @@
+exception Empty_list
+exception Invalid_index of int
+
 type 'a t
 
 (* return a new empty mutable list *)
@@ -47,7 +50,7 @@ val last : 'a t -> 'a
 val pop : 'a t -> 'a
 
 (* remove and return in a list the n first elements
-   raise No_such_element if the mutable list doed not
+   raise Empty_list if the mutable list doed not
    containes enough elements *)
 val npop : 'a t -> int -> 'a list
 
@@ -115,14 +118,14 @@ val sort : ?cmp:('a -> 'a -> int) -> 'a t -> unit
    specified predicate *)
 val filter : ('a -> bool) -> 'a t -> unit
 
-(* remove the first element that does match the
-   specified predicate
-   raise Not_found if no element is removed *)
-val filter_one : ('a -> bool) -> 'a t -> unit
-
 (* remove an element from the mutable list
    raise Not_found if the element is not found *)
 val remove : 'a t -> 'a -> unit
+
+(* remove the first element that does match the
+   specified predicate
+   raise Not_found if no element have been removed *)
+val remove_if : ('a -> bool) -> 'a t -> unit
 
 (* remove all elements equals to the specified
    element from the mutable list *)
@@ -139,9 +142,14 @@ val remove_all : 'a t -> 'a -> unit
 module Index : sig
 
 	(* return the index (position : 0 starting) of an element in
-	   a mutable list, using the optional comparator or ( = ) for default
+	   a mutable list, using ( = ) for testing element equality
 	   raise Not_found if no element was found *)
-	val index_of : ?comp:('a -> bool) -> 'a t -> 'a -> int
+	val index_of : 'a t -> 'a -> int
+
+	(* return the index (position : 0 starting) of an element in
+	   a mutable list, using the specified comparator
+	   raise Not_found if no element was found *)
+	val index : ('a -> bool) -> 'a t -> int
 
 	(* return the element of mutable list at the specified index
 	   raise Invalid_index if the index is outside [0 ; length-1] *)
