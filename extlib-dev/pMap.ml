@@ -79,6 +79,9 @@ let merge t1 t2 =
 let create cmp = { cmp = cmp; map = Empty }
 let empty = { cmp = compare; map = Empty }
 
+let is_empty x = 
+	x.map = Empty
+
 let add x d { cmp = cmp; map = map } =
   let rec loop = function
     | Node (l, k, v, r, h) ->
@@ -119,6 +122,8 @@ let mem x { cmp = cmp; map = map } =
         c = 0 || loop (if c < 0 then l else r)
     | Empty -> false in
   loop map
+
+let exists = mem
 
 let iter f { map = map } =
   let rec loop = function

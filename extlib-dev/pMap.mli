@@ -20,12 +20,14 @@
 type ('a, 'b) t
 
 val empty : ('a, 'b) t
+val is_empty : ('a, 'b) t -> bool
 val create : ('a -> 'a -> int) -> ('a, 'b) t
 
 val add : 'a -> 'b -> ('a, 'b) t -> ('a, 'b) t
 val find : 'a -> ('a, 'b) t -> 'b
 val remove : 'a -> ('a, 'b) t -> ('a, 'b) t
 val mem : 'a -> ('a, 'b) t -> bool
+val exists : 'a -> ('a, 'b) t -> bool
 
 val iter : ('a -> 'b -> unit) -> ('a, 'b) t -> unit
 val map : ('b -> 'c) -> ('a, 'b) t -> ('a, 'c) t
