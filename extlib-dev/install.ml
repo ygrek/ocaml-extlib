@@ -1,4 +1,26 @@
+(*
+ * Install - ExtLib installation * Copyright (C) 2003 Nicolas Cannasse
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *)
+ 
 open Printf
+
+type path =
+	| PathUnix
+	| PathDos
 
 let modules = [
 	"enum";
@@ -18,10 +40,10 @@ let modules = [
 let m_list suffix =
 	String.concat " " (List.map (fun m -> m ^ suffix) modules)
 
-let obj_ext , lib_ext = match Sys.os_type with
-	| "Unix" | "Cygwin" | "MacOS" -> ".o" , ".a"
-	| "Win32" -> ".obj" , ".lib"
-	| _ -> failwith "Unknown OS"
+let obj_ext , lib_ext , cp_cmd , path_type = match Sys.os_type with
+	| "Unix" | "Cygwin" | "MacOS" -> ".o" , ".a" , "cp", PathUnix
+	| "Win32" -> ".obj" , ".lib" , "copy", PathDos
+	| _ -> failwith "Unknown OS"		
 
 let run cmd =
 	prerr_endline cmd;
@@ -29,13 +51,25 @@ let run cmd =
 	if ecode <> 0 then failwith (sprintf "Exit Code %d - Stopped" ecode)
 
 let copy file dest =
-	prerr_endline ("Installing "^file);
-	let path = dest ^ file in
-	(try Sys.remove path with _ -> ());
-	try
-		Sys.rename file path;
-	with
-		_ -> failwith "Aborted"
+	if dest <> "" && dest <> "." then begin
+		prerr_endline ("Installing "^file);
+		let path = dest ^ file in
+		(try Sys.remove path with _ -> ());
+		try
+			Sys.rename file path;
+		with
+			_ -> failwith "Aborted"
+	end
+
+let complete_path p =
+	if p = "" then
+		p
+	else
+		let c = p.[String.length p - 1] in
+		if c = '/' || c = '\\' then
+			p
+		else
+			p^(match path_type with PathUnix -> "/" | PathDos -> "\\")
 
 let remove file =	
 	try
@@ -53,14 +87,19 @@ let install() =
 		| _ -> failwith "Invalid choice, exit.")
 	in
 	printf "Choose installation directory :\n> ";
-	let dest = read_line() in
-	if dest = "" then failwith "Empty directory - aborted.";
-	let dest = (let c = dest.[String.length dest - 1] in if c = '/' || c = '\\' then dest else dest^"/") in
+	let dest = complete_path (read_line()) in
 	(try
 		close_out (open_out (dest^"test.file"));
 		Sys.remove (dest^"test.file");
 	with
 		_ -> failwith ("Directory "^dest^" does not exists or cannot be written."));
+	printf "Do you want to generate ocamldoc documentation (Y/N) ?\n> ";
+	let doc = (match read_line() with
+		| "y" | "Y" -> true
+		| "n" | "N" -> false
+		| _ -> failwith "Invalid choice, exit.");
+	in
+	if doc then run (sprintf "mkdir %sdoc" dest);
 	run (sprintf "ocamlc -c %s" (m_list ".mli"));
 	if byte then begin
 		List.iter (fun m -> run (sprintf "ocamlc -c %s.ml" m)) modules;
@@ -74,6 +113,12 @@ let install() =
 		List.iter (fun m -> remove (m^".cmx"); remove (m^obj_ext)) modules;
 		remove "extLib.cmx";
 		remove ("extLib"^obj_ext);
+	end;
+	if doc then begin 
+		run (sprintf "ocamldoc -html -d %sdoc %s" dest (m_list ".mli"));
+		run ((match path_type with
+				| PathDos -> sprintf "%s odoc_style.css %sdoc\\style.css";
+				| PathUnix -> sprintf "%s odoc_style.css %sdoc/style.css") cp_cmd dest);
 	end;
 	List.iter (fun m -> copy (m^".cmi") dest) modules;
 	copy "extLib.cmi" dest;
