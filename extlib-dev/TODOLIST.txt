@@ -4,5 +4,8 @@ EXTLIB TODO LIST
 Here's a list of things/idea that have been discussed on the extlib mailling
 list and should be added in a near future :
 
+- Documentation of existing modules
+
 - Unit test + Benchmark module
+- Balanced Binary Search Tree
 

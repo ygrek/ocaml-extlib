@@ -2,7 +2,7 @@
 module Hashtbl :
   sig
 
-	type ('a,'b) t = ('a,'b) Hashtbl.t
+	type ('a,'b) t
 
 	val exists : ('a,'b) t -> bool
 
@@ -24,5 +24,7 @@ module Hashtbl :
 
 	(* remove all bindings for the given key *)
 	val remove_all : ('a,'b) t -> 'a -> unit
+
+	val map : ('b -> 'c) -> ('a,'b) t -> ('a,'c) t
 
   end
