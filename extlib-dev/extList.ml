@@ -102,6 +102,23 @@ let map f = function
 		loop r t;
 		inj r
 
+let rec drop n = function
+	| _ :: l when n > 0 -> drop (n-1) l
+	| l -> l
+
+let take n l =
+	let rec loop n dst = function
+		| h :: t when n > 0 ->
+			let r = { hd = h; tl = [] } in
+			dst.tl <- inj r;
+			loop (n-1) r t
+		| _ ->
+			()
+	in
+	let dummy = dummy_node() in
+	loop n dummy l;
+	dummy.tl
+
 let rec unique ?(cmp = ( = )) l =
 	let rec loop dst = function
 		| [] -> ()
@@ -315,11 +332,6 @@ let combine l1 l2 =
 
 let sort ?(cmp=compare) = List.sort cmp
 
-(* 
- * Additional functions
- * added 03-15-03 by Nicolas Cannasse
- *)
-
 let rec init size f =
 	if size = 0 then [] 
 	else if size < 0 then invalid_arg "ExtList.init"
@@ -432,20 +444,6 @@ let rec remove_all l x =
 	let dummy = dummy_node () in
 	loop dummy l;
 	dummy.tl
-
-let shuffle l =
-	let a = Array.of_list l in
-	let len = Array.length a in	
-	for i = 0 to len-2 do
-		let p = (Random.int (len-i))+i in
-		let tmp = a.(p) in
-		a.(p) <- a.(i);
-		a.(i) <- tmp;
-	done;
-	Array.to_list a
-
-(* Added functions for Enum support
-	- 2003-04-15, Nicolas Cannasse *)
 
 let enum l =
 	let rec make lr count =

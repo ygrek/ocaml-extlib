@@ -91,8 +91,13 @@ module List :
 	(** [remove_all l x] is similar to [remove] but removes all elements that
 	 are equal to [x] and not only the first one. *)
 
-	val shuffle : 'a list -> 'a list
-	(** Returns the shuffled list, using [Random] module. *)
+	val take : int -> 'a list -> 'a list
+	(** [take n l] returns up to the [n] first elements from list [l], if
+	 available. *)
+
+	val drop : int -> 'a list -> 'a list
+	(** [drop n l] returns [l] without the first [n] elements, or the empty
+	 list if [l] have less than [n] elements. *)
 
 	(** {6 Enum functions} *)
 
