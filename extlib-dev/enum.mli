@@ -19,9 +19,9 @@
 
 (** Enumeration over abstract collection of elements.
 
- Enumerations are entirely functional and most of the operations does not
- actually requires the allocation of data structures. Using enumerations
- to manipulate data is then efficient and simple. All data structures in
+ Enumerations are entirely functional and most of the operations do not
+ actually require the allocation of data structures. Using enumerations
+ to manipulate data is therefore efficient and simple. All data structures in
  ExtLib such as lists, arrays, etc. have support to convert from and to
  enumerations.
 *)
@@ -29,29 +29,68 @@
 
 type 'a t
 
+(** {6 Constructors} 
+
+ In this section the word {i shall} denotes a semantic
+ requirement. The correct operation
+ of the functions in this interface are conditional
+ on the client meeting these requirements.
+*)
+
+exception No_more_elements
+(** This exception {i shall} be raised by the [next] function of [make] 
+  or [from] when no more elements can be enumerated, it {i shall not}
+  be raised by any function which is an argument to any
+  other function specified in the interface.
+*)
+
+val make : next:(unit -> 'a) -> count:(unit -> int) -> clone:(unit -> 'a t) -> 'a t
+(** This function creates a fully defined enumeration.
+	{ul {li the [next] function {i shall} return the next element of the
+	enumeration or raise [No_more_elements] if the underlying data structure
+	does not have any more elements to enumerate.}
+	{li the [count] function {i shall} return the actual number of remaining
+	elements in the enumeration.}
+	{li the [clone] function {i shall} create a clone of the enumeration. }}
+ 
+	For some samples on how to correctly use [make], you can have a look
+		at implementation of [ExtList.enum]. 
+*)
+
+val init : int -> (int -> 'a) -> 'a t
+(** [init n f] create a new enumeration over elements
+  [f 0, f 1, ..., f (n-1)] *)
+
+val clone : 'a t -> 'a t
+(** [clone e] creates a new enumeration that is copy of [e]. If [e]
+ is consumed by later operations, the clone will not be affected. *)
+
 (** {6 Final functions}
 
- Theses functions are consuming all the enumeration until
- its end (or an exception is raised).
+ These functions consume the enumeration until
+ it ends or an exception is raised by the first
+ argument function.
 *)
 
 val iter : ('a -> unit) -> 'a t -> unit
-(** [iter f e] calls the function [f] with all elements of [e]. *)
+(** [iter f e] calls the function [f] with each elements of [e] in turn. *)
 
 val iter2 : ('a -> 'b -> unit) -> 'a t -> 'b t -> unit
-(** [iter2 f e1 e2] calls the function [f] with the next element of [e] and
- the next element of [e2] until one of the two enumerations ends. *)
+(** [iter2 f e1 e2] calls the function [f] with the next elements of [e] and
+ [e2] repeatedly until one of the two enumerations ends. *)
 
 val fold : ('a -> 'b -> 'b) -> 'b -> 'a t -> 'b
-(** [fold f v e] returns [f (... (f (f v a1) a2) ...) aN] where a1..N are
- the elements of [e]. *)
+(** [fold f v e] returns v if e is empty,
+  otherwise [f (... (f (f v a1) a2) ...) aN] where a1..N are
+  the elements of [e]. 
+*)
 
 val fold2 : ('a -> 'b -> 'c -> 'c) -> 'c -> 'a t -> 'b t -> 'c
 (** [fold2] is similar to [fold] but will fold over two enumerations at the
  same time until one of the two enumerations ends. *)
 
 (** Indexed fuctions : these functions are similar to previous ones
- except that they are calling the function with one additional argument which
+ except that they call the function with one additional argument which
  is an index starting at 0 and incremented after each call to the function. *)
 
 val iteri : (int -> 'a -> unit) -> 'a t -> unit
@@ -64,15 +103,14 @@ val fold2i : (int -> 'a -> 'b -> 'c -> 'c) -> 'c -> 'a t -> 'b t -> 'c
 
 (** {6 Useful functions} *)
 
-val init : int -> (int -> 'a) -> 'a t
-(** [init n f] create a new enumeration over elements
-  [f 0, f 1, ..., f (n-1)] *)
-
 val find : ('a -> bool) -> 'a t -> 'a
-(** [find f e] returns the first element [x] of [e] such as [f x] returns
- [true], or raises [Not_found] if no element can be found. Since [find] is
- consuming the enumeration, you can use it several times on the same
- enumeration to find the next element. *)
+(** [find f e] returns the first element [x] of [e] such that [f x] returns
+ [true], consuming the enumeration up to and including the
+ found element, or, raises [Not_found] if no such element exists
+ in the enumeration, consuming the whole enumeration in the search.
+
+ Since [find] consumes a prefix of the enumeration, it can be used several 
+ times on the same enumeration to find the next element. *)
 
 val empty : 'a t -> bool
 (** [empty e] returns true if [e] does not contains any element. *)
@@ -81,37 +119,50 @@ val peek : 'a t -> 'a option
 (** [peek e] returns [None] if [e] is empty or [Some x] where [x] is
  the next element of [e]. The element is not removed from the enumeration. *)
 
-val push : 'a t -> 'a -> unit
-(** [push e x] will add [x] at the beginning of [e]. *)
-
 val get : 'a t -> 'a option
 (** [get e] returns [None] if [e] is empty or [Some x] where [x] is
- the next element of [e]. The element is removed from the enumeration. *)
-
-val clone : 'a t -> 'a t
-(** [clone e] creates a new enumeration that is copy of [e]. If [e]
- is consumed by later operations, the clone will not get affected. *)
+  the next element of [e], in which case the element is removed from the enumeration. *)
 
 val force : 'a t -> unit
 (** [force e] forces the application of all lazy functions and the
- enumeration of all elements. An efficient intermediate data structure
- of enumerated elements is constructed and [e] will now enumerate over
- that data structure. *)
+ enumeration of all elements, exhausting the enumeration. 
+ 
+  An efficient intermediate data structure
+  of enumerated elements is constructed and [e] will now enumerate over
+  that data structure. *)
+
+(** {6 Counting} *)
 
 val count : 'a t -> int
-(** [count e] returns the number of remaining elements in [e].
- Depending of the underlying data structure that is implementing the
- enumeration functions, the count operation can be costly, and even sometimes
- can cause a call to [force]. *)
+(** [count e] returns the number of remaining elements in [e] without
+  consuming the enumeration.
 
-(** {6 Lazy functions}
+Depending of the underlying data structure that is implementing the
+enumeration functions, the count operation can be costly, and even sometimes
+can cause a call to [force]. *)
 
- Theses functions are lazy, that means that they will create a new modified
+val fast_count : 'a t -> bool
+(** For users worried about the speed of [count] you can call the [fast_count]
+    function that will give an hint about [count] implementation. Basicly, if
+    the enumeration has been created with [make] or [init] or if [force] has
+	been called on it, then [fast_count] will return true. *)
+  
+(** {6 Lazy constructors}
+
+ Theses functions are lazy which means that they will create a new modified
  enumeration without actually enumerating any element until they are asked
  to do so by the programmer (using one of the functions above).
  
- When the resulting enumerations of theses functions are consumed, the
+ When the resulting enumerations of these functions are consumed, the
  underlying enumerations they were created from are also consumed. *)
+
+val from : (unit -> 'a) -> 'a t
+(** [from next] creates an enumeration from the [next] function.
+ [next] {i shall} return the next element of the enumeration or raise
+ [No_more_elements] when no more elements can be enumerated. Since the
+ enumeration definition is incomplete, a call to [clone] or [count] will
+ result in a call to [force] that will enumerate all elements in order to
+ return a correct value. *)
 
 val map : ('a -> 'b) -> 'a t -> 'b t
 (** [map f e] returns an enumeration over [(f a1, f a2, ... , f aN)] where
@@ -137,42 +188,9 @@ val concat : 'a t t -> 'a t
 (** [concat e] returns an enumeration over all elements of all enumerations
  of [e]. *)
 
-(** {6 Creating enumerations} 
-
- Although enumerations over several data structures are already implemented
- in ExtLib, you might want to create your own enumerations over your own data
- structures. *)
-
-exception No_more_elements
-(** This exception is raised by the [next] function when no more elements
- can be enumerated. It should NOT be used anywhere else than in a [next]
- function used for [make] or [from] since it is used internaly. *)
-
-val from : (unit -> 'a) -> 'a t
-(** [from next] is creating an enumeration using only a [next] function.
- Such function returns the next element of the enumeration or raise
- [No_more_elements] when no more elements can be enumerated. Since the
- enumeration definition is uncomplete, a call to [clone] or [count] will
- result in a call to [force] that will enumerate all elements in order to
- return a correct value. *)
-
-val make : next:(unit -> 'a) -> count:(unit -> int) -> clone:(unit -> 'a t) -> 'a t
-(** this function is creating a fully defined enumeration.
-	{ul {li the [next] function will return the next element of the
-	enumeration or raise [No_more_elements] if the underlying data structure
-	does not have any more elements to enumerate.}
-	{li the [count] function will return the actual number of remaining
-	elements in the enumeration.}
-	{li the [clone] function will create a clone of the enumeration. }}
- 
-	{i (for some samples on how to correctly use [make], you can have a look
-		at implementation of [ExtList.enum]. }
-*)
+val push : 'a t -> 'a -> unit
+(** [push e x] will add [x] at the beginning of [e]. *)
 
 (**/**)
 
-val fast_count : 'a t -> bool
-(** For users worried about the speed of [count] you can call the [fast_count]
-    function that will give an hint about [count] implementation. Basicly, if
-    the enumeration has been created with [make] or [init] or if [force] has
-	been called on it, then [fast_count] will return true. *)
+
