@@ -13,5 +13,5 @@ doc: all
 	-mkdir dochtml
 	ocamldoc -d dochtml -html *.mli
 	
-chm: all
-	ocamldoc -o ext-lib.chm -g docchm.cma *.mli
+doc-dump: all
+	ocamldoc -dump ext-lib.odoc *.mli
