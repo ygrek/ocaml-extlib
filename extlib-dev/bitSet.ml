@@ -25,10 +25,8 @@ external blen : intern -> int = "%string_length"
 external bget : intern -> int -> int = "%string_unsafe_get"
 external bset : intern -> int -> int -> unit = "%string_unsafe_set"
 external fast_bool : int -> bool = "%identity"
-external bblit : intern -> int -> intern -> int -> int -> unit
-							 = "blit_string" "noalloc"
-external bfill : intern -> int -> int -> int -> unit
-							 = "fill_string" "noalloc"
+let bblit : intern -> int -> intern -> int -> int -> unit = Obj.magic String.blit
+let bfill : intern -> int -> int -> int -> unit = Obj.magic String.fill
 
 exception Negative_index of string
 
