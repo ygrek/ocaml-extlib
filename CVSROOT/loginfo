@@ -21,6 +21,7 @@
 #   v = new version number (post-checkin)
 #
 # For example:
+#
 
 DEFAULT (echo ""; date; id; echo $USER; echo " - "; echo %s; cat) >> $CVSROOT/CVSROOT/commitlog
 
