@@ -97,10 +97,6 @@ val tl : 'a t -> 'a t
     but without the first one or
     raises [Empty_list] if the ref list is empty *)
 
-val shuffle : 'a t -> unit
-(** Randomly shuffles the elements 
-    using the module Random - O(n^2) *)
-
 val rev : 'a t -> unit
 (** Reverses the ref list - O(n) *)
 

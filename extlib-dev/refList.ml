@@ -100,9 +100,6 @@ let npop rl n =
 	in
 	pop_aux !rl n
 
-let shuffle rl =
-	rl := List.shuffle !rl
-
 let copy_enum ~dst ~src = dst := List.of_enum src
 let enum rl = List.enum !rl
 let of_enum e = ref (List.of_enum e)
