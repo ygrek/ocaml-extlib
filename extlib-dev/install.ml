@@ -100,7 +100,7 @@ let install() =
 	let autodoc = ref false in
 	let autobyte = ref false in
 	let autonative = ref false in
-	let usage = "ExtLib installation program v1.1\n(c)2003,2004 Nicolas Cannasse" in
+	let usage = "ExtLib installation program v1.2\n(c)2003,2004 Nicolas Cannasse" in
 	Arg.parse [
 		("-d", Arg.String (fun s -> autodir := Some s) , "<dir> : install in target directory");
 		("-b", Arg.Unit (fun () -> autobyte := true) , ": byte code installation");
