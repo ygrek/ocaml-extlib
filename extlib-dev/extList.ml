@@ -1,7 +1,7 @@
 (*
- * ExtList - a tail recursive implementation of the OCaml List module.
+ * ExtList - additional and modified functions for lists.
  * Copyright (C) 2003 Brian Hurt
- * Copyright (C) 2003 Nicolas Cannasse (ncannasse@motion-twin.com)
+ * Copyright (C) 2003 Nicolas Cannasse
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -49,7 +49,7 @@ let nth l index =
 	let rec loop n = function
 		| [] -> raise (Invalid_index index);
 		| h :: t -> 
-			if (n = 0) then h else loop (n - 1) t
+			if n = 0 then h else loop (n - 1) t
 	in
 	loop index l
 
@@ -58,10 +58,11 @@ let append l1 l2 =
 	| [] -> l2
 	| h :: t ->
 		let rec loop dst = function
-		| [] -> dst.tl <- l2; ()
+		| [] ->
+			dst.tl <- l2
 		| h :: t ->
 			let cell = { hd = h; tl = [] } in
-			dst.tl <- (inj cell);
+			dst.tl <- inj cell;
 			loop cell t
 		in
 		let r = { hd = h; tl = [] } in
@@ -73,7 +74,7 @@ let rec flatten l =
 		| [] -> dst
 		| h :: t ->
 			let r = { hd = h; tl = [] } in
-			dst.tl <- (inj r);
+			dst.tl <- inj r;
 			inner r t
 	in
 	let rec outer dst = function
@@ -93,7 +94,7 @@ let map f = function
 		| [] -> ()
 		| h :: t ->
 			let r = { hd = f h; tl = [] } in
-			dst.tl <- (inj r);
+			dst.tl <- inj r;
 			loop r t
 		in
 		let r = { hd = f h; tl = [] } in
@@ -143,7 +144,7 @@ let fold_right f l init =
 			if n < fold_right_max then
 				f h (loop (n+1) t)
 			else
-				f h (tail_loop init (List.rev t))
+				f h (tail_loop init (rev t))
 	in
 	loop 0 l
 
@@ -248,7 +249,7 @@ let find_all p l =
 		| h :: t -> 
 			if p h then
 				let r = { hd = h; tl = [] } in
-				dst.tl <- (inj r);
+				dst.tl <- inj r;
 				findnext r t
 			else
 				findnext dst t
@@ -303,7 +304,7 @@ let combine l1 l2 =
 		| [], [] -> ()
 		| h1 :: t1, h2 :: t2 -> 
 			let r = { hd = h1, h2; tl = [] } in
-			dst.tl <- (inj r);
+			dst.tl <- inj r;
 			loop r t1 t2
 		| _, _ -> raise (Different_list_size "combine")
 	in
@@ -378,7 +379,7 @@ let split_nth index = function
 					loop (n-1) r t 
 			in
 			let r = { hd = h; tl = [] } in
-			(inj r), loop (index-1) r t
+			inj r, loop (index-1) r t
 
 let find_exc f e l =
 	try
@@ -474,7 +475,6 @@ let of_enum e =
 		r) h e in
 	h.tl
 
-let append_enum l e =
-	append l (of_enum e)
-
 end
+
+let ( @ ) = List.append
