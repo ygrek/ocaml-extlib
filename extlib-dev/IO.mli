@@ -147,7 +147,10 @@ exception Overflow of string
 (** Exception raised when a read or write operation cannot be completed. *)
 
 val read_byte : input -> int
-(** Read an unsigned 8-bit byte. *)
+(** Read an unsigned 8-bit integer. *)
+
+val read_signed_byte : input -> int
+(** Read an signed 8-bit integer. *)
 
 val read_ui16 : input -> int
 (** Read an unsigned 16-bit word. *)

@@ -328,12 +328,19 @@ let pipe() =
 
 exception Overflow of string
 
-let read_byte i = int_of_char (read i)
+let read_byte i = int_of_char (i.in_read())
+
+let read_signed_byte i =
+	let c = int_of_char (i.in_read()) in
+	if c land 128 <> 0 then
+		c - 0xFF
+	else
+		c
 
 let read_string i =
 	let b = Buffer.create 8 in
 	let rec loop() =
-		let c = read i in
+		let c = i.in_read() in
 		if c <> '\000' then begin
 			Buffer.add_char b c;
 			loop();
@@ -346,7 +353,7 @@ let read_line i =
 	let b = Buffer.create 8 in
 	let cr = ref false in
 	let rec loop() =
-		let c = read i in
+		let c = i.in_read() in
 		match c with
 		| '\n' ->
 			()
@@ -382,7 +389,7 @@ let read_i16 i =
 	let ch1 = read_byte i in
 	let ch2 = read_byte i in
 	let n = ch1 lor (ch2 lsl 8) in
-	if ch2 land 128 > 0 then
+	if ch2 land 128 <> 0 then
 		n - 65536
 	else
 		n
@@ -482,7 +489,7 @@ let read_i16 i =
 	let ch2 = read_byte i in
 	let ch1 = read_byte i in
 	let n = ch1 lor (ch2 lsl 8) in
-	if ch2 land 128 > 0 then
+	if ch2 land 128 <> 0 then
 		n - 65536
 	else
 		n
