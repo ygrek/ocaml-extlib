@@ -40,7 +40,7 @@ val print_bool : bool -> unit
 val prerr_bool : bool -> unit
 (** Print a boolean to stderr. *)
 
-val input_file : string -> string
+val input_file : ?bin:bool -> string -> string
 (** returns the data of a given filename. *)
 
 val output_file : filename:string -> text:string -> unit

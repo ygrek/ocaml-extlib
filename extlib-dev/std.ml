@@ -66,8 +66,8 @@ let input_all ic =
       else loop acc new_total buf new_ofs in
   loop [] 0 (String.create buf_len) 0
 
-let input_file fname =
-  let ch = open_in fname in
+let input_file ?(bin=false) fname =
+  let ch = (if bin then open_in_bin else open_in) fname in
   let str = input_all ch in
   close_in ch;
   str
