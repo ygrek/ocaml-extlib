@@ -1,8 +1,8 @@
 # Makefile contributed by Alain Frisch
 
 MODULES = \
- enum bitSet dbi dynArray extHashtbl extList extString global IO IOO option \
- pMap refList std uChar uTF8 base64
+ enum bitSet dbi dynArray extHashtbl extList extString global IO option \
+ pMap refList std uChar uTF8 base64 unzip
 
 # the list is topologically sorted
 
