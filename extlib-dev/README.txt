@@ -19,7 +19,7 @@ What is ExtLib ?
 ----------------
 
 ExtLib is a set of additional useful functions and modules for OCaml.
-You can reach watch the SourceForge project page here :
+You can watch the SourceForge project page here :
 	http://sourceforge.net/projects/ocaml-lib/
 The web site is here :
 	http://ocaml-lib.sourceforge.net/
@@ -41,14 +41,14 @@ and follow the instructions.
 Usage :
 -------
 
-Watch the documentation
+Generate and watch the documentation.
 
 Contributors :
 --------------
 
 Nicolas Cannasse (ncannasse@motion-twin.com)
 Brian Hurt (brian.hurt@qlogic.com)
-Yamagata Yoriyuki (yoriyuki@mbg.ocn.ne.jp)
+Yamagata Yoriyuki (yori@users.sourceforge.net)
 
 License :
 ---------
