@@ -36,14 +36,13 @@ let modules = [
 	"IO";
 	"option";
 	"pMap";
-	"refList";
 	"std";
 	"uChar";
 	"uTF8";
 	"base64";
 	"unzip";
 	"optParse";
-        "dllist";
+    "dllist";
 ]
 
 let m_list suffix =
