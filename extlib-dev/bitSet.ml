@@ -21,7 +21,6 @@
 type intern
 
 let bcreate : int -> intern = Obj.magic String.create
-external blen : intern -> int = "%string_length"
 external bget : intern -> int -> int = "%string_unsafe_get"
 external bset : intern -> int -> int -> unit = "%string_unsafe_set"
 external fast_bool : int -> bool = "%identity"
@@ -30,12 +29,18 @@ let bfill : intern -> int -> int -> int -> unit = Obj.magic String.fill
 
 exception Negative_index of string
 
-type t = intern ref
+type t = {
+	mutable data : intern;
+	mutable len : int;
+}
 
 let error fname = raise (Negative_index fname)
 
 let empty() =
-	ref (bcreate 0)
+	{
+		data = bcreate 0;
+		len = 0;
+	}
 
 let int_size = 7 (* value used to round up index *)
 let log_int_size = 3 (* number of shifts *)
@@ -45,46 +50,50 @@ let create n =
 	let size = (n+int_size) lsr log_int_size in
 	let b = bcreate size in
 	bfill b 0 size 0;
-	ref b
+	{
+		data = b;
+		len = size;
+	}
 
 let copy t =
-	let size = blen !t in
-	let b = bcreate size in
-	bblit !t 0 b 0 size;
-	ref b
+	let b = bcreate t.len in
+	bblit t.data 0 b 0 t.len;
+	{
+		data = b;
+		len = t.len
+	}
 
 let clone = copy
 
 let set t x =
 	if x < 0 then error "set";
 	let pos = x lsr log_int_size and delta = x land int_size in
-	let size = blen !t in
+	let size = t.len in
 	if pos >= size then begin
 		let b = bcreate (pos+1) in
-		bblit !t 0 b 0 size;
+		bblit t.data 0 b 0 size;
 		bfill b size (pos - size + 1) 0;
-		t := b;
+		t.data <- b;
 	end;
-	bset !t pos ((bget !t pos) lor (1 lsl delta))
+	bset t.data pos ((bget t.data pos) lor (1 lsl delta))
 
 let unset t x =
 	if x < 0 then error "unset";
 	let pos = x lsr log_int_size and delta = x land int_size in
-	let size = blen !t in
-	if pos < size then
-		bset !t pos ((bget !t pos) land (0xFF lxor (1 lsl delta)))
+	if pos < t.len then
+		bset t.data pos ((bget t.data pos) land (0xFF lxor (1 lsl delta)))
 
 let toggle t x =
 	if x < 0 then error "toggle";
 	let pos = x lsr log_int_size and delta = x land int_size in
-	let size = blen !t in
+	let size = t.len in
 	if pos >= size then begin
 		let b = bcreate (pos+1) in
-		bblit !t 0 b 0 size;
+		bblit t.data 0 b 0 size;
 		bfill b size (pos - size + 1) 0;
-		t := b;
+		t.data <- b;
 	end;
-	bset !t pos ((bget !t pos) lxor (1 lsl delta))
+	bset t.data pos ((bget t.data pos) lxor (1 lsl delta))
 
 let put t = function
 	| true -> set t
@@ -92,21 +101,21 @@ let put t = function
 
 let is_set t x =
 	let pos = x lsr log_int_size and delta = x land int_size in
-	let size = blen !t in
+	let size = t.len in
 	if pos < size then
-		fast_bool (((bget !t pos) lsr delta) land 1)
+		fast_bool (((bget t.data pos) lsr delta) land 1)
 	else
 		false
 
 (* we can't use Pervasives.compare because bitsets might be of different
    sizes but are actually the same integer *)
 let compare t1 t2 =
-	let size1 = blen !t1 and size2 = blen !t2 in
+	let size1 = t1.len and size2 = t2.len in
 	let size = (if size1 < size2 then size1 else size2) in
 	let rec loop2 n =
 		if n >= size2 then
 			0
-		else if bget !t2 n <> 0 then
+		else if bget t2.data n <> 0 then
 			1
 		else
 			loop2 (n+1)
@@ -114,7 +123,7 @@ let compare t1 t2 =
 	let rec loop1 n =
 		if n >= size1 then
 			0
-		else if bget !t1 n <> 0 then
+		else if bget t1.data n <> 0 then
 			-1
 		else
 			loop1 (n+1)
@@ -123,7 +132,7 @@ let compare t1 t2 =
 		if n = size then
 			(if size1 > size2 then loop1 n else loop2 n)
 		else
-			let d = bget !t2 n - bget !t1 n in
+			let d = bget t2.data n - bget t1.data n in
 			if d = 0 then
 				loop (n+1)
 			else if d < 0 then
@@ -145,19 +154,19 @@ let partial_count t x =
 		else
 			nbits (x lsr 1)
 	in
-	let size = blen !t in
+	let size = t.len in
 	let pos = x lsr log_int_size and delta = x land int_size in
 	let rec loop n acc =
 		if n = size then
 			acc
 		else
-			let x = bget !t n in
+			let x = bget t.data n in
 			loop (n+1) (acc + nbits x)
 	in
 	if pos >= size then
 		0
 	else
-		loop (pos+1) (nbits ((bget !t pos) lsr delta))
+		loop (pos+1) (nbits ((bget t.data pos) lsr delta))
 
 let count t =
 	partial_count t 0
@@ -167,8 +176,8 @@ let enum t =
 		let cur = ref n in
 		let rec next() =
 			let pos = !cur lsr log_int_size and delta = !cur land int_size in
-			if pos >= blen !t then raise Enum.No_more_elements;
-			let x = bget !t pos in
+			if pos >= t.len then raise Enum.No_more_elements;
+			let x = bget t.data pos in
 			let rec loop i =
 	if i = 8 then
 		next()
@@ -190,37 +199,37 @@ let enum t =
 	make 0
 
 let intersect t t' =
-	for i = 0 to blen !t - 1 do
-		bset !t i ((bget !t i) land (bget !t' i))
+	for i = 0 to t.len - 1 do
+		bset t.data i ((bget t.data i) land (bget t'.data i))
 	done
 
 let unite t t' =
-	let size = blen !t and size' = blen !t' in
+	let size = t.len and size' = t'.len in
 	let rec unite_loop = function
 		| -1 -> ()
-		| i -> bset !t i ((bget !t i) lor (bget !t' i));
+		| i -> bset t.data i ((bget t.data i) lor (bget t'.data i));
 				unite_loop (i-1) in
 	if size < size' then begin
 		let b = bcreate size' in
 		unite_loop (size'- 1);
-		t := b
+		t.data <- b
 	end else
 		unite_loop (size - 1)
 
 let differentiate t t' =
-	for i = 0 to blen !t - 1 do
-		bset !t i ((bget !t i) land (lnot (bget !t' i)))
+	for i = 0 to t.len - 1 do
+		bset t.data i ((bget t.data i) land (lnot (bget t'.data i)))
 	done
 
 let differentiate_sym t t' =
-	let size = blen !t and size' = blen !t' in
+	let size = t.len and size' = t'.len in
 	let rec diff_sym_loop = function
 		| -1 -> ()
-		| i -> bset !t i ((bget !t i) lxor (bget !t' i));
+		| i -> bset t.data i ((bget t.data i) lxor (bget t'.data i));
 				diff_sym_loop (i-1) in
 	if size < size' then begin
 		let b = bcreate size' in
 		diff_sym_loop (size'- 1);
-		t := b
+		t.data <- b
 	end else
 		diff_sym_loop (size - 1)
