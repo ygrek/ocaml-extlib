@@ -369,7 +369,7 @@ let read_byte i = int_of_char (i.in_read())
 let read_signed_byte i =
 	let c = int_of_char (i.in_read()) in
 	if c land 128 <> 0 then
-		c - 0xFF
+		c - 256
 	else
 		c
 
