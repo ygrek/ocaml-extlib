@@ -25,6 +25,8 @@ exception Empty_list
 exception Invalid_index of int
 exception Different_list_size of string
 
+include List
+
 (* Inner functions prefixed with _ *)
 let _setcdr : 'a list -> 'a list -> unit = fun c v -> 
     Obj.set_field (Obj.repr c) 1 (Obj.repr v)
@@ -42,13 +44,6 @@ let _duplicate = function
         let r = [ h ] in
         r, loop r t
 
-
-let length l =
-	let rec loop len = function
-		| [] -> len
-		| h :: t -> loop (len + 1) t
-    in
-	loop 0 l
 
 let hd = function
     | [] -> raise Empty_list
@@ -82,13 +77,6 @@ let append l1 l2 =
 		loop r t;
 		r
 
-let rec rev_append l1 l2 =
-    match l1 with
-    | [] -> l2
-    | h :: t -> rev_append t (h :: l2)
-
-let rev l = rev_append l []
-
 let flatten = function
     | [] -> []
     | h :: t ->
@@ -118,21 +106,6 @@ let map f = function
 		let r = [f h] in
 		loop r t;
 		r
-
-let rev_map f l =
-    let rec loop accum = function
-        | [] -> accum
-        | h :: t -> loop ((f h) :: accum) t
-    in
-    loop [] l
-
-let rec iter f = function
-    | [] -> ()
-    | h :: t -> f h; iter f t
-
-let rec fold_left f accum = function
-    | [] -> accum
-    | h :: t -> fold_left f (f accum h) t
 
 let fold_right f l accum =
     let rec loop accum = function
@@ -191,20 +164,6 @@ let rec fast_fold_right2 f l1 l2 accum =
     | h1 :: t1, h2 :: t2 -> f h1 h2 (fast_fold_right2 f t1 t2 accum)
     | _ -> raise (Different_list_size "fast_fold_right2")
 
-let for_all p l =
-    let rec loop = function
-        | [] -> true
-        | h :: t -> if p h then loop t else false
-    in
-    loop l
-
-let exists p l =
-    let rec loop = function
-        | [] -> false
-        | h :: t -> if p h then true else loop t
-    in
-    loop l
-
 let for_all2 p l1 l2 =
     let rec loop l1 l2 =
         match l1, l2 with
@@ -222,30 +181,6 @@ let exists2 p l1 l2 =
             | _ -> raise (Different_list_size "exists2")
     in
     loop l1 l2
-
-let rec mem x = function
-    | [] -> false
-    | h :: t -> if h = x then true else mem x t
-
-let rec memq x = function
-    | [] -> false
-    | h :: t -> if h == x then true else memq x t
-
-let rec assoc x = function
-    | [] -> raise Not_found
-    | (a, b) :: t -> if a = x then b else assoc x t
-
-let rec assq x = function
-    | [] -> raise Not_found
-    | (a, b) :: t -> if a == x then b else assq x t
-
-let rec mem_assoc x = function
-    | [] -> false
-    | (a, b) :: t -> if a = x then true else mem_assoc x t
-
-let rec mem_assq x = function
-    | [] -> false
-    | (a, b) :: t -> if (a == x) then true else mem_assq x t
 
 let remove_assoc x = function
     | [] -> []
@@ -286,10 +221,6 @@ let remove_assq x = function
 			let r = [ pair ] in
 			loop r t;
 			r
-
-let rec find p = function
-   | [] -> raise Not_found
-   | h :: t -> if p h then h else find p t
 
 let rfind p l = find p (List.rev l)
 
@@ -544,14 +475,12 @@ let enum l =
 		)
 
 let of_enum e =
-	try
-		let h = [ Obj.magic () ] in
-		let _ = Enum.fold (fun x acc ->
-			let r = [ x ] in
-			_setcdr acc r;
-			r) h e in
-		tl h
-	with Enum.No_more_elements -> []
+	let h = [ Obj.magic () ] in
+	let _ = Enum.fold (fun x acc ->
+		let r = [ x ] in
+		_setcdr acc r;
+		r) h e in
+	tl h
 
 let append_enum l e =
 	append l (of_enum e)
