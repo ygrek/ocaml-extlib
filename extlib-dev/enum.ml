@@ -115,32 +115,34 @@ let get t =
 	with
 		No_more_elements -> None
 
+let push t e =
+	let rec make t =
+		let fnext = t.next in
+		let fcount = t.count in
+		let fclone = t.clone in
+		let next_called = ref false in
+		t.next <- (fun () ->
+			next_called := true;
+			t.next <- fnext;
+			t.count <- fcount;
+			t.clone <- fclone;
+			e);
+		t.count <- (fun () ->
+			let n = fcount() in
+			if !next_called then n else n+1);
+		t.clone <- (fun () ->
+			let tc = fclone() in
+			if not !next_called then make tc;
+			tc);
+	in
+	make t
+
 let peek t =
-	try
-		let e = t.next() in
-		let rec make t =
-			let fnext = t.next in
-			let fcount = t.count in
-			let fclone = t.clone in
-			let next_called = ref false in
-			t.next <- (fun () ->
-				next_called := true;
-				t.next <- fnext;
-				t.count <- fcount;
-				t.clone <- fclone;
-				e);
-			t.count <- (fun () ->
-				let n = fcount() in
-				if !next_called then n else n+1);
-			t.clone <- (fun () ->
-				let tc = fclone() in
-				if not !next_called then make tc;
-				tc);
-		in
-		make t;
-		Some e
-	with
-		No_more_elements -> None
+	match get t with
+	| None -> None
+	| Some x ->
+		push t x;
+		Some x
 
 let empty t =
 	if t.fast then
@@ -178,24 +180,39 @@ let iteri f t =
 		No_more_elements -> ()
 
 let iter2 f t u =
+	let push_t = ref None in
 	let rec loop () =
-		f (t.next()) (u.next());
+		push_t := None;
+		let e = t.next() in
+		push_t := Some e;
+		f e (u.next());
 		loop ()
 	in
 	try
 		loop ()
 	with
-		No_more_elements -> ()
+		No_more_elements ->
+			match !push_t with
+			| None -> ()
+			| Some e ->
+				push t e
 
 let iter2i f t u =
+	let push_t = ref None in
 	let rec loop idx =
-		f idx (t.next()) (u.next());
+		push_t := None;
+		let e = t.next() in
+		push_t := Some e;
+		f idx e (u.next());
 		loop (idx + 1)
 	in
 	try
 		loop 0
 	with
-		No_more_elements -> ()
+		No_more_elements ->
+			match !push_t with
+			| None -> ()
+			| Some e -> push t e
 
 let fold f init t =
 	let acc = ref init in
@@ -221,25 +238,43 @@ let foldi f init t =
 
 let fold2 f init t u =
 	let acc = ref init in
+	let push_t = ref None in
 	let rec loop() =
-		acc := f (t.next()) (u.next()) !acc;
+		push_t := None;
+		let e = t.next() in
+		push_t := Some e;
+		acc := f e (u.next()) !acc;
 		loop()
 	in
 	try
 		loop()
 	with
-		No_more_elements -> !acc
+		No_more_elements ->
+			match !push_t with
+			| None -> !acc
+			| Some e ->
+				push t e;
+				!acc
 
 let fold2i f init t u =
 	let acc = ref init in
+	let push_t = ref None in
 	let rec loop idx =
-		acc := f idx (t.next()) (u.next()) !acc;
+		push_t := None;
+		let e = t.next() in
+		push_t := Some e;
+		acc := f idx e (u.next()) !acc;
 		loop (idx + 1)
 	in
 	try
 		loop 0
 	with
-		No_more_elements -> !acc
+		No_more_elements ->
+			match !push_t with
+			| None -> !acc
+			| Some e ->
+				push t e;
+				!acc
 
 let find f t =
 	let rec loop () =
@@ -266,23 +301,6 @@ let rec mapi f t =
 		next = (fun () -> incr idx; f !idx (t.next()));
 		clone = (fun () -> mapi f (t.clone()));
 		fast = t.fast;
-	}
-
-let rec map2 f t u =
-	{
-		count = (fun () -> (min (t.count()) (u.count())));
-		next = (fun () -> f (t.next()) (u.next()));
-		clone = (fun () -> map2 f (t.clone()) (u.clone()));
-		fast = t.fast && u.fast;
-	}
-
-let rec map2i f t u =
-	let idx = ref (-1) in
-	{
-		count = (fun () -> (min (t.count()) (u.count())));
-		next = (fun () -> incr idx; f !idx (t.next()) (u.next()));
-		clone = (fun () -> map2i f (t.clone()) (u.clone()));
-		fast = t.fast && u.fast;
 	}
 
 let rec filter f t =
