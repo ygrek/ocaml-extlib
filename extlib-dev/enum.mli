@@ -26,10 +26,6 @@ val make : next:(unit -> 'a) -> count:(unit -> int) -> 'a t
 
 val from : (unit -> 'a) -> 'a t
 
-val count : 'a t -> int
-
-val has_more : 'a t -> bool
-
 val iter : ('a -> unit) -> 'a t -> unit
 
 val iteri : (int -> 'a -> unit) -> 'a t -> unit
@@ -50,6 +46,8 @@ val find : ('a -> bool) -> 'a t -> 'a (* raise Not_found *)
 
 val force : 'a t -> unit
 
+val clone : 'a t -> 'a t
+
 (* Lazy operations, cost O(1) *)
 
 val map : ('a -> 'b) -> 'a t -> 'b t
@@ -66,3 +64,10 @@ val append : 'a t -> 'a t -> 'a t
 
 val concat : 'a t t -> 'a t
 
+val filter_map : ('a -> 'b option) -> 'a t -> 'b t
+
+(* Depending of the underlaying structure that is implementating the Enum
+   functions, the count operation can be costly, and sometimes will need
+   a intermediate list to be built and all operations applied. Use it with
+   care. *)
+val count : 'a t -> int

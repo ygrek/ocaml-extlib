@@ -35,9 +35,6 @@ let make ~next ~count =
 let count t =
 	t.count()
 
-let has_more t =
-	t.count() > 0
-
 let iter f t =
 	let rec loop () =
 		f (t.next());
@@ -237,3 +234,54 @@ let from f =
 	} in
 	e.count <- (fun () -> force e; e.count());
 	e
+
+let filter_map f t =
+    let rec next () =
+        match f (t.next()) with
+        | None -> next()
+        | Some x -> x
+    in
+    from next
+
+let clone t =
+	let fnext = t.next in
+	let tc = {
+		next = _dummy;
+		count = t.count;
+	} in
+	let force2 () =
+		let count = ref 1 in
+		let rec loop dst =
+			let x = [fnext()] in
+			incr count;
+			Obj.set_field (Obj.repr dst) 1 (Obj.repr x);
+			loop x
+		in
+		try
+			let x = [fnext()] in
+			(try loop x with No_more_elements -> ());
+			let enum = ref x in
+			t.count <- (fun () -> !count);
+			t.next <- (fun () ->
+				decr count;
+				match !enum with
+				| [] -> raise No_more_elements
+				| h :: t -> enum := t; h);
+			let count2 = ref !count in
+			let enum2 = ref !enum in
+			tc.count <- (fun () -> !count2);
+			tc.next <- (fun () ->
+				decr count2;
+				match !enum2 with
+				| [] -> raise No_more_elements
+				| h :: t -> enum2 := t; h);
+		with
+			No_more_elements ->
+				t.count <- (fun () -> 0);
+				tc.count <- (fun () -> 0);
+				t.next <- (fun () -> raise No_more_elements);
+				tc.next <- (fun () -> raise No_more_elements)
+	in
+	t.next <- (fun () -> force2(); t.next());
+	tc.next <- (fun () -> force2(); tc.next());
+	tc
