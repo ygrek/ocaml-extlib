@@ -1,6 +1,6 @@
 (*
- * ExtString - String module extensions
- * Copyright (C) 2003 Nicolas Cannasse (ncannasse@motion-twin.com)
+ * ExtString - Additional functions for string manipulations.
+ * Copyright (C) 2003 Nicolas Cannasse
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,7 @@ let ends_with s e =
 	if sl < el then
 		false
 	else
-		(compare (sub s (sl-el) el) e) = 0
+		sub s (sl-el) el = e
 
 let find str sub =
 	let sublen = length sub in

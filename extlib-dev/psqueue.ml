@@ -1,7 +1,6 @@
-
 (*
  * psq- an ocaml implementation of priority search queues.
- * Copyright (C) 2003 Brian Hurt (bhurt@spnz.org)
+ * Copyright (C) 2003 Brian Hurt
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public

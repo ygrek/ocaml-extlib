@@ -1,6 +1,6 @@
 (*
  * Std - Additional functions
- * Copyright (C) 2003 Nicolas Cannasse (ncannasse@motion-twin.com)
+ * Copyright (C) 2003 Nicolas Cannasse
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
