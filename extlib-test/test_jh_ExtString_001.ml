@@ -113,11 +113,11 @@ let t_strip () =
   assert (S.ends_with (S.strip ~chars:"" s) "5678")
 
 let test () = 
-  Util.run_test ~test_name:"jh_ExtString.t_starts_with" t_starts_with;
-  Util.run_test ~test_name:"jh_ExtString.t_ends_with" t_ends_with;
-  Util.run_test ~test_name:"jh_ExtString.t_map" t_map;
-  Util.run_test ~test_name:"jh_ExtString.t_lchop" t_lchop;
-  Util.run_test ~test_name:"jh_ExtString.t_rchop" t_rchop;
-  Util.run_test ~test_name:"jh_ExtString.t_split" t_split;
-  Util.run_test ~test_name:"jh_ExtString.t_replace_1" t_replace1;
-  Util.run_test ~test_name:"jh_ExtString.t_strip" t_strip
+  Util.run_test ~test_name:"jh_ExtString_001.t_starts_with" t_starts_with;
+  Util.run_test ~test_name:"jh_ExtString_001.t_ends_with" t_ends_with;
+  Util.run_test ~test_name:"jh_ExtString_001.t_map" t_map;
+  Util.run_test ~test_name:"jh_ExtString_001.t_lchop" t_lchop;
+  Util.run_test ~test_name:"jh_ExtString_001.t_rchop" t_rchop;
+  Util.run_test ~test_name:"jh_ExtString_001.t_split" t_split;
+  Util.run_test ~test_name:"jh_ExtString_001.t_replace_1" t_replace1;
+  Util.run_test ~test_name:"jh_ExtString_001.t_strip" t_strip

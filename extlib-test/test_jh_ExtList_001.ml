@@ -18,6 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
+(* Standard library list *)
+module StdList = List
+
 open ExtList
 
 exception Test_Exception
@@ -28,7 +31,7 @@ let check_empty_list_exn f =
 (** Random length list with [0;1;2;..n] contents. *)
 let rnd_list () = 
   let len = Random.int 3 in 
-  List.init len (fun n -> n)
+  List.init len Std.identity
 
 let test_iteri () = 
   for i = 0 to 15 do
@@ -70,9 +73,27 @@ let test_find_exc () =
     done
   with _ -> assert false
 
+let test_fold_right () = 
+  let maxlen = 2000 in
+  (* NOTE assuming we will not blow the stack with 2000 elements *)
+  let lst = List.init maxlen Std.identity in
+  let a = StdList.fold_right (fun e a -> e::a) lst [] in
+  let b = List.fold_right (fun e a -> e::a) lst [] in
+  assert (a = b)
+
+let test_map () = 
+  for i = 0 to 10 do
+    let f = ( * ) 2 in
+    let lst = rnd_list () in
+    let a = StdList.map f lst in
+    let b = List.map f lst in
+    assert (a = b)
+  done
+
 let test () = 
-  Util.run_test ~test_name:"jh_ExtList.iteri" test_iteri;
-  Util.run_test ~test_name:"jh_ExtList.mapi" test_mapi;
-  Util.run_test ~test_name:"jh_ExtList.exceptions" test_exceptions;
-  Util.run_test ~test_name:"jh_ExtList.find_exc" test_find_exc
-    
+  Util.run_test ~test_name:"jh_ExtList_001.iteri" test_iteri;
+  Util.run_test ~test_name:"jh_ExtList_001.mapi" test_mapi;
+  Util.run_test ~test_name:"jh_ExtList_001.exceptions" test_exceptions;
+  Util.run_test ~test_name:"jh_ExtList_001.find_exc" test_find_exc;
+  Util.run_test ~test_name:"jh_ExtList_001.fold_right" test_fold_right;
+  Util.run_test ~test_name:"jh_ExtList_001.map" test_map
