@@ -2,7 +2,7 @@
  * ExtList - additional and modified functions for lists.
  * Copyright (C) 2003 Brian Hurt
  * Copyright (C) 2003 Nicolas Cannasse
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -19,8 +19,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
-(** Additional and modified functions for lists. 
- 
+(** Additional and modified functions for lists.
+
 	The OCaml standard library provides a module for list functions.
 	This ExtList module can be used to override the List module or
 	as a standalone module. It provides new functions and modify
@@ -32,7 +32,7 @@ module List :
     sig
 
 	(** {6 New functions} *)
-	
+
 	val init : int -> (int -> 'a) -> 'a list
 	(** Similar to [Array.init], [init n f] returns the list containing
 	 the results of (f 0),(f 1).... (f (n-1)).
@@ -63,13 +63,13 @@ module List :
 	(** [find_exc p e l] returns the first element of [l] such as [p x]
 	 returns [true] or raises [e] if such element as not been found. *)
 
-	val unique : ?cmp:('a -> 'a -> bool) -> 'a list -> 'a list 
+	val unique : ?cmp:('a -> 'a -> bool) -> 'a list -> 'a list
 	(** [unique cmp l] returns the list [l] without any duplicate element.
 	 Default comparator ( = ) is used if no comparison function specified. *)
 
 	val filter_map : ('a -> 'b option) -> 'a list -> 'b list
 	(** [filter_map f l] call [(f a0) (f a1).... (f an)] where [a0..an] are
-	 the elements of [l]. It returns the list of elements [bi] such as 
+	 the elements of [l]. It returns the list of elements [bi] such as
 	 [f ai = Some bi] (when [f] returns [None], the corresponding element of
 	 [l] is discarded). *)
 
@@ -82,7 +82,7 @@ module List :
 	(** [remove l x] returns the list [l] without the first element [x] found
 	 or returns  [l] if no element is equal to [x]. Elements are compared
 	 using ( = ). *)
-	 
+
 	val remove_if : ('a -> bool) -> 'a list -> 'a list
 	(** [remove_if cmp l x] is similar to [remove], but with [cmp] used
 	 instead of ( = ). *)
@@ -143,7 +143,7 @@ module List :
 	val for_all2 : ('a -> 'b -> bool) -> 'a list -> 'b list -> bool
 	val exists2 : ('a -> 'b -> bool) -> 'a list -> 'b list -> bool
 	val combine : 'a list -> 'b list -> ('a * 'b) list
-	
+
 
 	(** {6 Improved functions} *)
 
@@ -172,7 +172,7 @@ module List :
 	val partition : ('a -> bool) -> 'a list -> 'a list * 'a list
 
 	(** {6 Older functions} *)
-	
+
 	(** These functions are already part of the Ocaml standard library
 		and have not been modified. Please refer to the Ocaml Manual for
 		documentation. *)
@@ -184,7 +184,7 @@ module List :
 	val iter : ('a -> unit) -> 'a list -> unit
 	val fold_left : ('b -> 'a -> 'b) -> 'b -> 'a list -> 'b
 	val for_all : ('a -> bool) -> 'a list -> bool
-	val exists : ('a -> bool) -> 'a list -> bool	
+	val exists : ('a -> bool) -> 'a list -> bool
 	val find : ('a -> bool) -> 'a list -> 'a
 
 	val mem : 'a -> 'a list -> bool
@@ -193,6 +193,11 @@ module List :
 	val assq : 'a -> ('a * 'b) list -> 'b
 	val mem_assoc : 'a -> ('a * 'b) list -> bool
 	val mem_assq : 'a -> ('a * 'b) list -> bool
+
+
+	val stable_sort : ('a -> 'a -> int) -> 'a list -> 'a list
+	val fast_sort : ('a -> 'a -> int) -> 'a list -> 'a list
+	val merge : ('a -> 'a -> int) -> 'a list -> 'a list -> 'a list
 
 	(** {6 Exceptions} *)
 
