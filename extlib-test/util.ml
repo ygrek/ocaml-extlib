@@ -18,8 +18,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
+module P = Printf
+
 let log s = 
-  Printf.printf "%s\n" s;
+  P.printf "%s\n" s;
   flush stdout
 
 let random_char () = 
@@ -44,13 +46,31 @@ let random_string_len len =
     done;
   str
 
+(* For  counting the success ratio *)
+let test_run_count = ref 0 
+let test_success_count = ref 0 
+
+let test_module name f = 
+  P.printf "%s\n" name;
+  flush stdout;
+  test_run_count := 0;
+  test_success_count := 0;
+  f ();
+  if !test_run_count <> 0 then
+    P.printf "  %i/%i tests succeeded.\n" 
+      !test_success_count !test_run_count
+  
+
 let run_test ?(test_name="<unknown>") f = 
   try
-    Printf.printf "run: %s\n" test_name;
+    incr test_run_count;
+    P.printf "  %s" test_name;
     flush stdout;
     f ();
+    incr test_success_count;
+    P.printf ", OK\n"
   with 
     Assert_failure (file,line,column) ->
-      Printf.printf " ..FAILED\n  reason:\n";
-      Printf.printf "%s:%i:%i test %s failed\n" file line column test_name;
+      P.printf ", FAILED\n    reason: ";
+      P.printf " %s:%i:%i\n" file line column;
       flush stdout

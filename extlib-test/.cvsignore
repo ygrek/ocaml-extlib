@@ -5,3 +5,5 @@
 *.cmx
 extlib_test
 extlib_test.exe
+mktemp
+build-tmp

@@ -111,18 +111,15 @@ let tests_of dirname =
 
 let mtest all_tests mname =
   let f = open_out (build_dir_name (mtest_filename mname ".ml")) in
-  output_string f "let test() = \n";
+  P.fprintf f "let test() = \n";
 
   let tests = Hashtbl.find_all all_tests mname in
-  output_string f ("  Util.log \"Checking module " ^ mname ^ "\";\n");
+  P.fprintf f "  Util.test_module \"%s\"\n    (fun () ->\n" mname;
   List.iter
-  (fun (author,test) ->
-    output_string f ("  Itest_" ^ author ^ "_" ^mname^"_"^test^".test ();\n")
-  )
-  tests
-  ;
-  output_string f "  ()\n";
-  output_string f "\n";
+    (fun (author,test) ->
+       P.fprintf f
+       "      Itest_%s_%s_%s.test ();\n" author mname test) tests;
+  P.fprintf f "      ())\n";
   close_out f
 
 

@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <title>ExtLib Testing Suite</title>
+    <style type="text/css">
+      body {
+      font-family: Verdana, Geneva, Arial, Sans-serif; 
+      font-size: 12px; 
+      background-color : #FFFFFF 
+      }
+      table { font-size: 12px; }
+      h1 { font-size: 24px; color:#AF4040; }
+      h2 { font-size: 18px; color:#BF3030; }
+      h3 { font-size: 14px; }
+      code { color:#202060; }
+
+      .auth { color:#B04040; }
+      .mod { color:#4040FF; }
+      .testname { color:#20A020; }
+
+    </style>
+  </head>
+  <body>
+
+    <h1>ExtLib Testing Suite</h1>
+
+    <h2>Getting the source</h2>
+
+    <p>Checkout both <code>extlib-dev</code> and
+      <code>extlib-test</code> modules from CVS.  Currently the
+      directory layout is fixed, so you need the following organization
+      in order to get the tester to compile:</p>
+
+    <pre>
+      $root/extlib-dev    (ExtLib source code)
+      $root/extlib-test   (Testing suite source code)
+    </pre>
+
+    <h2>Building and running</h2>
+
+    <h3>The simple way</h3>
+
+    <p>Go to <code>extlib-test</code> directory and run
+      <code>make</code>.  This will make the tester.  You can execute
+      the test by running <code>make run</code>.</p>
+
+    <p>If you want to build native code version of the tester, run
+      <code>make opt</code>.  You can run it with <code>make
+        run</code>.</p>
+
+    <h3>More advanced</h3>
+
+    <p>Since you don't always want to build ExtLib when you're
+      building the test suite, you can build just the tester and link
+      against prebuilt ExtLib.  You can do this by using
+      <code>test.mak</code> instead of <code>Makefile</code>.  E.g.,
+      to build the tester, run <code>make -f test.mak</code>.  This
+      assumes that ExtLib has already been built.</p>
+
+    <p>Make plays a very small role in all of this.  The test
+      executable is actually buit by a small program called
+      <code>mktest</code>.</p>
+
+    <h2>Adding tests</h2>
+
+    <p>Tests need to be named according to a specific syntax.  Files
+      that match this syntax are scanned from the
+      <code>extlib-test</code> directory and automatically included
+      into the test.</p>
+
+    <h3>Creating a test</h3>
+
+    <ol>
+      <li>Create a test file.  The syntax for the filename is: 
+        <code>Test_<span class="auth">&lt;xy&gt;</span>_<span class="mod">&lt;module_name&gt;</span>_<span class="testname">&lt;test_name&gt;</span>.ml</code>.
+        where <span class="auth">&lt;xy&gt;</span> is author's initials (e.g., jh); 
+        <span class="mod">&lt;module_name&gt;</span> is the module that is tested (e.g., ExtString); and
+        <span class="testname">&lt;test&gt;</span> is the name for the test (e.g., 001).
+      </li>
+
+      <li>Add test functions into your source file.  Check correctness
+        using <code>assert</code>.  Existing tests serve as good example
+        code.</li>
+
+      <li>Add a test entrypoint into your test module.  This
+        entrypoint should call all your tests with
+        <code>Util.run_test</code> function.  Example: <code>let test
+        () = Util.run_test ~test_name:"jh_BitSet.create"
+        test_create</code>.  The entrypoint must be named
+        <code>test</code> and its type must be <em>unit-&gt;unit</em>.
+      </li>
+    </ol>
+
+    <h3>Running your test</h3>
+
+    <ol>
+      <li>Drop your .ml file into <code>extlib-test</code> directory.</li>
+      <li>Run <code>make -f test.mak &amp;&amp; make -f test.mak run</code></li>
+    </ol>
+
+    <h3>Inclusion in the official test suite</h3>
+
+    <ol>
+      <li>Make sure your test makes at least some sense by discussing
+        it first on ExtLib mailing list.</li>
+
+      <li>Post to ExtLib mailing list requesting for inclusion or add
+        to CVS if you have write access.</li>
+    </ol>
+
+    <h2>Mktest</h2>
+
+    <p><em>TODO perhaps it makes sense to explain how the build
+        actually works?</em></p>
+
+  </body>
+</html>
