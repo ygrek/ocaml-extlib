@@ -149,7 +149,12 @@ let input_channel ch =
 			with
 				End_of_file -> raise No_more_input
 		);
-		in_available = (fun () -> None);
+		in_available = (fun () ->
+			try
+				Some (in_channel_length ch - pos_in ch)
+			with
+				_ -> None
+		);
 		in_close = (fun () -> Pervasives.close_in ch);
 	}
 
