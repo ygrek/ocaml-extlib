@@ -35,14 +35,17 @@ let popcount n =
   done;
   !p
 
-let bitset_of_int n = 
-  assert (n <= (1 lsl 29));
-  let s = B.create 30 in
+let set_bitset s n = 
   for i = 0 to 29 do
     if (n land (1 lsl i)) <> 0 then
       B.set s i
   done;
-  assert (popcount n = B.count s);
+  assert (popcount n = B.count s)
+
+let bitset_of_int n = 
+  assert (n <= (1 lsl 29));
+  let s = B.create 30 in
+  set_bitset s n;
   s
 
 let int_of_bitset s = 
@@ -160,6 +163,17 @@ let test_compare_2 () =
        let bs = bitset_of_int e in
        assert (BSSet.mem bs num_set)) nums
 
+let test_compare_3 () = 
+  for i = 0 to 63 do
+    for j = 0 to 63 do
+      let b1 = B.create ((Random.int 128)+32) in
+      let b2 = B.create ((Random.int 128)+32) in
+      set_bitset b1 i;
+      set_bitset b2 j;
+      assert (B.compare b1 b2 = compare i j)
+    done
+  done
+
 let test_empty () = 
   for len = 0 to 63 do
     let s = B.empty () in
@@ -238,4 +252,5 @@ let test () =
   Util.run_test ~test_name:"jh_BitSet.test_exceptions" test_exceptions;
   Util.run_test ~test_name:"jh_BitSet.test_compare" test_compare;
   Util.run_test ~test_name:"jh_BitSet.test_compare_2" test_compare_2;
+  Util.run_test ~test_name:"jh_BitSet.test_compare_3" test_compare_3;
   Util.run_test ~test_name:"jh_BitSet.test_set_opers" test_set_opers
