@@ -28,7 +28,6 @@ module List :
 	val fold : ('b -> 'a -> 'b) -> 'b -> 'a list -> 'b
 	val fold_left : ('b -> 'a -> 'b) -> 'b -> 'a list -> 'b
 	val fold_right : ('a -> 'b -> 'b) -> 'a list -> 'b -> 'b
-	val fast_fold_right : ('a -> 'b -> 'b) -> 'a list -> 'b -> 'b
 	val for_all : ('a -> bool) -> 'a list -> bool
 	val exists : ('a -> bool) -> 'a list -> bool
 	

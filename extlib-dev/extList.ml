@@ -136,17 +136,22 @@ let filter_map f l =
 
 let fold = fold_left
 
-let fold_right f l accum =
-	let rec loop accum = function
-		| [] -> accum
-		| h :: t -> loop (f h accum) t
-	in
-	loop accum (rev l)
+let fold_right_max = 1000
 
-let rec fast_fold_right f l accum =
-	match l with
-	| [] -> accum
-	| h :: t -> f h (fast_fold_right f t accum)
+let fold_right f l init =
+	let rec tail_loop acc = function
+		| [] -> acc
+		| h :: t -> tail_loop (f h acc) t
+	in
+	let rec loop n = function
+		| [] -> init
+		| h :: t ->
+			if n < fold_right_max then
+				f h (loop (n+1) t)
+			else
+				f h (tail_loop init (List.rev t))
+	in
+	loop 0 l
 
 let map2 f l1 l2 =
 	match l1, l2 with
