@@ -6,8 +6,8 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version,,
- * with the special exception on linking described in file LICENCE.
+ * version 2.1 of the License, or (at your option) any later version,
+ * with the special exception on linking described in file LICENSE.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -65,7 +65,7 @@ module List :
 
 	val unique : ?cmp:('a -> 'a -> bool) -> 'a list -> 'a list 
 	(** [unique cmp l] returns the list [l] without any duplicate element.
-	 Default comparator ( = ) is used if no comparaison function specified. *)
+	 Default comparator ( = ) is used if no comparison function specified. *)
 
 	val filter_map : ('a -> 'b option) -> 'a list -> 'b list
 	(** [filter_map f l] call [(f a0) (f a1).... (f an)] where [a0..an] are
@@ -108,7 +108,7 @@ module List :
 
 	(** {6 Modified functions} *)
 
-	(** Some minor modifications have been made to the specificiation of some
+	(** Some minor modifications have been made to the specification of some
 	 functions, especially concerning exceptions raised. *)
 
 	val hd : 'a list -> 'a

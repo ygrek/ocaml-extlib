@@ -1,12 +1,12 @@
 (* 
- * IO - Abstract input/ouput
+ * IO - Abstract input/output
  * Copyright (C) 2003 Nicolas Cannasse
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version,,
- * with the special exception on linking described in file LICENCE.
+ * version 2.1 of the License, or (at your option) any later version,
+ * with the special exception on linking described in file LICENSE.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -84,7 +84,7 @@ val available : ('a, 'b) input -> int
   [Not_implemented] if the IO can't deal with it. *)
 
 val pos_in : ('a, 'b) input -> int
-(** Returns the number of tokens readed, or raise
+(** Returns the number of tokens read, or raise
   [Not_implemented] if the IO can't deal with it. *)
 
 val write : ('a, 'b, 'c) output -> 'a -> unit
@@ -168,7 +168,7 @@ val read_i16 : (char,'a) input -> int
 
 val read_i32 : (char,'a) input -> int
 (** Read a signed 32-bit integer. Raise [Overflow] if the
-  readed integer cannot be represented as a Caml 31-bit integer. *)
+  read integer cannot be represented as a Caml 31-bit integer. *)
 
 val read_string : (char,'a) input -> string
 (** Read a null-terminated string. *)

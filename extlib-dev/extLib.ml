@@ -1,12 +1,12 @@
 (* 
- * ExtLib - use extensions as seperate modules
+ * ExtLib - use extensions as separate modules
  * Copyright (C) 2003 Nicolas Cannasse
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version,,
- * with the special exception on linking described in file LICENCE.
+ * version 2.1 of the License, or (at your option) any later version,
+ * with the special exception on linking described in file LICENSE.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -29,7 +29,7 @@
 	Users can simply do an "open ExtLib" to import all Ext*
 	namespaces instead of doing "open ExtList" for example.
 
-	The tradeoff is that they'll have to link all the modules
+	The trade-off is that they'll have to link all the modules
 	included below so the resulting binary is bigger.
 *)
 

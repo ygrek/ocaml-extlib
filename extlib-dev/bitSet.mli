@@ -5,8 +5,8 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version,,
- * with the special exception on linking described in file LICENCE.
+ * version 2.1 of the License, or (at your option) any later version,
+ * with the special exception on linking described in file LICENSE.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,7 +22,7 @@
 
  A bitset is an array of boolean values that can be accessed with indexes
  like an array but provides a better memory usage (divided by 8) for a
- very small speed tradeoff. *)
+ very small speed trade-off. *)
 
 type t
 
@@ -31,7 +31,7 @@ exception Negative_index of string
  this exception is raised with the name of the function. *)
 
 val empty : unit ->  t
-(** Create an empty bitset of size 0, the bitset will automaticaly expand
+(** Create an empty bitset of size 0, the bitset will automatically expand
  when needed. *)
 
 val create : int -> t
@@ -85,4 +85,4 @@ val differentiate : t -> t -> unit
 (** [intersect s t] removes the elements of [t] from [s]. *)
 
 val differentiate_sym : t -> t -> unit
-(** [intersect s t] sets [s] to the symetrical difference of the sets [s] and [t]. *)
+(** [intersect s t] sets [s] to the symmetrical difference of the sets [s] and [t]. *)

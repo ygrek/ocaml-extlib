@@ -6,8 +6,8 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version,,
- * with the special exception on linking described in file LICENCE.
+ * version 2.1 of the License, or (at your option) any later version,
+ * with the special exception on linking described in file LICENSE.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -32,7 +32,7 @@ exception Invalid_arg of int * string * string
 (** When an operation on an array fails, [Invalid_arg] is raised. The
 	integer is the value that made the operation fail, the first string
 	contains the function name that has been called and the second string
-	contains the paramater name that made the operation fail.
+	contains the parameter name that made the operation fail.
 *)
 
 (** {6 Array creation} *)
@@ -142,23 +142,23 @@ val iteri : (int -> 'a -> unit) -> 'a t -> unit
 
 val map : ('a -> 'b) -> 'a t -> 'b t
 (** [map f darr] applies the function [f] to every element of [darr]
-	and creates a dynamic array from the results - similiar to [List.map] or
+	and creates a dynamic array from the results - similar to [List.map] or
 	[Array.map]. *)
 
 val mapi : (int -> 'a -> 'b) -> 'a t -> 'b t
 (** [mapi f darr] applies the function [f] to every element of [darr]
-	and creates a dynamic array from the results - similiar to [List.mapi] or
+	and creates a dynamic array from the results - similar to [List.mapi] or
 	[Array.mapi]. *)
 
 val fold_left : ('a -> 'b -> 'a) -> 'a -> 'b t -> 'a
 (** [fold_left f x darr] computes 
 	[f ( ... ( f ( f (get darr 0) x) (get darr 1) ) ... ) (get darr n-1)],
-	similiar to [Array.fold_left] or [List.fold_left]. *)
+	similar to [Array.fold_left] or [List.fold_left]. *)
 
 val fold_right : ('a -> 'b -> 'b) -> 'a t -> 'b -> 'b
 (** [fold_right f darr x] computes
 	[ f (get darr 0) (f (get darr 1) ( ... ( f (get darr n-1) x ) ... ) ) ]
-	similiar to [Array.fold_right] or [List.fold_right]. *)
+	similar to [Array.fold_right] or [List.fold_right]. *)
 
 val index_of : ('a -> bool) -> 'a t -> int
 (** [index_of f darr] returns the index of the first element [x] in darr such
@@ -234,12 +234,12 @@ val exponential_resizer : resizer_t
 	that less than 2 words per element are used.  Even on removals
 	where the amount of wasted space is allowed to rise to 75%, that
 	only means that darray is using 4 words per element.  This is
-	generally not a signifigant overhead.
+	generally not a significant overhead.
 
 	Furthermore, [exponential_resizer] minimizes the number of copies
 	needed- appending n elements into an empty darray with initial size
 	0 requires between n and 2n elements of the array be copied- O(n)
-	work, or O(1) work per element (on average).  A similiar argument
+	work, or O(1) work per element (on average).  A similar argument
 	can be made that deletes from the end of the array are O(1) as
 	well (obviously deletes from anywhere else are O(n) work- you
 	have to move the n or so elements above the deleted element down).

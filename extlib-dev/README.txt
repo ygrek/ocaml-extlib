@@ -4,7 +4,7 @@ OCaml Extended standard Library - ExtLib.
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version,,
- * with the special exception on linking described in file LICENCE.
+ * with the special exception on linking described in file LICENSE.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -18,16 +18,16 @@ OCaml Extended standard Library - ExtLib.
 What is ExtLib ?
 ----------------
 
-ExtLib is a set of additionnal useful functions and modules for OCaml.
+ExtLib is a set of additional useful functions and modules for OCaml.
 You can reach watch the SourceForge project page here :
 	http://sourceforge.net/projects/ocaml-lib/
 The web site is here :
 	http://ocaml-lib.sourceforge.net/
-and you can join the mailling list here :
+and you can join the mailing list here :
 	http://lists.sourceforge.net/lists/listinfo/ocaml-lib-devel
 
 People are encouraged to contribute and to report any bug or problem
-they might have with ExtLib by using the mailling list.
+they might have with ExtLib by using the mailing list.
 
 Installation :
 --------------
@@ -50,7 +50,7 @@ Nicolas Cannasse (ncannasse@motion-twin.com)
 Brian Hurt (brian.hurt@qlogic.com)
 Yamagata Yoriyuki (yoriyuki@mbg.ocn.ne.jp)
 
-Licence :
+License :
 ---------
 
-See LICENCE
+See LICENSE

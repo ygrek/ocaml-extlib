@@ -5,8 +5,8 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version,,
- * with the special exception on linking described in file LICENCE.
+ * version 2.1 of the License, or (at your option) any later version,
+ * with the special exception on linking described in file LICENSE.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -45,7 +45,7 @@ module Hashtbl =
 			let hdata = ref idata in
 			let hcount = ref icount in
 			let force() =
-				(** this is a hack in order to keep an O(1) enum contructor **)
+				(** this is a hack in order to keep an O(1) enum constructor **)
 				if !hcount = -1 then begin
 					hcount := (h_conv h).size;
 					hdata := Array.copy (h_conv h).data;

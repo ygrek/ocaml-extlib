@@ -5,8 +5,8 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version,,
- * with the special exception on linking described in file LICENCE.
+ * version 2.1 of the License, or (at your option) any later version,
+ * with the special exception on linking described in file LICENSE.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -38,7 +38,7 @@ module String :
 
 	val split : string -> string -> string * string
 	(** [split s sep] splits the string [s] between the first
-		occurence of [sep].
+		occurrence of [sep].
 	    raises [Invalid_string] if the separator is not found. *)
 
 	val nsplit : string -> string -> string list
@@ -86,7 +86,7 @@ module String :
 	(** Creates a string from a character enumeration. *)
 	
 	val map : (char -> char) -> string -> string
-	(** [map f s] returns a string where all characters [c] in [s] have beeen
+	(** [map f s] returns a string where all characters [c] in [s] have been
 		replaced by [f c]. **)
 
 	val strip : ?chars:string -> string -> string

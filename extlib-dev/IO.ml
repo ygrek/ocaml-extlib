@@ -1,12 +1,12 @@
 (* 
- * IO - Abstract input/ouput
+ * IO - Abstract input/output
  * Copyright (C) 2003 Nicolas Cannasse
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version,,
- * with the special exception on linking described in file LICENCE.
+ * version 2.1 of the License, or (at your option) any later version,
+ * with the special exception on linking described in file LICENSE.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -240,7 +240,7 @@ type 'a queue = {
 }
 
 let pipe() =
-	let readed = ref 0 in
+	let read = ref 0 in
 	let written = ref 0 in
 	let n = ref 0 in
 	let empty = ((Obj.magic None) : 'a queue) in
@@ -249,7 +249,7 @@ let pipe() =
 	let get() =	
 		let q = !head in
 		head := q.next;
-		incr readed;		
+		incr read;		
 		q.cur
 	in
 	let rec nget n = 
@@ -279,7 +279,7 @@ let pipe() =
 			n := !n - nr;
 			nget nr
 		);
-		in_pos = (fun () -> !readed);
+		in_pos = (fun () -> !read);
 		in_close = (fun () -> ());
 		in_available = (fun () -> !n);
 	} in
@@ -299,7 +299,7 @@ let pipe() =
 	input , output
 
 (* -------------------------------------------------------------- *)
-(* STDIO APIS *)
+(* STDIO APIs *)
 
 exception Overflow of string
 

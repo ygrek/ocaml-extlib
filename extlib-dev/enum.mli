@@ -5,8 +5,8 @@
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version,,
- * with the special exception on linking described in file LICENCE.
+ * version 2.1 of the License, or (at your option) any later version,
+ * with the special exception on linking described in file LICENSE.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -54,7 +54,7 @@ val fold2 : ('a -> 'b -> 'c -> 'c) -> 'c -> 'a t -> 'b t -> 'c
 (** [fold2] is similar to [fold] but will fold over two enumerations at the
  same time until one of the two enumerations ends. *)
 
-(** Indexed fuctions : these functions are similar to previous ones
+(** Indexed functions : these functions are similar to previous ones
  except that they call the function with one additional argument which
  is an index starting at 0 and incremented after each call to the function. *)
 
@@ -196,8 +196,6 @@ can cause a call to [force]. *)
 
 val fast_count : 'a t -> bool
 (** For users worried about the speed of [count] you can call the [fast_count]
-    function that will give an hint about [count] implementation. Basicly, if
+    function that will give an hint about [count] implementation. Basically, if
     the enumeration has been created with [make] or [init] or if [force] has
-	been called on it, then [fast_count] will return true. *)
-
-
+    been called on it, then [fast_count] will return true. *)

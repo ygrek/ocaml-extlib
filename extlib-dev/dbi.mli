@@ -5,7 +5,7 @@
  * modify it under the terms of the GNU Library General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version,
- * with the special exception on linking described in file LICENCE.
+ * with the special exception on linking described in file LICENSE.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: dbi.mli,v 1.2 2004-05-02 10:47:26 ncannasse Exp $
+ * $Id: dbi.mli,v 1.3 2004-05-06 09:44:41 ncannasse Exp $
  *)
 
 (** Generic database interface.
@@ -270,7 +270,7 @@ and virtual connection :
   ?password:string ->
   string ->
 object
-  (** {2 Connection managment & information} *)
+  (** {2 Connection management & information} *)
 
   method id : int
     (** Returns a unique integer which can be used to identify this
