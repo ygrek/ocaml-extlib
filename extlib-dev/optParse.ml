@@ -133,6 +133,7 @@ module Opt =
 
     type 'a t = { 
       option_set : string -> string list -> unit;
+      option_set_value : 'a -> unit;
       option_get : unit -> 'a option;
       option_metavars : string list;
       option_defhelp : string option 
@@ -142,6 +143,9 @@ module Opt =
       match opt.option_get () with
         Some x -> x
       | None -> raise No_value
+
+    let set opt v =
+      opt.option_set_value v
 
     let is_set opt = Option.is_some (opt.option_get ())
 
@@ -153,6 +157,7 @@ module Opt =
         option_metavars = [metavar]; 
         option_defhelp = None;
         option_get = (fun _ -> !data);
+        option_set_value = (fun x -> data := Some x);
         option_set =
          (fun option args ->
             let arg = List.hd args in
@@ -167,6 +172,7 @@ module Opt =
         option_metavars = [metavar]; 
         option_defhelp = None;
         option_get = (fun _ -> Some ());
+        option_set_value = (fun () -> ());
         option_set =
          (fun option args ->
             let arg = List.hd args in
@@ -193,6 +199,7 @@ module StdOpt =
         option_metavars = []; 
         option_defhelp = None;
         option_get = (fun _ -> !data);
+        option_set_value = (fun x -> data := Some x);
         option_set = fun _ _ -> data := Some const
       }
 
@@ -227,6 +234,7 @@ module StdOpt =
         option_metavars = []; 
         option_defhelp = None;
         option_get = (fun _ -> Some !dest);
+        option_set_value = (fun x -> dest := x);
         option_set = fun _ _ -> dest := !dest + increment
       }
 
@@ -241,6 +249,7 @@ module StdOpt =
         option_metavars = [];
         option_defhelp = Some "show this help message and exit";
         option_get = (fun _ -> raise No_value);
+        option_set_value = (fun _ -> ());
         option_set = fun _ _ -> raise Option_help
       }
 
@@ -249,6 +258,7 @@ module StdOpt =
         option_metavars = [];
         option_defhelp = Some "show program's version and exit";
         option_get = (fun _ -> raise No_value);
+        option_set_value = (fun _ -> ());
         option_set = fun _ _ -> print_endline (vfunc ()); exit 0
       }
   end

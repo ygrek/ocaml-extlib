@@ -56,6 +56,7 @@ module Opt :
 
     type 'a t = {
       option_set : string -> string list -> unit;
+      option_set_value : 'a -> unit;
       option_get : unit -> 'a option;
       option_metavars : string list;
       option_defhelp : string option
@@ -68,6 +69,9 @@ module Opt :
       given on the command line and a list of strings, each representing
       one of the argument values given on the command line. It may raise
       [Option_error] if the value is invalid (for whatever reason).
+
+      [option_set_value] is a closure which sets the value of an option
+      to a particular value.
 
       [option_get] is a closure which retrieves the recorded value
       of the option. If the option value has not been set from the
@@ -102,6 +106,9 @@ module Opt :
       and the option value has not been set from the command line.
 
     *)
+
+    val set : 'a t -> 'a -> unit
+    (** Set the value of an option. *)
 
     val opt : 'a t -> 'a option
     (** Get the value of an option as an optional value.
