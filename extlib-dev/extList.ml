@@ -27,10 +27,6 @@ exception Different_list_size of string
 
 include List
 
-(* Inner functions prefixed with _ *)
-let _setcdr : 'a list -> 'a list -> unit = fun c v -> 
-	Obj.set_field (Obj.repr c) 1 (Obj.repr v)
-
 let _duplicate = function
 	| [] -> assert false
 	| h :: t ->
@@ -38,7 +34,7 @@ let _duplicate = function
 			| [] -> dst
 			| h :: t -> 
 				let r = [ h ] in
-				_setcdr dst r;
+				Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
 				loop r t
 		in
 		let r = [ h ] in
@@ -67,10 +63,10 @@ let append l1 l2 =
 	| [] -> l2
 	| h :: t ->
 		let rec loop accu = function
-		| [] -> _setcdr accu l2
+		| [] -> Obj.set_field (Obj.repr accu) 1 (Obj.repr l2)
 		| h :: t ->
 			let cell = [h] in
-			_setcdr accu cell;
+			Obj.set_field (Obj.repr accu) 1 (Obj.repr cell);
 			loop cell t
 		in
 		let r = [h] in
@@ -83,9 +79,9 @@ let flatten = function
 		let rec loop dst = function
 			| [] -> ()
 			| h :: t ->
-			   let a, b = _duplicate h in
-			   _setcdr dst a;
-			   loop b t
+				let a, b = _duplicate h in
+				Obj.set_field (Obj.repr dst) 1 (Obj.repr a);
+				loop b t
 		in
 		let a, b = _duplicate h in
 		loop b t;
@@ -100,7 +96,7 @@ let map f = function
 		| [] -> ()
 		| h :: t ->
 			let r = [f h] in
-			_setcdr dst r;
+			Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
 			loop r t
 		in
 		let r = [f h] in
@@ -128,7 +124,7 @@ let map2 f l1 l2 =
 			| [], [] -> ()
 			| h1 :: t1, h2 :: t2 ->
 				let r = [ f h1 h2 ] in
-				_setcdr dst r;
+				Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
 				loop r t1 t2
 			| _ -> raise (Different_list_size "map2")
 		in
@@ -189,10 +185,10 @@ let remove_assoc x = function
 			| [] -> ()
 			| (a, _ as pair) :: t -> 
 				if a = x then
-					_setcdr dst t
+					Obj.set_field (Obj.repr dst) 1 (Obj.repr t)
 				else
 					let r = [ pair ] in
-					_setcdr dst r;
+					Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
 					loop r t
 		in
 		if a = x then
@@ -209,10 +205,10 @@ let remove_assq x = function
 			| [] -> ()
 			| (a, _ as pair) :: t -> 
 				if a == x then
-					_setcdr dst t
+					Obj.set_field (Obj.repr dst) 1 (Obj.repr t)
 				else
 					let r = [ pair ] in
-					_setcdr dst r;
+					Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
 					loop r t
 		in
 		if a == x then
@@ -235,7 +231,7 @@ let find_all p l =
 					| h :: t -> 
 						if p h then
 							let r = [ h ] in
-							_setcdr dst r;
+							Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
 							findnext r t
 						else
 							findnext dst t
@@ -257,10 +253,10 @@ let partition p = function
 			| h :: t ->
 				let r = [ h ] in
 				if p h then begin
-					_setcdr yesdst r;
+					Obj.set_field (Obj.repr yesdst) 1 (Obj.repr r);
 					both r nodst t
 				end else begin
-					_setcdr nodst r;
+					Obj.set_field (Obj.repr nodst) 1 (Obj.repr r);
 					both yesdst r t
 				end
 		in
@@ -269,7 +265,7 @@ let partition p = function
 			| h :: t ->
 				let r = [ h ] in
 				if p h then begin
-					_setcdr yesdst r;
+					Obj.set_field (Obj.repr yesdst) 1 (Obj.repr r);
 					yesonly r t
 				end else begin
 					both yesdst r t;
@@ -284,7 +280,7 @@ let partition p = function
 					both r nodst t;
 					r
 				end else begin
-					_setcdr nodst r;
+					Obj.set_field (Obj.repr nodst) 1 (Obj.repr r);
 					noonly r t
 				end
 		in
@@ -301,8 +297,8 @@ let split = function
 			| [] -> ()
 			| (a, b) :: t -> 
 				let x = [ a ] and y = [ b ] in
-				_setcdr adst x;
-				_setcdr bdst y;
+				Obj.set_field (Obj.repr adst) 1 (Obj.repr x);
+				Obj.set_field (Obj.repr bdst) 1 (Obj.repr y);
 				loop x y t
 		in
 		let x = [ a ] and y = [ b ] in
@@ -318,7 +314,7 @@ let combine l1 l2 =
 			| [], [] -> ()
 			| h1 :: t1, h2 :: t2 -> 
 				let r = [ h1, h2 ] in
-				_setcdr dst r;
+				Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
 				loop r t1 t2
 			| _, _ -> raise (Different_list_size "combine")
 		in
@@ -341,7 +337,7 @@ let rec init size f =
 		let rec loop dst n =
 			if n < size then
 				let r = [ f n ] in
-				_setcdr dst r;
+				Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
 				loop r (n+1)
 		in
 		let r = [ f 0 ] in
@@ -355,7 +351,7 @@ let mapi f = function
 			| [] -> ()
 			| h :: t -> 
 				let r = [ f n h ] in
-				_setcdr dst r;
+				Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
 				loop r (n+1) t
 		in	
 		let r = [ f 0 h ] in
@@ -390,7 +386,7 @@ let split_nth index = function
 				| [] -> raise (Invalid_index index)
 				| h :: t ->
 					let r = [ h ] in
-					_setcdr dst r;
+					Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
 					loop (n-1) r t 
 			in
 			let r = [ h ] in
@@ -412,10 +408,10 @@ let remove l x =
 				| [] -> raise Not_found
 				| h :: t ->
 					if x = h then 
-						_setcdr dst t
+						Obj.set_field (Obj.repr dst) 1 (Obj.repr t)
 					else
 						let r = [ h ] in
-						_setcdr dst r;
+						Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
 						loop r t
 			in
 			let r = [ h ] in
@@ -440,7 +436,7 @@ let rec remove_all l x =
 						loop dst t
 					else
 						let r = [ h ] in
-						_setcdr dst r;
+						Obj.set_field (Obj.repr dst) 1 (Obj.repr r);
 						loop r t
 			in
 			let r = [ h ] in
@@ -478,7 +474,7 @@ let of_enum e =
 	let h = [ Obj.magic () ] in
 	let _ = Enum.fold (fun x acc ->
 		let r = [ x ] in
-		_setcdr acc r;
+		Obj.set_field (Obj.repr acc) 1 (Obj.repr r);
 		r) h e in
 	tl h
 
