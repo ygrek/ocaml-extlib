@@ -23,9 +23,9 @@ type path =
 	| PathDos
 
 let modules = [
+	"enum";
 	"bitSet";
 	"dynArray";
-	"enum";
 	"extHashtbl";
 	"extList";
 	"extString";
@@ -81,40 +81,49 @@ let remove file =
 
 (** Do we have findlib? *)
 let is_findlib () = 
-  printf "Looking for findlib...\n";
+  print_endline "Looking for findlib...\n";
   let findlib = Sys.command "ocamlfind printconf" = 0 in
-  printf "Done.\n";
+  print_endline "Done.\n";
   if findlib then
-    printf "We have findlib.\n"
+    print_endline "We have findlib.\n"
   else
-    printf "We do not have findlib.\n";
+    print_endline "We do not have findlib.\n";
   findlib
+
+type install_dir = Findlib | Dir of string
 
 let install() =
 	let autodir = ref None in
+	let docflag = ref None in
 	let autodoc = ref false in
 	let autobyte = ref false in
 	let autonative = ref false in
-	let usage = "ExtLib installation program v1.1\n(c)2003 Nicolas Cannasse" in
+	let usage = "ExtLib installation program v1.1\n(c)2003,2004 Nicolas Cannasse" in
 	Arg.parse [
 		("-d", Arg.String (fun s -> autodir := Some s) , "<dir> : install in target directory");
 		("-b", Arg.Unit (fun () -> autobyte := true) , ": byte code installation");
 		("-n", Arg.Unit (fun () -> autonative := true) , ": native code installation");
-		("-doc", Arg.Unit (fun () -> autodoc := true) , ": documentation installation");
+		("-doc", Arg.Unit (fun () -> docflag := Some true) , ": documentation installation");
+		("-nodoc", Arg.Unit (fun () -> docflag := Some false) , ": documentation installation");
 	] (fun s -> raise (Arg.Bad s)) usage;
 	let findlib = is_findlib () in
 	let install_dir = (
 		match !autodir with
 		| Some dir ->
 			if not !autobyte && not !autonative && not !autodoc then failwith "Nothing to do.";
-			complete_path dir
+			Dir (complete_path dir)
 		| None -> 
+			let byte, native = 
+			  if !autobyte || !autonative then
+			    (!autobyte, !autonative)
+			  else begin
 			printf "Choose one of the following :\n1- Bytecode installation only\n2- Native installation only\n3- Both Native and Bytecode installation\n> ";
-			let byte, native = (match read_line() with
+			  (match read_line() with
 				| "1" -> true, false
 				| "2" -> false, true
 				| "3" -> true, true
 				| _ -> failwith "Invalid choice, exit.")
+			  end
 			in
 			let dest = 
 			  if not findlib then begin
@@ -125,19 +134,27 @@ let install() =
 			      Sys.remove (dest^"test.file");
 			    with
 			      _ -> failwith ("Directory "^dest^" does not exists or cannot be written."));
-			    dest;
-			  end else "" in
-			printf "Do you want to generate ocamldoc documentation (Y/N) ?\n> ";
-			let doc = (match read_line() with
-				| "y" | "Y" -> true
-				| "n" | "N" -> false
-				| _ -> failwith "Invalid choice, exit.") in
+			    Dir dest;
+			  end else Findlib in
+			let doc = 
+			  match !docflag with
+			    Some doc -> doc
+			  | None ->
+			      printf "Do you want to generate ocamldoc documentation (Y/N) ?\n> ";
+			      (match read_line() with
+			      | "y" | "Y" -> true
+			      | "n" | "N" -> false
+			      | _ -> failwith "Invalid choice, exit.") in
 			autodoc := doc;
 			autobyte := byte;
 			autonative := native;
 			dest
 	) in
-	let doc_dir = sprintf "%sextlib-doc" install_dir in
+	let doc_dir = 
+	  match install_dir with
+	    Findlib -> "extlib-doc"
+	  | Dir install_dir ->
+	      sprintf "%sextlib-doc" install_dir in
 	if !autodoc && not (Sys.file_exists doc_dir) then run (sprintf "mkdir %s" doc_dir);
 	run (sprintf "ocamlc -c %s" (m_list ".mli"));
 	if !autobyte then begin
@@ -159,26 +176,30 @@ let install() =
 				| PathDos -> sprintf "%s odoc_style.css %s\\style.css";
 				| PathUnix -> sprintf "%s odoc_style.css %s/style.css") cp_cmd doc_dir);
 	end;
-	let install_files = Buffer.create 0 in
-	let install = 
-	  if findlib then 
-	    fun filename -> 
-	      Buffer.add_string install_files filename;
-	      Buffer.add_char install_files ' ';
-	  else
-	    fun filename -> copy filename install_dir in
-	List.iter (fun m -> install (m^".cmi")) modules;
-	install "extLib.cmi";
-	if !autobyte then install "extLib.cma";
-	if !autonative then begin
-	  install "extLib.cmxa";
-	  install ("extLib"^lib_ext);
-	end;
-	if findlib then begin
-	  run (sprintf "%s META.txt META" cp_cmd);
-	  let install_files = Buffer.contents install_files in
-	  run (sprintf "ocamlfind install extlib %s META" install_files);
-	end
+	match install_dir with
+	  Findlib ->
+	    let files = Buffer.create 0 in
+	    List.iter (fun m -> 
+	      Buffer.add_string files (m^".cmi");
+	      Buffer.add_char files ' ')
+	      modules;
+	    Buffer.add_string files "extLib.cmi ";
+	    if !autobyte then Buffer.add_string files "extLib.cma ";
+	    if !autonative then begin
+	      Buffer.add_string files "extLib.cmxa ";
+	      Buffer.add_string files ("extLib"^lib_ext^" ");
+	    end;
+	    run (sprintf "%s META.txt META" cp_cmd);
+	    let files = Buffer.contents files in
+	    run (sprintf "ocamlfind install extlib %s META" files);
+	| Dir install_dir ->
+	    List.iter (fun m -> copy (m^".cmi") install_dir) modules;
+	    copy "extLib.cmi" install_dir;
+	    if !autobyte then copy "extLib.cma"  install_dir;
+	    if !autonative then begin
+	      copy "extLib.cmxa" install_dir;
+	      copy ("extLib"^lib_ext) install_dir;
+	    end;
 ;;
 try 
 	install();
