@@ -1,4 +1,4 @@
- (*
+(* 
  * DynArray - Resizeable Ocaml arrays
  * Copyright (C) 2003 Brian Hurt (bhurt@spnz.org)
  * Copyright (C) 2003 Nicolas Cannasse (ncannasse@motion-twin.com)
@@ -103,6 +103,13 @@ let compact d =
 		done;
 		d.arr <- newarr;
 	end
+
+let create() = 
+	{
+		resize = default_resizer;
+		len = 0;
+		arr = imake 0 0;
+	}
 
 let make initsize = 
 	if initsize < 0 then invalid_arg initsize "make" "size";
@@ -301,6 +308,18 @@ let iteri f d =
 	for i = 0 to d.len - 1 do
 		f i (iget d.arr i)
 	done
+
+let index_of f d =
+	let rec loop i =
+		if i >= d.len then
+			raise Not_found
+		else
+			if f (iget d.arr i) then
+				i
+			else
+				loop (i+1)
+	in
+	loop 0
 
 let map f src =
 	let arr = imake 0 src.len in

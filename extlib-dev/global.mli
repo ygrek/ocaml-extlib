@@ -1,36 +1,57 @@
-(** Global variables.
+(*
+ * Global - Mutable global variable
+ * Copyright (C) 2003 Nicolas Cannasse (ncannasse@motion-twin.com)
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *)
 
-    A Global variable is a pair consisting of a string name and
-    a mutable value.
+(** Mutable global variable.
+ 
+	Often in OCaml you want to have a global variable, which is mutable 
+    and uninitialized when declared. You can use a ['a option ref] but
+	this is not very convenient. The Global module is providing few functions
+	to easily create and manipulate such variables.
 *)
 
-(** {6 Types} *)
+type 'a t
+(** Abstract type of a global *)
 
 exception Global_not_initialized of string
-(** Thrown when a global variable is accessed without first having been assigned a value *)
+(** Raised when a global variable is accessed without first having been
+ assigned a value. The parameter contains the name of the global. *)
 
-type 'a t
-(** The type of globals *)
-
-(** {6 Functions} *)
-
-(** returns an new named empty global *)
 val empty : string -> 'a t
+(** returns an new named empty global. The name of the global can be any
+ string. It identify the global and make debugging easier. *)
 
-(** retrieve the name of a global *)
 val name : 'a t -> string
+(** retrieve the name of a global. *)
 
-(** set the global value contents *)
 val set : 'a t -> 'a -> unit
+(** set the global value contents. *)
 
-(** get the global value contents - raise Global_not_initialized if not defined *)
 val get : 'a t -> 'a
+(** get the global value contents - raise Global_not_initialized if not
+ defined. *)
 
-(** reset the global value contents to undefined *)
 val undef : 'a t -> unit 
+(** reset the global value contents to undefined. *)
 
-(** tell if the global value has been set *)
 val isdef : 'a t -> bool 
+(** tell if the global value has been set. *)
 
-(** return None if the global is undefined, or Some v where v is the current global value contents *)
 val opt : 'a t -> 'a option 
+(** return [None] if the global is undefined, or [Some v] where v is the
+  current global value contents either. *)

@@ -25,7 +25,6 @@ module List :
 	val iteri : (int -> 'a -> 'b) -> 'a list -> unit
 	val rev_map : ('a -> 'b) -> 'a list -> 'b list
 	val iter : ('a -> unit) -> 'a list -> unit
-	val fold : ('b -> 'a -> 'b) -> 'b -> 'a list -> 'b
 	val fold_left : ('b -> 'a -> 'b) -> 'b -> 'a list -> 'b
 	val fold_right : ('a -> 'b -> 'b) -> 'a list -> 'b -> 'b
 	val for_all : ('a -> bool) -> 'a list -> bool
@@ -63,7 +62,6 @@ module List :
 	val iter2 : ('a -> 'b -> unit) -> 'a list -> 'b list -> unit
 	val fold_left2 : ('a -> 'b -> 'c -> 'a) -> 'a -> 'b list -> 'c list -> 'a
 	val fold_right2 : ('a -> 'b -> 'c -> 'c) -> 'a list -> 'b list -> 'c -> 'c
-	val fast_fold_right2 : ('a -> 'b -> 'c -> 'c) -> 'a list -> 'b list -> 'c -> 'c
 	val for_all2 : ('a -> 'b -> bool) -> 'a list -> 'b list -> bool
 	val exists2 : ('a -> 'b -> bool) -> 'a list -> 'b list -> bool
 

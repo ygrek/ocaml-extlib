@@ -1,9 +1,10 @@
 (** Extra functions over strings *)
 
-exception Invalid_string
 
 module String :
   sig
+
+	exception Invalid_string
 
 	val ends_with : string -> string -> bool
 
@@ -43,7 +44,6 @@ module String :
 	    raise Invalid_string if the string does not represent a float *)
 
 	val enum : string -> char Enum.t
-
 	val of_enum : char Enum.t -> string
 	
   end

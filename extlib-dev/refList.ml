@@ -1,3 +1,21 @@
+(*
+ * RefList - List reference
+ * Copyright (C) 2003 Nicolas Cannasse
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *)
 open ExtList
 
 exception Empty_list
@@ -7,7 +25,7 @@ type 'a t = 'a list ref
 
 let empty () = ref []
 
-let isempty x =
+let is_empty x =
 	match !x with
 	| [] -> true
 	| _ -> false
@@ -32,7 +50,6 @@ let transform f rl = rl := List.map f !rl
 let map_list f rl = List.map f !rl
 let find f rl = List.find f !rl
 let rev rl = rl := List.rev !rl
-let rev_list rl = List.rev !rl
 let find_exc f exn rl = try List.find f !rl with _ -> raise exn
 let exists f rl = List.exists f !rl
 let sort ?(cmp=compare) rl = rl := List.sort ~cmp !rl

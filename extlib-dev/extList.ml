@@ -1,6 +1,7 @@
-
-(* ExtList, a tail recursion only implementation of the OCaml list library.
+(*
+ * ExtList - a tail recursive implementation of the OCaml List module.
  * Copyright (C) 2003 Brian Hurt
+ * Copyright (C) 2003 Nicolas Cannasse (ncannasse@motion-twin.com)
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,7 +16,6 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
  *)
 
 module List = struct
@@ -26,19 +26,15 @@ exception Different_list_size of string
 
 include List
 
-(* This code comes from Jacques Garrigue, and thanks *)
-
-type 'a mut_list = 
-	{
-		hd: 'a; 
-		mutable tl: 'a list
-	}
-
+(* Thanks to Jacques Garrigue for suggesting the following structure *)
+type 'a mut_list =  {
+	hd: 'a; 
+	mutable tl: 'a list
+}
 external inj : 'a mut_list -> 'a list = "%identity"
 
-(* The end of Garrigue's code *)
 
-let dummy_node () = { hd = (Obj.magic ()); tl = [] }
+let dummy_node () = { hd = Obj.magic (); tl = [] }
 
 let hd = function
 	| [] -> raise Empty_list
@@ -123,19 +119,17 @@ let filter_map f l =
 	let rec loop dst = function
 		| [] -> ()
 		| h :: t ->
-		match f h with
+			match f h with
 			| None -> loop dst t
 			| Some x ->
 				let r = { hd = x; tl = [] }  in
-				dst.tl <- (inj r);
+				dst.tl <- inj r;
 				loop r t
 	in
 	let dummy = dummy_node() in
 	loop dummy l;
 	dummy.tl
-
-let fold = fold_left
-
+	
 let fold_right_max = 1000
 
 let fold_right f l init =
@@ -152,11 +146,6 @@ let fold_right f l init =
 				f h (tail_loop init (List.rev t))
 	in
 	loop 0 l
-
-let rec fast_fold_right f l accum =
-	match l with
-	| [] -> accum
-	| h :: t -> f h (fast_fold_right f t accum)
 
 let map2 f l1 l2 =
 	let rec loop dst src1 src2 =
@@ -184,20 +173,24 @@ let rec fold_left2 f accum l1 l2 =
 	| h1 :: t1, h2 :: t2 -> fold_left2 f (f accum h1 h2) t1 t2
 	| _ -> raise (Different_list_size "fold_left2")
 
-let fold_right2 f l1 l2 accum =
-	let rec loop l1 l2 accum =
+let fold_right2 f l1 l2 init =
+	let rec tail_loop acc l1 l2 =
 		match l1, l2 with
-		| [], [] -> accum
-		| h1 :: t1, h2 :: t2 -> loop t1 t2 (f h1 h2 accum)
+		| [] , [] -> acc
+		| h1 :: t1 , h2 :: t2 -> tail_loop (f h1 h2 acc) t1 t2
 		| _ -> raise (Different_list_size "fold_right2")
 	in
-	loop (rev l1) (rev l2) accum
-
-let rec fast_fold_right2 f l1 l2 accum =
-	match l1, l2 with
-	| [], [] -> accum
-	| h1 :: t1, h2 :: t2 -> f h1 h2 (fast_fold_right2 f t1 t2 accum)
-	| _ -> raise (Different_list_size "fast_fold_right2")
+	let rec loop n l1 l2 =
+		match l1, l2 with
+		| [], [] -> init
+		| h1 :: t1, h2 :: t2 ->
+			if n < fold_right_max then
+				f h1 h2 (loop (n+1) t1 t2)
+			else
+				f h1 h2 (tail_loop init (rev t1) (rev t2))
+		| _ -> raise (Different_list_size "fold_right2")
+	in
+	loop 0 l1 l2
 
 let for_all2 p l1 l2 =
 	let rec loop l1 l2 =

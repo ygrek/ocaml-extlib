@@ -1,4 +1,5 @@
-(* Enum, a lazy implementation of abstracts enumerators
+(* 
+ * Enum, enumeration over abstract collection of elements.
  * Copyright (C) 2003 Nicolas Cannasse
  * 
  * This library is free software; you can redistribute it and/or
@@ -28,42 +29,6 @@
 
 
 type 'a t
-
-(** {6 Constructors} 
-
- In this section the word {i shall} denotes a semantic
- requirement. The correct operation
- of the functions in this interface are conditional
- on the client meeting these requirements.
-*)
-
-exception No_more_elements
-(** This exception {i shall} be raised by the [next] function of [make] 
-  or [from] when no more elements can be enumerated, it {i shall not}
-  be raised by any function which is an argument to any
-  other function specified in the interface.
-*)
-
-val make : next:(unit -> 'a) -> count:(unit -> int) -> clone:(unit -> 'a t) -> 'a t
-(** This function creates a fully defined enumeration.
-	{ul {li the [next] function {i shall} return the next element of the
-	enumeration or raise [No_more_elements] if the underlying data structure
-	does not have any more elements to enumerate.}
-	{li the [count] function {i shall} return the actual number of remaining
-	elements in the enumeration.}
-	{li the [clone] function {i shall} create a clone of the enumeration. }}
- 
-	For some samples on how to correctly use [make], you can have a look
-		at implementation of [ExtList.enum]. 
-*)
-
-val init : int -> (int -> 'a) -> 'a t
-(** [init n f] create a new enumeration over elements
-  [f 0, f 1, ..., f (n-1)] *)
-
-val clone : 'a t -> 'a t
-(** [clone e] creates a new enumeration that is copy of [e]. If [e]
- is consumed by later operations, the clone will not be affected. *)
 
 (** {6 Final functions}
 
@@ -123,6 +88,9 @@ val get : 'a t -> 'a option
 (** [get e] returns [None] if [e] is empty or [Some x] where [x] is
   the next element of [e], in which case the element is removed from the enumeration. *)
 
+val push : 'a t -> 'a -> unit
+(** [push e x] will add [x] at the beginning of [e]. *)
+
 val junk : 'a t -> unit
 (** [junk e] removes the first element from the enumeration, if any. *)
 
@@ -138,22 +106,6 @@ val force : 'a t -> unit
   of enumerated elements is constructed and [e] will now enumerate over
   that data structure. *)
 
-(** {6 Counting} *)
-
-val count : 'a t -> int
-(** [count e] returns the number of remaining elements in [e] without
-  consuming the enumeration.
-
-Depending of the underlying data structure that is implementing the
-enumeration functions, the count operation can be costly, and even sometimes
-can cause a call to [force]. *)
-
-val fast_count : 'a t -> bool
-(** For users worried about the speed of [count] you can call the [fast_count]
-    function that will give an hint about [count] implementation. Basicly, if
-    the enumeration has been created with [make] or [init] or if [force] has
-	been called on it, then [fast_count] will return true. *)
-  
 (** {6 Lazy constructors}
 
  Theses functions are lazy which means that they will create a new modified
@@ -162,14 +114,6 @@ val fast_count : 'a t -> bool
  
  When the resulting enumerations of these functions are consumed, the
  underlying enumerations they were created from are also consumed. *)
-
-val from : (unit -> 'a) -> 'a t
-(** [from next] creates an enumeration from the [next] function.
- [next] {i shall} return the next element of the enumeration or raise
- [No_more_elements] when no more elements can be enumerated. Since the
- enumeration definition is incomplete, a call to [clone] or [count] will
- result in a call to [force] that will enumerate all elements in order to
- return a correct value. *)
 
 val map : ('a -> 'b) -> 'a t -> 'b t
 (** [map f e] returns an enumeration over [(f a1, f a2, ... , f aN)] where
@@ -195,9 +139,64 @@ val concat : 'a t t -> 'a t
 (** [concat e] returns an enumeration over all elements of all enumerations
  of [e]. *)
 
-val push : 'a t -> 'a -> unit
-(** [push e x] will add [x] at the beginning of [e]. *)
+(** {6 Constructors} 
 
+ In this section the word {i shall} denotes a semantic
+ requirement. The correct operation
+ of the functions in this interface are conditional
+ on the client meeting these requirements.
+*)
+
+exception No_more_elements
+(** This exception {i shall} be raised by the [next] function of [make] 
+  or [from] when no more elements can be enumerated, it {i shall not}
+  be raised by any function which is an argument to any
+  other function specified in the interface.
+*)
+
+val make : next:(unit -> 'a) -> count:(unit -> int) -> clone:(unit -> 'a t) -> 'a t
+(** This function creates a fully defined enumeration.
+	{ul {li the [next] function {i shall} return the next element of the
+	enumeration or raise [No_more_elements] if the underlying data structure
+	does not have any more elements to enumerate.}
+	{li the [count] function {i shall} return the actual number of remaining
+	elements in the enumeration.}
+	{li the [clone] function {i shall} create a clone of the enumeration
+	such as operations on the original enumeration will not affect the
+	clone. }}
+ 
+	For some samples on how to correctly use [make], you can have a look
+		at implementation of [ExtList.enum]. 
+*)
+
+val from : (unit -> 'a) -> 'a t
+(** [from next] creates an enumeration from the [next] function.
+ [next] {i shall} return the next element of the enumeration or raise
+ [No_more_elements] when no more elements can be enumerated. Since the
+ enumeration definition is incomplete, a call to [clone] or [count] will
+ result in a call to [force] that will enumerate all elements in order to
+ return a correct value. *)
+
+val init : int -> (int -> 'a) -> 'a t
+(** [init n f] create a new enumeration over elements
+  [f 0, f 1, ..., f (n-1)] *)
+
+(** {6 Counting} *)
+
+val count : 'a t -> int
+(** [count e] returns the number of remaining elements in [e] without
+  consuming the enumeration.
+
+Depending of the underlying data structure that is implementing the
+enumeration functions, the count operation can be costly, and even sometimes
+can cause a call to [force]. *)
+
+val fast_count : 'a t -> bool
+(** For users worried about the speed of [count] you can call the [fast_count]
+    function that will give an hint about [count] implementation. Basicly, if
+    the enumeration has been created with [make] or [init] or if [force] has
+	been called on it, then [fast_count] will return true. *)
+ 
 (**/**)
 
 

@@ -19,21 +19,17 @@
  *)
 
 (** Dynamic arrays.
-   
-	Dynamic arrays automatically adjust storage requirements as elements
-	are added or removed from the array. They are a resizable equivalent
-	of the Ocaml arrays.
-*)
 
-(** {6 Types} *)
+   An dynamic array is equivalent to a OCaml array the will resize itself
+   when elements are added ore removed, except that floats are boxed and
+   that no initialization element is required.
+*)
 
 type 'a t (* abstract *)
 (** The abstract type of a dynamic array. *)
 
 exception Invalid_arg of int * string * string
-(** Exception on array operation :
-
-	When an operation on an array fails, [Invalid_arg] is raised. The
+(** When an operation on an array fails, [Invalid_arg] is raised. The
 	integer is the value that made the operation fail, the first string
 	contains the function name that has been called and the second string
 	contains the paramater name that made the operation fail.
@@ -41,35 +37,37 @@ exception Invalid_arg of int * string * string
 
 (** {6 Array creation} *)
 
+val create : unit -> 'a t
+(** [create()] returns a new empty dynamic array. *)
+
 val make : int -> 'a t
-(** [make size] returns an array originally capable of holding [size]
-	elements. *)
+(** [make count] returns an array with some memory already allocated so
+	up to [count] elements can be stored into it without resizing. *)
 
 val init : int -> (int -> 'a) -> 'a t
-(** [init len f] returns an array of [len] elements filled with values
-	returned by [f 0 , f 1, ... f (len-1)]. *)
+(** [init n f] returns an array of [n] elements filled with values
+	returned by [f 0 , f 1, ... f (n-1)]. *)
 
 (** {6 Array manipulation functions} *)
 
 val empty : 'a t -> bool
-(** Return true if the number of used elements in the array is 0. *)
+(** Return true if the number of elements in the array is 0. *)
 
 val length : 'a t -> int
-(** Return the number of used elements in the array - this is effectively
-	it's length. *)
+(** Return the number of elements in the array. *)
 
 val get : 'a t -> int -> 'a
 (** [get darr idx] gets the element in [darr] at index [idx]. If [darr] has
 	[len] elements in it, then the valid indexs range from [0] to [len-1]. *)
 
 val last : 'a t -> 'a
-(** [last darr] returns the last element of [darr] *)
+(** [last darr] returns the last element of [darr]. *)
 
 val set : 'a t -> int -> 'a -> unit
 (** [set darr idx v] sets the element of [darr] at index [idx] to value
 	[v].  The previous value is overwritten.  If [idx] is equal to
 	[length darr] (i.e. the index is one past the end of the array), the
-	array is expanded to hold the new element- in this case, the function
+	array is expanded to hold the new element - in this case, the function
 	behaves like [add].  Otherwise, the array is not expanded. *)
 
 val insert : 'a t -> int -> 'a -> unit
@@ -96,12 +94,10 @@ val delete_last : 'a t -> unit
 
 val blit : 'a t -> int -> 'a t -> int -> int -> unit
 (** [blit src srcidx dst dstidx len] copies [len] elements from [src]
-	starting with index [srcidx] to [dst] starting at [dstidx].  The
-	[dst] array can be in the same as [src], and even overlap.  This is a
-	fast way to move blocks of elements around. *)
+	starting with index [srcidx] to [dst] starting at [dstidx]. *)
 
 val compact : 'a t -> unit
-(** [compact darr] ensure that the space allocated by the array is minimal. *)
+(** [compact darr] ensures that the space allocated by the array is minimal.*)
 
 (** {6 Array copy and conversion} *)
 
@@ -111,6 +107,9 @@ val to_list : 'a t -> 'a list
 val to_array : 'a t -> 'a array
 (** [to_array darr] returns the elements of [darr] in order as an array. *)
 
+val enum : 'a t -> 'a Enum.t
+(** [enum darr] returns the enumeration of [darr] elements. *)
+
 val of_list : 'a list -> 'a t
 (** [of_list lst] returns a dynamic array with the elements of [lst] in
 	it in order. *)
@@ -118,6 +117,9 @@ val of_list : 'a list -> 'a t
 val of_array : 'a array -> 'a t
 (** [of_array arr] returns an array with the elements of [arr] in it
 	in order. *)
+
+val of_enum : 'a Enum.t -> 'a t
+(** [of_enum e] returns an array that holds, in order, the elements of [e]. *)
 
 val copy : 'a t -> 'a t
 (** [copy src] returns a fresh copy of [src], such that no modification of
@@ -158,66 +160,9 @@ val fold_right : ('a -> 'b -> 'b) -> 'a t -> 'b -> 'b
 	[ f (get darr 0) (f (get darr 1) ( ... ( f (get darr n-1) x ) ... ) ) ]
 	similiar to [Array.fold_right] or [List.fold_right]. *)
 
-(** {6 Array enumerations} *)
-
-val enum : 'a t -> 'a Enum.t
-(** [enum darr] returns the enumeration of [darr] *)
-
-val of_enum : 'a Enum.t -> 'a t
-(** [of_enum e] returns an t that holds, in order, the  elements of [e]. *)
-
-(*/* --- removed temporary
-
-val sub_enum : 'a t -> int -> int -> 'a Enum.t
-(** [sub_enum darr idx len] returns an enumeration of a subset of [len]
-	elements of [darr], starting with the element at index [idx]. *)
-
-val insert_enum : 'a t -> int -> 'a Enum.t -> unit
-(** [insert_enum darr idx e] inserts the elements of [e] into [darr]
-	so the first element of [e] has index [idx], the second index [idx]+1,
-	etc.   All the elements of [darr] with index greater than or equal to
-	[idx] are moved up by the number of elements in [e] to make room. *)
-
-val set_enum : 'a t -> int -> 'a Enum.t -> unit
-(** [set_enum darr idx e] sets the elements from [e] into [darr],
-	so the first element of [e] has index [idx], etc.  The elements with
-	indexs [idx], [idx]+1, etc. are overwritten. *)
-
-(* Reversed enum functions *)
-
-val rev_enum : 'a t -> 'a Enum.t
-(** [rev_enum darr] returns the reverse enumeration of [darr]- elements are
-	enumerated in reverse order - from largest index to smallest. *)
-
-val sub_rev_enum : 'a t -> int -> int -> 'a Enum.t
-(** [sub_rev_enum darr idx len] returns an enumeration of a subset of [len]
-	elements of [darr], starting with the element at index [idx]+[len]-1.
-	The elements are returned in reverse order- from highest index to
-	lowest index.  So the last element returned from [e] becomes the
-	element at index [idx]. *)
-
-val of_rev_enum : 'a Enum.t -> 'a t
-(** [of_rev_enum e] returns a dynamic array that holds, in reverse
-	order, the elements of [e].  The first element returned from [e] becomes
-	the highest indexed element of the returned dynamic array, and so on.
-	Otherwise it acts like [of_enum].
-*)
-
-val insert_rev_enum : 'a t -> int -> 'a Enum.t -> unit
-(** [insert_rev_enum darr idx e] inserts the elements of [e] into [darr]
-	so the first element of [e] has index [idx]+[len]-1, the second index 
-	[idx]+[len]-2, etc, where [len] is the count of elements initially in 
-	[e].   The last element from [e] becomes the element at index [idx].  
-	Otherwise it acts like [insert_enum].
-*)
-
-val set_rev_enum : 'a t -> int -> 'a Enum.t -> unit
-(** [set_rev_enum darr idx e] sets the elements from [e] into [darr],
-	so the first element of [e] has index [idx]+[len]-1, etc, where [len]
-	is the count of elements initially in [e].  The last element of [e]
-	has index [idx].  Otherwise it acts like [set_enum].
-*)
-*/*)
+val index_of : ('a -> bool) -> 'a t -> int
+(** [index_of f darr] returns the index of the first element [x] in darr such
+	as [f x] returns [true] or raise [Not_found] if not found. *)
 
 (** {6 Array resizers} *)
 
