@@ -1,5 +1,6 @@
 body { padding: 0px 20px 0px 26px; background: #ffffff; color: #000000; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 90%; }
 h1 { padding : 5px 0px 5px 0px; font-size : 16pt; font-weight : normal; background-color : #E0E0FF }
+h6 { padding : 5px 0px 5px 20px; font-size : 16pt; font-weight : normal; background-color : #E0E0FF }
 a:link, a:visited, a:active { text-decoration: none; }
 a:link { color: #000077; }
 a:visited { color: #000077; }
