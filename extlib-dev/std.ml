@@ -1,22 +1,24 @@
 
-let input_enum ch =
+let input_lines ch =
 	Enum.from (fun () -> try input_line ch with End_of_file -> raise Enum.No_more_elements)
 
-let input_char_enum ch =
+let input_chars ch =
 	Enum.from (fun () -> try input_char ch with End_of_file -> raise Enum.No_more_elements)
 
-let input_lines ch =
+let input_list ch =
 	let rec loop dst =
 		let r = [ input_line ch ] in
 		Obj.magic (Obj.repr dst) 1 (Obj.repr r);
 		loop r
 	in
+	let r = [ Obj.magic () ] in
 	try
-		let r = [ input_line ch ] in
-		(try loop r with End_of_file -> ());
-		r
+		loop r
 	with
-		End_of_file -> []
+		End_of_file ->
+			match r with
+			| x :: l -> l
+			| [] -> assert false
 
 
 let buf_len = 8192
