@@ -171,6 +171,39 @@ let map f s =
 	done;
 	sc
 
+(* fold_left and fold_right by Eric C. Cooper *)
+let fold_left f init str =
+  let n = String.length str in
+  let rec loop i result =
+    if i = n then result
+    else loop (i + 1) (f result str.[i])
+  in
+  loop 0 init
+
+let fold_right f str init =
+  let n = String.length str in
+  let rec loop i result =
+    if i = 0 then result
+    else
+      let i' = i - 1 in
+      loop i' (f str.[i'] result)
+  in
+  loop n init
+
+(* explode and implode from the OCaml Expert FAQ. *)
+let explode s =
+  let rec exp i l =
+    if i < 0 then l else exp (i - 1) (s.[i] :: l) in
+  exp (String.length s - 1) []
+
+let implode l =
+  let res = String.create (List.length l) in
+  let rec imp i = function
+  | [] -> res
+  | c :: l -> res.[i] <- c; imp (i + 1) l in
+  imp 0 l
+
+
 let replace_chars f s =
 	let len = String.length s in
 	let tlen = ref 0 in

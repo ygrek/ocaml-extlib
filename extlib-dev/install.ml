@@ -27,7 +27,6 @@ type path =
 let modules = [
 	"enum";
 	"bitSet";
-	"dbi";
 	"dynArray";
 	"extHashtbl";
 	"extList";

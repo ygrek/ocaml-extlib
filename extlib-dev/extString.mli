@@ -107,6 +107,19 @@ module String :
 	(** [map f s] returns a string where all characters [c] in [s] have been
 		replaced by [f c]. **)
 
+	val fold_left : ('a -> char -> 'a) -> 'a -> string -> 'a
+	  (** [fold_left f a s] is
+	      [f (... (f (f a s.[0]) s.[1]) ...) s.[n-1]] *)
+	val fold_right : (char -> 'a -> 'a) -> string -> 'a -> 'a
+	  (** [fold_right f s b] is
+	      [f s.[0] (f s.[1] (... (f s.[n-1] b) ...))] *)
+
+	val explode : string -> char list
+	  (** [explode s] returns the list of characters in the string [s]. *)
+	val implode : char list -> string
+	  (** [implode cs] returns a string resulting from concatenating
+	      the characters in the list [cs]. *)
+
 	val strip : ?chars:string -> string -> string
 	(** Returns the string without the chars if they are at the beginning or
 		at the end of the string. By default chars are " \t\r\n". *)
