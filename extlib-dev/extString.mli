@@ -93,6 +93,14 @@ module String :
 	(** Returns the string without the chars if they are at the beginning or
 		at the end of the string. By default chars are " \t\r\n". *)
 
+	val exists : string -> string -> bool
+	(** [exists str sub] returns true if [sub] is a substring of [str] or
+		false otherwise. *)
+
+	val replace : (char -> string) -> string -> string
+	(** [replace f s] returns a string were all chars [c] of [s] have been
+		replaced by the string returned by [f c]. *)
+
 	(** {6 Older Functions} *)
 
 	(** Please refer to the Ocaml Manual for documentation of these

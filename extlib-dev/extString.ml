@@ -65,6 +65,13 @@ let find str sub =
 		with
 			Exit -> !found
 
+let exists str sub =
+	try
+		ignore(find str sub);
+		true
+	with
+		Invalid_string -> false
+
 let strip ?(chars=" \t\r\n") s =
 	let p = ref 0 in
 	let l = length s in
@@ -148,5 +155,28 @@ let map f s =
 		unsafe_set sc i (f (unsafe_get s i))
 	done;
 	sc
+
+let replace f s =
+	let len = String.length s in
+	let tlen = ref 0 in
+	let rec loop i acc =
+		if i = len then acc else 
+			let s = f (unsafe_get s i) in
+			tlen := !tlen + length s;
+			loop (i-1) (s :: acc)
+	in
+	let strs = loop 0 [] in
+	let sbuf = create !tlen in
+	let pos = ref !tlen in
+	let rec loop2 = function
+		| [] -> ()
+		| s :: acc ->
+			let len = length s in
+			pos := !pos - len;
+			blit s 0 sbuf !pos len;
+			loop2 acc
+	in
+	loop2 strs;
+	sbuf
 
 end
