@@ -321,8 +321,16 @@ let read_line i =
 			Buffer.add_char b c;
 			loop();
 	in
-	loop();
-	Buffer.contents b
+	try
+		loop();
+		Buffer.contents b
+	with
+		No_more_input ->
+			if !cr then Buffer.add_char b '\r';
+			if Buffer.length b > 0 then
+				Buffer.contents b
+			else
+				raise No_more_input
 
 let read_ui16 i =
 	let ch1 = read_byte i in
