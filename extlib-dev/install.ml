@@ -17,7 +17,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
- 
+
 open Printf
 
 type path =
@@ -32,7 +32,7 @@ let modules = [
 	"extHashtbl";
 	"extList";
 	"extString";
-	"global";	
+	"global";
 	"IO";
 	"IOO";
 	"option";
@@ -41,7 +41,8 @@ let modules = [
 	"std";
 	"uChar";
 	"uTF8";
-	"base64"
+	"base64";
+	"unzip"
 ]
 
 let m_list suffix =
@@ -50,7 +51,7 @@ let m_list suffix =
 let obj_ext , lib_ext , cp_cmd , path_type = match Sys.os_type with
 	| "Unix" | "Cygwin" | "MacOS" -> ".o" , ".a" , "cp", PathUnix
 	| "Win32" -> ".obj" , ".lib" , "copy", PathDos
-	| _ -> failwith "Unknown OS"		
+	| _ -> failwith "Unknown OS"
 
 let run cmd =
 	print_endline cmd;
@@ -78,13 +79,13 @@ let complete_path p =
 		else
 			p ^ (match path_type with PathUnix -> "/" | PathDos -> "\\")
 
-let remove file =	
+let remove file =
 	try
 		Sys.remove file
 	with
 		_ -> prerr_endline ("Warning : failed to delete " ^ file)
 
-let is_findlib() = 
+let is_findlib() =
 	let findlib = Sys.command (if Sys.os_type = "Win32" then "ocamlfind printconf 2>NUL" else "ocamlfind printconf") = 0 in
 	if findlib then
 		print_endline "Findlib found."
@@ -114,8 +115,8 @@ let install() =
 		| Some dir ->
 			if not !autobyte && not !autonative && not !autodoc then failwith "Nothing to do.";
 			Dir (complete_path dir)
-		| None -> 
-			let byte, native = 
+		| None ->
+			let byte, native =
 			  if !autobyte || !autonative then
 			    (!autobyte, !autonative)
 			  else begin
@@ -127,7 +128,7 @@ let install() =
 				| _ -> failwith "Invalid choice, exit.")
 			  end
 			in
-			let dest = 
+			let dest =
 			  if not findlib then begin
 			    printf "Choose installation directory :\n> ";
 			    let dest = complete_path (read_line()) in
@@ -142,7 +143,7 @@ let install() =
 			autonative := native;
 			dest
 	) in
-	let doc = 
+	let doc =
 		match !docflag with
 		Some doc -> doc
 		| None ->
@@ -152,8 +153,8 @@ let install() =
 			| "n" | "N" -> false
 			| _ -> failwith "Invalid choice, exit.")
 	in
-	autodoc := doc;	
-	let doc_dir = 
+	autodoc := doc;
+	let doc_dir =
 	  match install_dir with
 	    Findlib -> "extlib-doc"
 	  | Dir install_dir ->
@@ -169,10 +170,10 @@ let install() =
 	if !autonative then begin
 		List.iter (fun m -> run (sprintf "ocamlopt -c %s.ml" m)) modules;
 		run (sprintf "ocamlopt -a -o extLib.cmxa %s extLib.ml" (m_list ".cmx"));
-		List.iter (fun m -> remove (m ^ obj_ext)) modules;		
+		List.iter (fun m -> remove (m ^ obj_ext)) modules;
 		remove ("extLib" ^ obj_ext);
 	end;
-	if !autodoc then begin 
+	if !autodoc then begin
 		run (sprintf "ocamldoc -sort -html -d %s %s" doc_dir (m_list ".mli"));
 		run ((match path_type with
 				| PathDos -> sprintf "%s odoc_style.css %s\\style.css";
@@ -181,7 +182,7 @@ let install() =
 	match install_dir with
 	  Findlib ->
 	    let files = Buffer.create 0 in
-	    List.iter (fun m -> 
+	    List.iter (fun m ->
 	      Buffer.add_string files (m ^ ".cmi");
 	      Buffer.add_char files ' ')
 	      modules;
@@ -195,17 +196,17 @@ let install() =
 	    let files = Buffer.contents files in
 	    run (sprintf "ocamlfind install extlib %s META" files);
 	| Dir install_dir ->
-	    List.iter (fun m -> 
+	    List.iter (fun m ->
 			copy (m ^ ".cmi") install_dir;
 			if !autonative then copy (m ^ ".cmx") install_dir
-		) ("extLib" :: modules);	    
+		) ("extLib" :: modules);
 	    if !autobyte then copy "extLib.cma"  install_dir;
 	    if !autonative then begin
 	      copy "extLib.cmxa" install_dir;
 	      copy ("extLib" ^ lib_ext) install_dir;
 	    end;
 ;;
-try 
+try
 	install();
 	printf "Done.";
 with
