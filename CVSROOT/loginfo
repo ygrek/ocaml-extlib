@@ -23,5 +23,6 @@
 # For example:
 #
 #
-
-DEFAULT (echo ""; date; echo $USER; echo " - "; echo %s; cat) >> $CVSROOT/CVSROOT/commit.log
+# disabled : we don't have rights on commit.log
+#
+# DEFAULT (echo ""; date; echo $USER; echo " - "; echo %s; cat) >> $CVSROOT/CVSROOT/commit.log
