@@ -1,6 +1,6 @@
 (* 
  * Enum - Enumeration over abstract collection of elements.
- * Copyright (C) 2003 Nicolas Cannasse (ncannasse@motion-twin.com)
+ * Copyright (C) 2003 Nicolas Cannasse
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -51,6 +51,14 @@ let rec init n f =
 		clone = (fun () -> init !count f);
 		fast = true;
 	}			
+
+let rec empty () =
+	{
+		count = (fun () -> 0);
+		next = (fun () -> raise No_more_elements);
+		clone = (fun () -> empty());
+		fast = true;
+	}
 
 let force t =
 	let rec clone enum count =
@@ -150,7 +158,7 @@ let junk t =
 	with
 		No_more_elements -> ()
 
-let empty t =
+let is_empty t =
 	if t.fast then
 		t.count() = 0
 	else
