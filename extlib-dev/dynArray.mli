@@ -170,6 +170,8 @@ val index_of : ('a -> bool) -> 'a t -> int
 (** [index_of f darr] returns the index of the first element [x] in darr such
 	as [f x] returns [true] or raise [Not_found] if not found. *)
 
+val filter : ('a -> bool) -> 'a t -> unit
+
 (** {6 Array resizers} *)
 
 type resizer_t = currslots:int -> oldlength:int -> newlength:int -> int

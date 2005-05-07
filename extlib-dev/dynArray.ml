@@ -344,6 +344,21 @@ let iteri f d =
 		f i (iget d.arr i)
 	done
 
+let filter f d =
+	let l = d.len in
+	let a = imake 0 l in
+	let a2 = d.arr in
+	let p = ref 0 in
+	for i = 0 to l - 1 do
+		let x = iget a2 i in
+		if f x then begin
+			iset a !p x;
+			incr p;
+		end;
+	done;
+	d.len <- !p;
+	d.arr <- a
+
 let index_of f d =
 	let rec loop i =
 		if i >= d.len then
