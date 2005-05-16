@@ -170,4 +170,11 @@ module String :
 	type t = string
 	val compare : t -> t -> int
 
+	(**/**)
+
+	external unsafe_get : string -> int -> char = "%string_unsafe_get"
+	external unsafe_set : string -> int -> char -> unit = "%string_unsafe_set"
+	external unsafe_blit : string -> int -> string -> int -> int -> unit = "caml_blit_string" "noalloc"
+	external unsafe_fill : string -> int -> int -> char -> unit = "caml_fill_string" "noalloc"
+
   end
