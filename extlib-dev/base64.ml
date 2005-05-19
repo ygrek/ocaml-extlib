@@ -33,12 +33,15 @@ let chars = [|
 	'w';'x';'y';'z';'0';'1';'2';'3';'4';'5';'6';'7';'8';'9';'+';'/'
 |]
 
-let inv_chars =
-	let a = Array.make 256 (-1) in
+let make_decoding_table tbl =
+	if Array.length tbl <> 64 then raise Invalid_table;
+	let d = Array.make 256 (-1) in
 	for i = 0 to 63 do
-		Array.unsafe_set a (int_of_char (Array.unsafe_get chars i)) i;
+		Array.unsafe_set d (int_of_char (Array.unsafe_get tbl i)) i;
 	done;
-	a
+	d
+
+let inv_chars = make_decoding_table chars
 
 let encode ?(tbl=chars) ch =
 	if Array.length tbl <> 64 then raise Invalid_table;

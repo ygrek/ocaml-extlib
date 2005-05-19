@@ -52,3 +52,6 @@ val encode : ?tbl:encoding_table -> 'a IO.output -> 'a IO.output
 
 (** Generic base64 decoding over an input. *)
 val decode : ?tbl:decoding_table -> IO.input -> IO.input
+
+(** Create a valid decoding table from an encoding one. *)
+val make_decoding_table : encoding_table -> decoding_table
