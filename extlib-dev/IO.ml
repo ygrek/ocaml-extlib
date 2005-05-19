@@ -359,6 +359,8 @@ let pipe() =
 	} in
 	input , output
 
+external cast_output : 'a output -> unit output = "%identity"
+
 (* -------------------------------------------------------------- *)
 (* BINARY APIs *)
 
@@ -509,6 +511,7 @@ let write_i64 ch n =
 let write_double ch f =
 	write_i64 ch (Int64.bits_of_float f)
 
+(* -------------------------------------------------------------- *)
 (* Big Endians *)
 
 module BigEndian = struct
@@ -596,6 +599,83 @@ let write_double ch f =
 
 end
 
+(* -------------------------------------------------------------- *)
+(* Bits API *)
+
+type 'a bc = {
+	ch : 'a;
+	mutable nbits : int;
+	mutable bits : int;
+}
+
+type bc_in = input bc
+type bc_out = unit output bc
+
+exception Bits_error
+
+let input_bits ch =
+	{
+		ch = ch;
+		nbits = 0;
+		bits = 0;
+	}
+
+let output_bits ch =
+	{
+		ch = cast_output ch;
+		nbits = 0;
+		bits = 0;
+	}
+
+let rec read_bits b n =
+	if b.nbits >= n then begin
+		let c = b.nbits - n in
+		let k = (b.bits asr c) land ((1 lsl n) - 1) in
+		b.nbits <- c;
+		k
+	end else begin
+		let k = read_byte b.ch in
+		if b.nbits >= 24 then begin
+			if n >= 31 then raise Bits_error;
+			let c = 8 + b.nbits - n in
+			let d = b.bits land ((1 lsl b.nbits) - 1) in
+			let d = (d lsl (8 - c)) lor (k lsr c) in
+			b.bits <- k;
+			b.nbits <- c;
+			d
+		end else begin			
+			b.bits <- (b.bits lsl 8) lor k;
+			b.nbits <- b.nbits + 8;
+			read_bits b n;
+		end
+	end
+
+let drop_bits b =
+	b.nbits <- 0
+
+let rec write_bits b ~nbits x =
+	let n = nbits in
+	if n + b.nbits >= 32 then begin
+		if n > 31 then raise Bits_error;
+		let n2 = 32 - b.nbits - 1 in
+		let n3 = n - n2 in
+		write_bits b ~nbits:n2 (x asr n3);
+		write_bits b ~nbits:n3 (x land ((1 lsl n3) - 1));
+	end else begin
+		if n < 0 then raise Bits_error;
+		if (x < 0 || x > (1 lsl n - 1)) && n <> 31 then raise Bits_error;
+		b.bits <- (b.bits lsl n) lor x;
+		b.nbits <- b.nbits + n;
+		while b.nbits >= 8 do
+			b.nbits <- b.nbits - 8;
+			write_byte b.ch (b.bits asr b.nbits)
+		done
+	end
+
+let flush_bits b =
+	if b.nbits > 0 then write_bits b (8 - b.nbits) 0
+
+(* -------------------------------------------------------------- *)
 (* Generic IO *)
 
 class in_channel ch =

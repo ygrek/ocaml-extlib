@@ -153,6 +153,10 @@ val pos_out : 'a output -> 'a output * (unit -> int)
 (** Create an output that provide a count function of the number of bytes
   written through it. *)
 
+external cast_output : 'a output -> unit output = "%identity"
+(** You can safely transform any output to an unit output in a safe way 
+  by using this function. *)
+
 (** {6 Binary files API}
 
 	Here is some API useful for working with binary files, in particular
@@ -242,6 +246,36 @@ sig
 	val write_double : 'a output -> float -> unit
 
 end
+
+(** {6 Bits API}
+
+	This enable you to read and write from an IO bit-by-bit or several bits
+	at the same time.
+*)
+
+type bc_in
+type bc_out
+
+exception Bits_error
+
+val input_bits : input -> bc_in
+(** Read bits from an input *)
+
+val output_bits : 'a output -> bc_out
+(** Write bits to an output *)
+
+val read_bits : bc_in -> int -> int
+(** Read up to 31 bits, raise Bits_error if n < 0 or n > 31 *)
+
+val write_bits : bc_out -> nbits:int -> int -> unit
+(** Write up to 31 bits represented as a value, raise Bits_error if nbits < 0
+ or nbits > 31 or the value representation excess nbits. *)
+
+val flush_bits : bc_out -> unit
+(** Flush remaining unwritten bits, adding up to 7 bits which values 0. *)
+
+val drop_bits : bc_in -> unit
+(** Drop up to 7 buffered bits and restart to next input character. *)
 
 (** {6 Generic IO Object Wrappers}
 
