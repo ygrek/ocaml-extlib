@@ -19,8 +19,12 @@
  *)
 
 exception Invalid_char
+exception Invalid_table
 
 external unsafe_char_of_int : int -> char = "%identity"
+
+type encoding_table = char array
+type decoding_table = int array
 
 let chars = [|
 	'A';'B';'C';'D';'E';'F';'G';'H';'I';'J';'K';'L';'M';'N';'O';'P';
@@ -36,13 +40,14 @@ let inv_chars =
 	done;
 	a
 
-let encode ch =
+let encode ?(tbl=chars) ch =
+	if Array.length tbl <> 64 then raise Invalid_table;
 	let data = ref 0 in
 	let count = ref 0 in
 	let flush() =
 		if !count > 0 then begin
 			let d = (!data lsl (6 - !count)) land 63 in
-			IO.write ch (Array.unsafe_get chars d);
+			IO.write ch (Array.unsafe_get tbl d);
 		end;		
 	in
 	let write c =
@@ -52,7 +57,7 @@ let encode ch =
 		while !count >= 6 do
 			count := !count - 6;
 			let d = (!data asr !count) land 63 in
-			IO.write ch (Array.unsafe_get chars d)
+			IO.write ch (Array.unsafe_get tbl d)
 		done;
 	in
 	let output s p l =
@@ -65,7 +70,8 @@ let encode ch =
 		~flush:(fun () -> flush(); IO.flush ch)
 		~close:(fun() -> flush(); IO.close_out ch)
 
-let decode ch =
+let decode ?(tbl=inv_chars) ch =
+	if Array.length tbl <> 256 then raise Invalid_table;
 	let data = ref 0 in
 	let count = ref 0 in
 	let rec fetch() =
@@ -75,7 +81,7 @@ let decode ch =
 			unsafe_char_of_int d
 		end else
 			let c = int_of_char (IO.read ch) in
-			let c = Array.unsafe_get inv_chars c in
+			let c = Array.unsafe_get tbl c in
 			if c = -1 then raise Invalid_char;
 			data := (!data lsl 6) lor c;
 			count := !count + 6;
@@ -100,11 +106,11 @@ let decode ch =
 	in
 	IO.create_in ~read ~input ~close
 
-let str_encode s =
-	let ch = encode (IO.output_string()) in
+let str_encode ?(tbl=chars) s =
+	let ch = encode ~tbl (IO.output_string()) in
 	IO.nwrite ch s;
 	IO.close_out ch
 
-let str_decode s =
-	let ch = decode (IO.input_string s) in
+let str_decode ?(tbl=inv_chars) s =
+	let ch = decode ~tbl (IO.input_string s) in
 	IO.nread ch ((String.length s * 6) / 8)

@@ -20,22 +20,35 @@
 
 (** Base64 codec.
 
- 8-bit characters are encoded into 6-bit ones using ASCII characters A-Z,
- a-z, 0-9, and '+' , '/' (in that order). *)
+	8-bit characters are encoded into 6-bit ones using ASCII lookup tables.
+	Default tables maps 0..63 values on characters A-Z, a-z, 0-9, '+' and '/'
+	(in that order). 
+*)
 
 (** This exception is raised when reading an invalid character
 	from a base64 input. *)
 exception Invalid_char
 
+(** This exception is raised if the encoding or decoding table
+	size is not correct. *)
+exception Invalid_table
+
+(** An encoding table maps integers 0..63 to the corresponding char. *)
+type encoding_table = char array
+
+(** A decoding table mais chars 0..255 to the corresponding 0..63 value
+ or -1 if the char is not accepted. *)
+type decoding_table = int array
+
 (** Encode a string into Base64. *)
-val str_encode : string -> string
+val str_encode : ?tbl:encoding_table -> string -> string
 
 (** Decode a string encoded into Base64, raise [Invalid_char] if a
 	character in the input string is not a valid one. *)
-val str_decode : string -> string
+val str_decode : ?tbl:decoding_table -> string -> string
 
 (** Generic base64 encoding over an output. *)
-val encode : 'a IO.output -> 'a IO.output
+val encode : ?tbl:encoding_table -> 'a IO.output -> 'a IO.output
 
 (** Generic base64 decoding over an input. *)
-val decode : IO.input -> IO.input
+val decode : ?tbl:decoding_table -> IO.input -> IO.input
