@@ -608,8 +608,8 @@ type 'a bc = {
 	mutable bits : int;
 }
 
-type bc_in = input bc
-type bc_out = unit output bc
+type in_bits = input bc
+type out_bits = unit output bc
 
 exception Bits_error
 
