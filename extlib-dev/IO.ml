@@ -337,6 +337,7 @@ let pipe() =
 		if !inpos = String.length !input then flush();
 		let r = (if !inpos + l > String.length !input then String.length !input - !inpos else l) in
 		String.unsafe_blit !input !inpos s p r;
+		inpos := !inpos + r;
 		r
 	in
 	let write c =
