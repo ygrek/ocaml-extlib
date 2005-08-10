@@ -81,6 +81,17 @@ let test_fold_right () =
   let b = List.fold_right (fun e a -> e::a) lst [] in
   assert (a = b)
 
+let test_fold_right2 () = 
+  let len = 2000 in
+  let cnt = ref 0 in
+  let lst = List.init len Std.identity in
+  let a = StdList.fold_right (fun e a -> incr cnt; e::a) lst [] in
+  let cnt_std = !cnt in
+  cnt := 0;
+  let b = List.fold_right (fun e a -> incr cnt; e::a) lst [] in
+  assert (cnt_std = len);
+  assert (!cnt = cnt_std)
+
 let test_map () = 
   for i = 0 to 10 do
     let f = ( * ) 2 in
@@ -96,4 +107,5 @@ let test () =
   Util.run_test ~test_name:"jh_ExtList_001.exceptions" test_exceptions;
   Util.run_test ~test_name:"jh_ExtList_001.find_exc" test_find_exc;
   Util.run_test ~test_name:"jh_ExtList_001.fold_right" test_fold_right;
+  Util.run_test ~test_name:"jh_ExtList_001.fold_right2" test_fold_right2;
   Util.run_test ~test_name:"jh_ExtList_001.map" test_map
