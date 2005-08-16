@@ -56,10 +56,13 @@ val unique : unit -> int
 (** returns an unique identifier every time it is called. *)
 
 val dump : 'a -> string
-(** reprensent a runtime value as a string. *)
+(** represent a runtime value as a string. Since types are lost at compile
+	time, the representation might not match your type. For example, None
+	will be printed 0 since they share the same runtime representation. *)
 
 val print : 'a -> unit
-(** print the representation of a runtime value on stdout. *)
+(** print the representation of a runtime value on stdout.
+	See remarks for [dump]. *)
 
 val finally : (unit -> unit) -> ('a -> 'b) -> 'a -> 'b 
 (** finally [fend f x] calls [f x] and then [fend()] even if [f x] raised
