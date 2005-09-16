@@ -73,6 +73,26 @@ let test_find_exc () =
     done
   with _ -> assert false
 
+let test_findi () =
+  let check_fn f = try (let e,i = f () in e<>i) with Not_found -> true in
+  try 
+    for i = 0 to 15 do
+      let rnd_lst = rnd_list () in
+      begin 
+        match rnd_lst with
+          [] -> ()
+        | lst -> 
+            let rnd_elem = Random.int (List.length lst) in
+            assert (check_fn 
+                      (fun () -> 
+                         List.findi (fun i e -> e = List.length lst) lst));
+            assert (not (check_fn 
+                           (fun () -> 
+                              List.findi (fun i e -> e = rnd_elem) lst)))
+      end
+    done
+  with _ -> assert false
+
 let test_fold_right () = 
   let maxlen = 2000 in
   (* NOTE assuming we will not blow the stack with 2000 elements *)
@@ -106,6 +126,7 @@ let test () =
   Util.run_test ~test_name:"jh_ExtList_001.mapi" test_mapi;
   Util.run_test ~test_name:"jh_ExtList_001.exceptions" test_exceptions;
   Util.run_test ~test_name:"jh_ExtList_001.find_exc" test_find_exc;
+  Util.run_test ~test_name:"jh_ExtList_001.findi" test_findi;
   Util.run_test ~test_name:"jh_ExtList_001.fold_right" test_fold_right;
   Util.run_test ~test_name:"jh_ExtList_001.fold_right2" test_fold_right2;
   Util.run_test ~test_name:"jh_ExtList_001.map" test_map
