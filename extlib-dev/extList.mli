@@ -68,6 +68,11 @@ module List :
 	(** [find_exc p e l] returns the first element of [l] such as [p x]
 	 returns [true] or raises [e] if such element as not been found. *)
 
+	val findi : (int -> 'a -> bool) -> 'a list -> (int * 'a)
+	(** [findi p e l] returns the first element [ai] of [l] along with its
+	 index [i] such that [p i ai] is true, or raises [Not_found] if no
+	 such element has been found. *)
+
 	val unique : ?cmp:('a -> 'a -> bool) -> 'a list -> 'a list
 	(** [unique cmp l] returns the list [l] without any duplicate element.
 	 Default comparator ( = ) is used if no comparison function specified. *)

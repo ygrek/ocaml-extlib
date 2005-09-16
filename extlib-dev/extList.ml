@@ -288,6 +288,14 @@ let find_all p l =
 	findnext dummy l;
 	dummy.tl
 
+let rec findi p l =
+	let rec loop n = function
+		| [] -> raise Not_found
+		| h :: t ->
+			if p n h then (n,h) else loop (n+1) t
+	in
+	loop 0 l
+
 let filter = find_all
 
 let partition p lst = 
