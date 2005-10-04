@@ -126,14 +126,24 @@ let next node = node.next
 let prev node = node.prev
 
 let skip node idx =
-	let m = if idx > 0 then -1 else 1 in
-	let rec loop idx n =
+	let rec floop idx n =
 		if idx == 0 then
 			n
 		else
-			loop (idx + m) n.next
+			floop (idx - 1) n.next
 	in
-	loop idx node
+	let rec bloop idx n = 
+		if idx == 0 then
+			n
+		else
+			bloop (idx + 1) n.prev
+	in
+		if idx>0 then
+			floop idx node
+		else if idx<0 then
+			bloop idx node
+		else
+			node
 
 let rev node =
 	let rec loop next n =
