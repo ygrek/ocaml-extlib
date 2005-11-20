@@ -46,8 +46,8 @@ module Opt :
       The user should therefore not attempt to catch it.  *)
 
     exception Option_help
-    (** When an option wants to display a usage message, [Help] may be
-      raised.  This exception can never "escape" the scope of a
+    (** When an option wants to display a usage message, this exception
+      may be raised.  It can never "escape" the scope of a
       {!OptParse.OptParser.parse} call and the user should therefore not
       attempt to catch it. *)
 
