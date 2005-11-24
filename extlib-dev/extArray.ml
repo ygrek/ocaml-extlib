@@ -25,7 +25,7 @@ include Array
 let rev_in_place xs =
   let n = length xs in
   let j = ref (n-1) in
-  for i = 0 to n/2 do
+  for i = 0 to n/2-1 do
     let c = xs.(i) in
     xs.(i) <- xs.(!j);
     xs.(!j) <- c;
