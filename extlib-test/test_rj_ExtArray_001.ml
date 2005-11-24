@@ -1,0 +1,106 @@
+(*
+ * ExtLib Testing Suite
+ * Copyright (C) 2005 Richard W.M. Jones
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version,
+ * with the special exception on linking described in file LICENSE.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *)
+
+(* Standard library array. *)
+module StdArray = Array
+
+open ExtArray
+
+let test_rev () =
+  assert ([| 1; 2; 3; 4; 5 |] = Array.rev [| 5; 4; 3; 2; 1 |]);
+  assert ([| 1; 2; 3; 4; 5; 6 |] = Array.rev [| 6; 5; 4; 3; 2; 1 |]);
+  assert ([| "a"; "b"; "c" |] = Array.rev [| "c"; "b"; "a" |]);
+  assert ([| "a"; "b" |] = Array.rev [| "b"; "a" |])
+
+let test_rev_in_place () =
+  let a = [| 5; 4; 3; 2; 1 |] in
+  Array.rev_in_place a;
+  assert ([| 1; 2; 3; 4; 5 |] = a);
+  let a = [| 6; 5; 4; 3; 2; 1 |] in
+  Array.rev_in_place a;
+  assert ([| 1; 2; 3; 4; 5; 6 |] = a);
+  let a = [| "c"; "b"; "a" |] in
+  Array.rev_in_place a;
+  assert ([| "a"; "b"; "c" |] = a);
+  let a = [| "b"; "a" |] in
+  Array.rev_in_place a;
+  assert ([| "a"; "b" |] = a)
+
+let test_for_all () =
+  let a = [| 0; 2; 4; 6; 8; 10; 12 |] in
+  let is_even i = 0 = (i land 1) in
+  assert (Array.for_all is_even a);
+  assert (Array.for_all is_even [| |])
+
+let test_exists () =
+  let a = [| 0; 2; 4; 6; 8; 10; 11; 12 |] in
+  let b = [| 0; 2; 4; 6; 8; 10; 12 |] in
+  let is_even i = 0 = (i land 1) in
+  let is_odd i = 1 = (i land 1) in
+  assert (Array.exists is_odd a);
+  assert (not (Array.exists is_odd b));
+  assert (not (Array.exists is_even [| |]))
+
+let test_mem () =
+  let a = [| 0; 2; 4; 6; 8; 10; 11; 12 |] in
+  assert (Array.mem 11 a);
+  assert (Array.mem 12 a);
+  assert (not (Array.mem 13 a))
+
+let test_memq () =
+  let a = [| 0; 2; 4; 6; 8; 10; 11; 12 |] in
+  assert (Array.memq 11 a);
+  assert (Array.memq 12 a);
+  assert (not (Array.memq 13 a))
+
+let test_find () =
+  let a = [| 0; 2; 4; 6; 8; 10; 11; 12 |] in
+  assert (11 = Array.find ((=) 11) a);
+  assert (12 = Array.find ((=) 12) a);
+  assert (try ignore (Array.find ((=) 13) a); false with Not_found -> true)
+
+let test_findi () =
+  let a = [| 0; 2; 4; 6; 8; 10; 11; 12 |] in
+  assert (6 = Array.findi ((=) 11) a);
+  assert (7 = Array.findi ((=) 12) a);
+  assert (try ignore (Array.findi ((=) 13) a); false with Not_found -> true)
+
+let test_filter () =
+  let a = [| 0; 1; 2; 3; 4; 5; 6; 7; 8; 9 |] in
+  let is_even i = 0 = (i land 1) in
+  let is_odd i = 1 = (i land 1) in
+  assert ([| 0; 2; 4; 6; 8 |] = Array.filter is_even a);
+  assert ([| 1; 3; 5; 7; 9 |] = Array.filter is_odd a);
+  let a = Array.init 10_000 (fun i -> i) in
+  let b = Array.init 5_000 (fun i -> i * 2) in
+  let c = Array.init 5_000 (fun i -> i * 2 + 1) in
+  assert (b = Array.filter is_even a);
+  assert (c = Array.filter is_odd a)
+
+let test () =
+  Util.run_test ~test_name:"rj_ExtArray_001.rev" test_rev;
+  Util.run_test ~test_name:"rj_ExtArray_001.rev_in_place" test_rev_in_place;
+  Util.run_test ~test_name:"rj_ExtArray_001.for_all" test_for_all;
+  Util.run_test ~test_name:"rj_ExtArray_001.exists" test_exists;
+  Util.run_test ~test_name:"rj_ExtArray_001.mem" test_mem;
+  Util.run_test ~test_name:"rj_ExtArray_001.memq" test_memq;
+  Util.run_test ~test_name:"rj_ExtArray_001.find" test_find;
+  Util.run_test ~test_name:"rj_ExtArray_001.findi" test_findi;
+  Util.run_test ~test_name:"rj_ExtArray_001.filter" test_filter;
