@@ -86,6 +86,16 @@ sig
 	The order of the elements in the input array is preserved. *)
 *)
 
+
+
+  (** {6 Enumerations} *)
+
+  val enum : 'a array -> 'a Enum.t
+    (** Returns an enumeration of the elements of an array. *)
+
+  val of_enum : 'a Enum.t -> 'a array
+    (** Build an array from an enumeration. *)
+
   (** {6 Old functions} *)
 
   (** These functions are already part of the Ocaml standard library

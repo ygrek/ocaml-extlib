@@ -124,4 +124,32 @@ let filter p xs =
 
 let find_all = filter
 
+let enum xs =
+  let rec make start xs =
+    let n = length xs in
+    Enum.make
+      ~next:(fun () ->
+	       if !start < n then (
+		 let r = xs.(!start) in
+		 incr start;
+		 r
+	       ) else
+		 raise Enum.No_more_elements)
+      ~count:(fun () ->
+		n - !start)
+      ~clone:(fun () ->
+		let xs' = Array.sub xs !start (n - !start) in
+		make (ref 0) xs')
+  in
+  make (ref 0) xs
+
+let of_enum e =
+  let n = Enum.count e in
+  (* This assumes, reasonably, that init traverses the array in order. *)
+  Array.init n
+    (fun i ->
+       match Enum.get e with
+       | Some x -> x
+       | None -> assert false)
+
 end
