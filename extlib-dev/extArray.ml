@@ -1,7 +1,6 @@
 (*
  * ExtList - additional and modified functions for lists.
- * Copyright (C) 2003 Brian Hurt
- * Copyright (C) 2003 Nicolas Cannasse
+ * Copyright (C) 2005 Richard W.M. Jones (rich @ annexia.org)
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,6 +22,40 @@ module Array = struct
 
 include Array
 
+let for_all p xs =
+  let n = length xs in
+  let rec loop i =
+    if i = n then true
+    else if p xs.(i) then loop (succ i)
+    else false
+  in
+  loop 0
 
+let exists p xs =
+  let n = length xs in
+  let rec loop i =
+    if i = n then false
+    else if p xs.(i) then true
+    else loop (succ i)
+  in
+  loop 0
+
+let mem a xs =
+  let n = length xs in
+  let rec loop i =
+    if i = n then false
+    else if a = xs.(i) then true
+    else loop (succ i)
+  in
+  loop 0
+
+let memq a xs =
+  let n = length xs in
+  let rec loop i =
+    if i = n then false
+    else if a == xs.(i) then true
+    else loop (succ i)
+  in
+  loop 0
 
 end

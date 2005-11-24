@@ -29,7 +29,25 @@ module Array :
 sig
 
   (** {6 New functions} *)
+  val for_all : ('a -> bool) -> 'a array -> bool
+    (** [for_all p [a1; ...; an]] checks if all elements of the array
+	satisfy the predicate [p].  That is, it returns
+	[ (p a1) && (p a2) && ... && (p an)].
+    *)
 
+  val exists : ('a -> bool) -> 'a array -> bool
+    (** [exists p [a1; ...; an]] checks if at least one element of
+	the array satisfies the predicate [p].  That is, it returns
+	[ (p a1) || (p a2) || ... || (p an)].
+    *)
+
+  val mem : 'a -> 'a array -> bool
+    (** [mem m a] is true if and only if [m] is equal to an element of [a]. *)
+
+  val memq : 'a -> 'a array -> bool
+    (** Same as {!Array.mem} but uses physical equality instead of
+	structural equality to compare array elements.
+    *)
 
 
   (** {6 Old functions} *)
