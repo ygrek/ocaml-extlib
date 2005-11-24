@@ -127,7 +127,7 @@ module List :
 	(** Returns an enumeration of the elements of a list. *)
 
 	val of_enum : 'a Enum.t -> 'a list
-	(** Build a list from and enumeration. *)
+	(** Build a list from an enumeration. *)
 
 	(** {6 Modified functions} *)
 
