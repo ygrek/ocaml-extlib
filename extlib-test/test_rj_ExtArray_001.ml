@@ -27,7 +27,9 @@ let test_rev () =
   assert ([| 1; 2; 3; 4; 5 |] = Array.rev [| 5; 4; 3; 2; 1 |]);
   assert ([| 1; 2; 3; 4; 5; 6 |] = Array.rev [| 6; 5; 4; 3; 2; 1 |]);
   assert ([| "a"; "b"; "c" |] = Array.rev [| "c"; "b"; "a" |]);
-  assert ([| "a"; "b" |] = Array.rev [| "b"; "a" |])
+  assert ([| "a"; "b" |] = Array.rev [| "b"; "a" |]);
+  assert ([| "a" |] = Array.rev [| "a" |]);
+  assert ([| |] = Array.rev [| |])
 
 let test_rev_in_place () =
   let a = [| 5; 4; 3; 2; 1 |] in
@@ -41,7 +43,13 @@ let test_rev_in_place () =
   assert ([| "a"; "b"; "c" |] = a);
   let a = [| "b"; "a" |] in
   Array.rev_in_place a;
-  assert ([| "a"; "b" |] = a)
+  assert ([| "a"; "b" |] = a);
+  let a = [| "a" |] in
+  Array.rev_in_place a;
+  assert ([| "a" |] = a);
+  let a = [| |] in
+  Array.rev_in_place a;
+  assert ([| |] = a)
 
 let test_for_all () =
   let a = [| 0; 2; 4; 6; 8; 10; 12 |] in
@@ -62,25 +70,30 @@ let test_mem () =
   let a = [| 0; 2; 4; 6; 8; 10; 11; 12 |] in
   assert (Array.mem 11 a);
   assert (Array.mem 12 a);
-  assert (not (Array.mem 13 a))
+  assert (not (Array.mem 13 a));
+  assert (not (Array.mem 13 [| |]))
 
 let test_memq () =
   let a = [| 0; 2; 4; 6; 8; 10; 11; 12 |] in
   assert (Array.memq 11 a);
   assert (Array.memq 12 a);
-  assert (not (Array.memq 13 a))
+  assert (not (Array.memq 13 a));
+  assert (not (Array.memq 13 [| |]))
 
 let test_find () =
   let a = [| 0; 2; 4; 6; 8; 10; 11; 12 |] in
   assert (11 = Array.find ((=) 11) a);
   assert (12 = Array.find ((=) 12) a);
-  assert (try ignore (Array.find ((=) 13) a); false with Not_found -> true)
+  assert (try ignore (Array.find ((=) 13) a); false with Not_found -> true);
+  assert (try ignore (Array.find ((=) 13) [| |]); false with Not_found -> true)
 
 let test_findi () =
   let a = [| 0; 2; 4; 6; 8; 10; 11; 12 |] in
   assert (6 = Array.findi ((=) 11) a);
   assert (7 = Array.findi ((=) 12) a);
-  assert (try ignore (Array.findi ((=) 13) a); false with Not_found -> true)
+  assert (try ignore (Array.findi ((=) 13) a); false with Not_found -> true);
+  assert (try ignore (Array.findi ((=) 13) [| |]); false
+	  with Not_found -> true)
 
 let test_filter () =
   let a = [| 0; 1; 2; 3; 4; 5; 6; 7; 8; 9 |] in
@@ -92,7 +105,8 @@ let test_filter () =
   let b = Array.init 5_000 (fun i -> i * 2) in
   let c = Array.init 5_000 (fun i -> i * 2 + 1) in
   assert (b = Array.filter is_even a);
-  assert (c = Array.filter is_odd a)
+  assert (c = Array.filter is_odd a);
+  assert ([| |] = Array.filter is_even [| |])
 
 let test () =
   Util.run_test ~test_name:"rj_ExtArray_001.rev" test_rev;
