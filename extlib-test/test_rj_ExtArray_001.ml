@@ -108,6 +108,16 @@ let test_filter () =
   assert (c = Array.filter is_odd a);
   assert ([| |] = Array.filter is_even [| |])
 
+let test_enum () =
+  let a = Array.init 1000 (fun i -> i) in
+  let e = Array.enum a in
+  let l = ExtList.List.of_enum e in
+  assert (l = Array.to_list a);
+  let l = ExtList.List.init 2000 (fun i -> i) in
+  let e = ExtList.List.enum l in
+  let a = Array.of_enum e in
+  assert (a = Array.of_list l)
+
 let test () =
   Util.run_test ~test_name:"rj_ExtArray_001.rev" test_rev;
   Util.run_test ~test_name:"rj_ExtArray_001.rev_in_place" test_rev_in_place;
@@ -118,3 +128,4 @@ let test () =
   Util.run_test ~test_name:"rj_ExtArray_001.find" test_find;
   Util.run_test ~test_name:"rj_ExtArray_001.findi" test_findi;
   Util.run_test ~test_name:"rj_ExtArray_001.filter" test_filter;
+  Util.run_test ~test_name:"rj_ExtArray_001.enum" test_enum;
