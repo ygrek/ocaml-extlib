@@ -22,6 +22,21 @@ module Array = struct
 
 include Array
 
+let rev_in_place xs =
+  let n = length xs in
+  let j = ref (n-1) in
+  for i = 0 to n/2 do
+    let c = xs.(i) in
+    xs.(i) <- xs.(!j);
+    xs.(!j) <- c;
+    decr j
+  done
+
+let rev xs =
+  let ys = Array.copy xs in
+  rev_in_place ys;
+  ys
+
 let for_all p xs =
   let n = length xs in
   let rec loop i =
@@ -57,5 +72,56 @@ let memq a xs =
     else loop (succ i)
   in
   loop 0
+
+let findi p xs =
+  let n = length xs in
+  let rec loop i =
+    if i = n then raise Not_found
+    else if p xs.(i) then i
+    else loop (succ i)
+  in
+  loop 0
+
+let find p xs = xs.(findi p xs)
+
+let filter p xs =
+  let n = length xs in
+  let inc = min n 1024 in
+  (* Results list: a list of sub-arrays of size inc elements. *)
+  let rs = ref [] in
+  let rec loop i r =
+    if i = n then r (* finished *)
+    else (
+      let r =
+	if p xs.(i) then ( (* append xs.(i) to the result *)
+	  if r < inc then (
+	    let h = List.hd !rs in
+	    h.(r) <- xs.(i);
+	    succ r
+	  ) else (
+	    let h = Array.make inc xs.(i) in
+	    rs := h :: !rs;
+	    1
+	  )
+	)
+	else
+	  r in
+      loop (succ i) r
+    )
+  in
+  let r = loop 0 inc in
+  let rs = !rs in
+  (* Truncate final sub-array to the right size. *)
+  let rs =
+    if r = inc then rs else
+      match rs with
+      | [] -> []
+      | h :: t ->
+	  (Array.sub h 0 r) :: t in
+  (* Concat into a single array. *)
+  let rs = List.rev rs in
+  concat rs
+
+let find_all = filter
 
 end
