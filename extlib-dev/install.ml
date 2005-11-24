@@ -28,6 +28,7 @@ let modules = [
 	"enum";
 	"bitSet";
 	"dynArray";
+	"extArray";
 	"extHashtbl";
 	"extList";
 	"extString";

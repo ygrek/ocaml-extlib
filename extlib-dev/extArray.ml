@@ -1,5 +1,6 @@
-(* 
- * ExtLib - use extensions as separate modules
+(*
+ * ExtList - additional and modified functions for lists.
+ * Copyright (C) 2003 Brian Hurt
  * Copyright (C) 2003 Nicolas Cannasse
  * 
  * This library is free software; you can redistribute it and/or
@@ -18,26 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
-(* 
-	Note:
-	
-	Since ExtLib is provided for namespace convenience for
-	users who wants to keep the usage of the original
-	Ocaml Standard Library, no MLI CMI nor documentation will
-	be provided for this module.
+module Array = struct
 
-	Users can simply do an "open ExtLib" to import all Ext*
-	namespaces instead of doing "open ExtList" for example.
+include Array
 
-	The trade-off is that they'll have to link all the modules
-	included below so the resulting binary is bigger.
-*)
 
-module List = ExtList.List
-module String = ExtString.String
-module Hashtbl = ExtHashtbl.Hashtbl
-module Array = ExtArray.Array
 
-exception Invalid_string = ExtString.Invalid_string
-
-include Std
+end
