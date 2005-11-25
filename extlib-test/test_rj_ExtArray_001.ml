@@ -108,6 +108,18 @@ let test_filter () =
   assert (c = Array.filter is_odd a);
   assert ([| |] = Array.filter is_even [| |])
 
+let test_partition () =
+  let a = [| 0; 1; 2; 3; 4; 5; 6; 7; 8; 9 |] in
+  let is_even i = 0 = (i land 1) in
+  let is_odd i = 1 = (i land 1) in
+  let x, y = Array.partition is_even a in
+  assert ([| 0; 2; 4; 6; 8 |] = x);
+  assert ([| 1; 3; 5; 7; 9 |] = y);
+  let x, y = Array.partition is_odd a in
+  assert ([| 1; 3; 5; 7; 9 |] = x);
+  assert ([| 0; 2; 4; 6; 8 |] = y);
+  assert (([| |], [| |]) = Array.partition is_even [| |])
+
 let test_enum () =
   let a = Array.init 1000 (fun i -> i) in
   let e = Array.enum a in
@@ -128,4 +140,5 @@ let test () =
   Util.run_test ~test_name:"rj_ExtArray_001.find" test_find;
   Util.run_test ~test_name:"rj_ExtArray_001.findi" test_findi;
   Util.run_test ~test_name:"rj_ExtArray_001.filter" test_filter;
+  Util.run_test ~test_name:"rj_ExtArray_001.partition" test_partition;
   Util.run_test ~test_name:"rj_ExtArray_001.enum" test_enum;
