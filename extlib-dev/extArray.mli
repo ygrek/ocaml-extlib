@@ -77,16 +77,12 @@ sig
   val find_all : ('a -> bool) -> 'a array -> 'a array
     (** [find_all] is another name for {!Array.filter}. *)
 
-(*
   val partition : ('a -> bool) -> 'a array -> 'a array * 'a array
     (** [partition p a] returns a pair of arrays [(a1, a2)], where
 	[a1] is the array of all the elements of [a] that
 	satisfy the predicate [p], and [a2] is the array of all the
 	elements of [a] that do not satisfy [p].
 	The order of the elements in the input array is preserved. *)
-*)
-
-
 
   (** {6 Enumerations} *)
 
