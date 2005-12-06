@@ -126,24 +126,14 @@ let next node = node.next
 let prev node = node.prev
 
 let skip node idx =
-	let rec floop idx n =
+	let m = if idx > 0 then -1 else 1 in
+	let rec loop idx n =
 		if idx == 0 then
 			n
 		else
-			floop (idx - 1) n.next
+			loop (idx + m) n.next
 	in
-	let rec bloop idx n = 
-		if idx == 0 then
-			n
-		else
-			bloop (idx + 1) n.prev
-	in
-		if idx>0 then
-			floop idx node
-		else if idx<0 then
-			bloop idx node
-		else
-			node
+	loop idx node
 
 let rev node =
 	let rec loop next n =
@@ -293,5 +283,5 @@ let of_enum enm =
 		| Some(d) ->
 			let first = create d in
 			let f d n = append n d in
-			let last = Enum.fold f first enm in
+			ignore(Enum.fold f first enm);
 			first

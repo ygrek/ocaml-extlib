@@ -309,11 +309,11 @@ let rec inflate_loop z =
 		let cinfo = cmf lsr 4 in
 		if cm <> 8 || cinfo <> 7 then error Invalid_data;
 		let flg = IO.read_byte z.zinput in
-		let fcheck = flg land 31 in
+		(*let fcheck = flg land 31 in*)
 		let fdict = flg land 32 <> 0 in
-		let flevel = flg lsr 6 in
+		(*let flevel = flg lsr 6 in*)
 		if (cmf lsl 8 + flg) mod 31 <> 0 then error Invalid_data;
-		let dict = (if fdict then error Unsupported_dictionary else None) in
+		if fdict then error Unsupported_dictionary;
 		z.zstate <- Block;
 		inflate_loop z
 	| Crc ->
