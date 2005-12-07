@@ -88,10 +88,7 @@ let remove file =
 
 let is_findlib() =
 	let findlib = Sys.command (if Sys.os_type = "Win32" then "ocamlfind printconf 2>NUL" else "ocamlfind printconf") = 0 in
-	if findlib then
-		print_endline "Findlib found."
-  	else
-		print_endline "Findlib not found.";
+	if findlib then	print_endline "Using Findlib";
 	findlib
 
 type install_dir = Findlib | Dir of string
