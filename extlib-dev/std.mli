@@ -65,5 +65,5 @@ val print : 'a -> unit
 	See remarks for [dump]. *)
 
 val finally : (unit -> unit) -> ('a -> 'b) -> 'a -> 'b 
-(** finally [fend f x] calls [f x] and then [fend()] even if [f x] raised
+(** [finally fend f x] calls [f x] and then [fend()] even if [f x] raised
 	an exception. *)

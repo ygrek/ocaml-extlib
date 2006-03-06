@@ -346,7 +346,7 @@ module OptParser :
 
 
     exception Option_conflict of string
-    (** [Option_conflic name] is raised by {!OptParse.OptParser.add}
+    (** [Option_conflict name] is raised by {!OptParse.OptParser.add}
       when two different options are added with identical
       names. Usually this doesn't need to be caught since this error
       is usually easily fixed permanently by removing/renaming the
