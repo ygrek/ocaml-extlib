@@ -91,12 +91,18 @@ let split str sep =
 	let slen = length str in
 	sub str 0 p, sub str (p + len) (slen - p - len)
 
-let rec nsplit str sep =
-	try
-		let s1 , s2 = split str sep in
-		s1 :: nsplit s2 sep
-	with
-		Invalid_string -> [str]
+let nsplit str sep =
+	if str = "" then []
+	else (
+		let rec nsplit str sep =
+			try
+				let s1 , s2 = split str sep in
+				s1 :: nsplit s2 sep
+			with
+				Invalid_string -> [str]
+		in
+		nsplit str sep
+	)
 
 let join = concat
 

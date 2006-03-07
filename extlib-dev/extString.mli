@@ -43,7 +43,8 @@ module String :
 
 	val nsplit : string -> string -> string list
 	(** [nsplit s sep] splits the string [s] into a list of strings
-		which are separated by [sep]. *)
+		which are separated by [sep].
+                [nsplit "" _] returns the empty list. *)
 
 	val join : string -> string list -> string
 	(** Same as [concat] *)
