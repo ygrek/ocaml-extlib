@@ -431,7 +431,7 @@ let find_exc f e l =
 
 let remove l x =
 	let rec loop dst = function
-		| [] -> raise Not_found
+		| [] -> ()
 		| h :: t ->
 			if x = h then 
 				dst.tl <- t
