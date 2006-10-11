@@ -162,4 +162,11 @@ let of_enum e =
        | Some x -> x
        | None -> assert false)
 
+let iter2 f a1 a2 =
+     if Array.length a1 <> Array.length a2
+     then raise (Invalid_argument "Array.iter2");
+     for i = 0 to Array.length a1 - 1 do
+       f a1.(i) a2.(i);
+     done;;
+
 end
