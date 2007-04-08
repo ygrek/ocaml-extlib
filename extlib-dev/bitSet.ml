@@ -205,34 +205,46 @@ let partial_count t x =
 		loop (pos+1) (nbits ((bget t.data pos) lsr delta))
 
 let count t =
-	partial_count t 0
+  partial_count t 0
 
+(* Find the first set bit in the bit array *)
+let find_first_set b n =
+  (* TODO there are many ways to speed this up.  Lookup table would be
+     one way to speed this up. *)
+  let find_lsb b =
+    assert (b <> 0);
+    let rec loop n =
+      if b land (1 lsl n) <> 0 then n else loop (n+1) in
+    loop 0 in
+
+  let buf = b.data in
+  let rec find_bit byte_ndx bit_offs =
+    if byte_ndx >= b.len then
+      None
+    else
+      let byte = (bget buf byte_ndx) lsr bit_offs in
+      if byte = 0 then
+        find_bit (byte_ndx + 1) 0
+      else
+        Some ((find_lsb byte) + (byte_ndx lsl log_int_size) + bit_offs) in
+  find_bit (n lsr log_int_size) (n land int_size)
+      
 let enum t =
-	let rec make n =
-		let cur = ref n in
-		let rec next() =
-			let pos = !cur lsr log_int_size and delta = !cur land int_size in
-			if pos >= t.len then raise Enum.No_more_elements;
-			let x = bget t.data pos in
-			let rec loop i =
-	if i = 8 then
-		next()
-	else if x land (1 lsl i) = 0 then begin
-		incr cur;
-		loop (i+1)
-	end else
-		!cur
-			in
-			let b = loop delta in
-			incr cur;
-			b
-		in
-		Enum.make
-			~next
-			~count:(fun () -> partial_count t !cur)
-			~clone:(fun () -> make !cur)
-	in
-	make 0
+  let rec make n =
+    let cur = ref n in
+    let rec next () =
+      match find_first_set t !cur with
+        Some elem ->
+          cur := (elem+1);
+          elem
+      | None ->
+          raise Enum.No_more_elements in
+    Enum.make
+      ~next
+      ~count:(fun () -> partial_count t !cur)
+      ~clone:(fun () -> make !cur)
+  in
+  make 0
 
 let raw_create size = 
   let b = bcreate size in
