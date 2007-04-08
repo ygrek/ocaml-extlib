@@ -105,10 +105,10 @@ let test_fold_right2 () =
   let len = 2000 in
   let cnt = ref 0 in
   let lst = List.init len Std.identity in
-  let a = StdList.fold_right (fun e a -> incr cnt; e::a) lst [] in
+  ignore (StdList.fold_right (fun e a -> incr cnt; e::a) lst []);
   let cnt_std = !cnt in
   cnt := 0;
-  let b = List.fold_right (fun e a -> incr cnt; e::a) lst [] in
+  ignore (List.fold_right (fun e a -> incr cnt; e::a) lst []);
   assert (cnt_std = len);
   assert (!cnt = cnt_std)
 

@@ -98,7 +98,6 @@ let tst_rex = "^test_\\(.+\\)_\\(.+\\)_\\(.+\\)\\.ml$"
 
 
 let tests_of dirname =
-  let h = Hashtbl.create 97 in
   let crexp = Str.regexp tst_rex in
   List.map
     (fun s-> 

@@ -42,7 +42,6 @@ let test () =
     (fun () -> 
        for i = 0 to 64 do
          let s = Util.random_string () in
-         let len = String.length s in
          let enc = Base64.str_encode s in
          assert ((Base64.str_decode enc) = s);
          check_chars enc
