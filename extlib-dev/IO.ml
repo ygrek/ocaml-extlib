@@ -485,7 +485,7 @@ let write_ui16 ch n =
 	write_byte ch (n lsr 8)
 
 let write_i16 ch n =
-	if n < -0x7FFF || n > 0x7FFF then raise (Overflow "write_i16");
+	if n < -0x8000 || n > 0x7FFF then raise (Overflow "write_i16");
 	if n < 0 then
 		write_ui16 ch (65536 + n)
 	else
@@ -571,7 +571,7 @@ let write_ui16 ch n =
 	write_byte ch n
 
 let write_i16 ch n =
-	if n < -0x7FFF || n > 0x7FFF then raise (Overflow "write_i16");
+	if n < -0x8000 || n > 0x7FFF then raise (Overflow "write_i16");
 	if n < 0 then
 		write_ui16 ch (65536 + n)
 	else
