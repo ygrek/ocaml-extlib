@@ -331,7 +331,7 @@ let rec inflate_loop z =
 		| 0 -> (* no compression *)
 			z.zlen <- IO.read_ui16 z.zinput;
 			let nlen = IO.read_ui16 z.zinput in
-			if nlen <> 0x10000 - z.zlen then error Invalid_data;
+			if nlen <> 0xffff - z.zlen then error Invalid_data;
 			z.zstate <- Flat;
 			inflate_loop z;
 			reset_bits z
