@@ -23,28 +23,18 @@
    Thanks Rob! *)
 
 let test_unzip_bug1 () =
-  (* This string represents an uncompressed block. 
-     0x80 : bit 8 is set to indicate the last block,
-            bits 6 and 7 are 00 to indicate an uncompressed block
-            all other bits are ignored
-     0x02
-     0x00 : length of data (2) in little endian
-     0xfd
-     0xff : one's complement of data length (little endian)
-     X
-     Y    : the data
-
-     The bug is that the Unzip module incorrectly checked that the
-     one's complement representation of the length matched the
-     original length. *)
-  let block    = "\x80\x02\x00\xfd\xffXY" in
-  let input    = IO.input_string block in
-  let unzipped = Unzip.inflate ~header:false input in
+  let test data =
+    let input    = IO.input_string data in
+    let unzipped = Unzip.inflate input in
     try
-      let str      = IO.really_nread unzipped 2 in
+      let str      = IO.read_all unzipped in
       assert (str = "XY")
-    with Unzip.Error Unzip.Invalid_data -> 
-      assert false
+    with Unzip.Error Unzip.Invalid_data -> assert false
+  in
+  (* this is "XY" compressed by zlib at level 9 *)
+  test "\x78\xda\x8b\x88\x04\x00\x01\x0b\x00\xb2";
+  (* this is "XY" compressed by zlib at level 0 *)
+  test "\x78\x01\x01\x02\x00\xfd\xff\x58\x59\x01\x0b\x00\xb2"
 
 let test () = 
   Util.run_test ~test_name:"jh_Unzip.unzip_bug1" test_unzip_bug1
