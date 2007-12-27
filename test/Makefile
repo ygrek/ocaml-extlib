@@ -1,10 +1,10 @@
 
 all:
-	cd ../extlib-dev && make all
+	cd ../extlib && make all
 	make -f test.mak all
 
 opt:
-	cd ../extlib-dev && make opt
+	cd ../extlib && make opt
 	make -f test.mak opt
 
 run:

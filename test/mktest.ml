@@ -17,7 +17,7 @@ module SMap = Map.Make (String)
 (* Step 1: find a list of all ExtLib modules *)
 
 let extlib_dev_dir = 
-  Filename.concat Filename.parent_dir_name "extlib-dev"
+  Filename.concat Filename.parent_dir_name "extlib"
 
 let build_dir = "build-tmp"
 
