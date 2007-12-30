@@ -158,12 +158,16 @@ let exec cmd msg =
     failwith ("FAILURE: msg=" ^ msg ^ ", cmd=" ^cmd)
 
 
-let ocaml_cmd = function
-    `CompileByte -> "ocamlc -g"
-  | `CompileNative -> "ocamlopt"
-
-let compile_file build_type filename =
-  let cmd = (ocaml_cmd build_type)^" -I "^extlib_dev_dir^
+let ocaml_cmd use_ocamlfind mode =
+  let prefix = if use_ocamlfind then "ocamlfind " else "" in
+  match mode with
+    `CompileByte -> prefix^"ocamlc -g"
+  | `CompileNative -> prefix^"ocamlopt"
+      
+let compile_file ~use_ocamlfind build_type filename =
+  let extlib_incl = 
+    if use_ocamlfind then " -package extlib" else " -I "^extlib_dev_dir in
+  let cmd = (ocaml_cmd use_ocamlfind build_type)^extlib_incl^
     " -I " ^ build_dir ^
     " -I " ^ Filename.current_dir_name ^
     " -c " ^ filename 
@@ -172,32 +176,37 @@ let compile_file build_type filename =
   exec cmd ("Compilation of " ^ filename)
 
 
-let compile_tests build_type all_modules all_tests =
+let compile_tests ~use_ocamlfind build_type all_modules all_tests =
   (* compile individual tests *)
   Hashtbl.iter
     (fun mname (author,test) ->
        let filename = build_dir_name (itest_filename author mname test ".ml") in
-       compile_file build_type filename) all_tests;
+       compile_file ~use_ocamlfind build_type filename) all_tests;
   (* compile generated module level thunks *)
   List.iter
     (fun s ->
        let filename = build_dir_name (mtest_filename s ".ml") in
-       compile_file build_type filename) all_modules;
+       compile_file use_ocamlfind build_type filename) all_modules;
   (* compile mainline *)
-  compile_file build_type (build_dir_name "extlib_test.ml")
+  compile_file ~use_ocamlfind build_type (build_dir_name "extlib_test.ml")
 
 
 
-let link_tests ~exe_name build_type all_modules all_tests =
+let link_tests ~exe_name ~use_ocamlfind build_type all_modules all_tests =
   let (obj_ext,lib_ext) = 
     match build_type with
       `CompileByte -> (".cmo",".cma")
     | `CompileNative -> (".cmx", ".cmxa") in
+  let extlib_link = 
+    if use_ocamlfind then
+      " -package extlib -linkpkg " 
+    else 
+      " -I "^extlib_dev_dir^" extLib"^lib_ext in
   (* Individual tests *)
   let linkstring =
-    P.sprintf "%s -I %s -I %s -I %s -o %s extLib%s util%s"
-      (ocaml_cmd build_type) extlib_dev_dir build_dir 
-      (Filename.current_dir_name) exe_name lib_ext obj_ext in
+    ocaml_cmd use_ocamlfind build_type^" -I "^build_dir^
+      " -I "^Filename.current_dir_name^" -o "^exe_name^" util"^obj_ext^
+      " "^extlib_link in
   let test_o_files = 
     String.concat " " 
       (Hashtbl.fold (fun mname (auth,test) accu ->
@@ -222,6 +231,7 @@ let parse_options () =
      (`OptArg, "module", "Use only tests that test the specified module");
      (`OptArg, "test",   "Only use the specified test");
      (`OptArg, "output", "Set output file name");
+     (`OptToggle, "use-ocamlfind", "Use ExtLib lib as found by ocamlfind");
      (`OptToggle, "opt", "Compile native code (default is bytecode)")] in
   let print_usage () = 
     P.fprintf stderr "Usage: %s [options]\n" (F.basename Sys.argv.(0));
@@ -232,8 +242,8 @@ let parse_options () =
            | (`OptToggle,opt_name,desc) -> ("--"^opt_name) in
          P.fprintf stderr "  %-22s      %s\n" (opt_str opt) desc) options in
   let args = ref [] in
-  let assign_re = Str.regexp "^--\\([A-Za-z]+\\)=\\(.*\\)$" in
-  let toggle_re = Str.regexp "^--\\([A-Za-z]+\\)$" in
+  let assign_re = Str.regexp "^--\\([A-Za-z-]+\\)=\\(.*\\)$" in
+  let toggle_re = Str.regexp "^--\\([A-Za-z-]+\\)$" in
   let opt_exists opt = List.exists (function (_,f,_) -> f = opt) in
   let toggles = List.filter (function (`OptToggle,_,_) -> true | _ -> false) options
   and assigns = List.filter (function (`OptArg,_,_) -> true | _ -> false) options in
@@ -281,6 +291,7 @@ let main =
   and include_test = make_inclusion_test "test" in
   let build_type = 
     if SMap.mem "opt" options then `CompileNative else `CompileByte in
+  let use_ocamlfind = SMap.mem "use-ocamlfind" options in
   let output_name = 
     try SSet.choose (SMap.find "output" options) with Not_found -> "extlib_test" in
   mkdir build_dir;
@@ -313,7 +324,7 @@ let main =
   patch_tests all_tests;
 
   copy_file "util.ml" (build_dir_name "util.ml");
-  compile_file build_type (build_dir_name "util.ml");
-  compile_tests build_type all_modules all_tests;
-  link_tests ~exe_name:output_name build_type all_modules all_tests;
+  compile_file ~use_ocamlfind build_type (build_dir_name "util.ml");
+  compile_tests ~use_ocamlfind build_type all_modules all_tests;
+  link_tests ~use_ocamlfind ~exe_name:output_name build_type all_modules all_tests;
   print_endline (output_name^" generated")
