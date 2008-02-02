@@ -45,8 +45,8 @@ val iter2 : ('a -> 'b -> unit) -> 'a t -> 'b t -> unit
  [e2] repeatedly until one of the two enumerations ends. *)
 
 val fold : ('a -> 'b -> 'b) -> 'b -> 'a t -> 'b
-(** [fold f v e] returns v if e is empty,
-  otherwise [f (... (f (f v a1) a2) ...) aN] where a1..N are
+(** [fold f v e] returns [v] if [e] is empty,
+  otherwise [f aN (... (f a2 (f a1 v)) ...)] where a1..N are
   the elements of [e]. 
 *)
 
