@@ -83,6 +83,12 @@ module List :
 	 [f ai = Some bi] (when [f] returns [None], the corresponding element of
 	 [l] is discarded). *)
 
+	val find_map : ('a -> 'b option) -> 'a list -> 'b
+	(** [find_map pred list] finds the first element of [list] for which
+	    [pred element] returns [Some r].  It returns [r] immediately
+	    once found or raises [Not_found] if no element matches the
+	    predicate.  See also {!filter_map}. *)
+
 	val split_nth : int -> 'a list -> 'a list * 'a list
 	(** [split_nth n l] returns two lists [l1] and [l2], [l1] containing the
 	 first [n] elements of [l] and [l2] the others. Raise [Invalid_index] if
