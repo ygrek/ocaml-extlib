@@ -40,7 +40,18 @@ let test_regr_1 () =
     ignore (DynArray.of_array [||])
   done
 
+(* Memory corruption in DynArray.insert; fixed. BD 2009/Jun/18. *)
+let test_insert () =
+  let d = ref (DynArray.create ()) and n = 4100 in
+  for i = 0 to n do
+    assert (i = DynArray.length !d);
+    (* This is needed in order to expose the memory corruption. *)
+    Printf.ifprintf stdout "%d %d\n" i (DynArray.length !d); flush stdout;
+    DynArray.insert !d 0 (Array.create 42 "")
+  done
+  
 let test () = 
   Util.run_test ~test_name:"jh_DynArray.triv" test_triv;
-  Util.run_test ~test_name:"jh_DynArray.regr_1" test_regr_1
+  Util.run_test ~test_name:"jh_DynArray.regr_1" test_regr_1;
+  Util.run_test ~test_name:"jh_DynArray.test_insert" test_insert
 
