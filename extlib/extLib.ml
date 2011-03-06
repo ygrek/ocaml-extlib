@@ -40,4 +40,6 @@ module Array = ExtArray.Array
 
 exception Invalid_string = ExtString.Invalid_string
 
+let (@) = ExtList.(@)
+
 include Std
