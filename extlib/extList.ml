@@ -374,14 +374,13 @@ let rec init size f =
 		loop r 1;
 		inj r
 
-(* make by Richard W.M. Jones. *)
 let make i x =
   if i < 0 then invalid_arg "ExtList.List.make";
-  let rec make' x = function
-    | 0 -> []
-    | i -> x :: make' x (i-1)
+  let rec loop acc x = function
+  | 0 -> acc
+  | i -> loop (x::acc) x (i-1)
   in
-  make' x i
+  loop [] x i
 
 let mapi f = function
 	| [] -> []
