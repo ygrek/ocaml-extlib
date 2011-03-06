@@ -93,6 +93,7 @@ let split str sep =
 
 let nsplit str sep =
 	if str = "" then []
+	else if sep = "" then raise Invalid_string
 	else (
 		let rec nsplit str sep =
 			try
