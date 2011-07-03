@@ -80,6 +80,8 @@ let conservative_exponential_resizer ~currslots ~oldlength ~newlength =
 let default_resizer = conservative_exponential_resizer
 
 let changelen (d : 'a t) newlen =
+	if newlen > Sys.max_array_length then invalid_arg newlen "changelen" "newlen";
+
 	let oldsize = ilen d.arr in
 	let r = d.resize
 			~currslots:oldsize
@@ -88,8 +90,9 @@ let changelen (d : 'a t) newlen =
 	in
 	(* We require the size to be at least large enough to hold the number
 	 * of elements we know we need!
+	 * Also be sure not to exceed max_array_length
 	 *)
-	let newsize = if r < newlen then newlen else r in
+	let newsize = if r < newlen then newlen else min Sys.max_array_length r in
 	if newsize <> oldsize then begin
 		let newarr = imake 0 newsize in
 		let cpylen = (if newlen < d.len then newlen else d.len) in
