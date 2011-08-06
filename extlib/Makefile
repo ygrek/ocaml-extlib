@@ -20,7 +20,6 @@ doc:
 	cp odoc_style.css doc/style.css
 
 install:
-	cp META.txt META
 	ocamlfind install extlib META *.cmi *.cma $(MLI) $(wildcard *.cmxa) $(wildcard *.a)
 
 uninstall:

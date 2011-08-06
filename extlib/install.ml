@@ -192,7 +192,6 @@ let install() =
 	      Buffer.add_string files "extLib.cmxa ";
 	      Buffer.add_string files ("extLib" ^ lib_ext^ " ");
 	    end;
-	    run (sprintf "%s META.txt META" cp_cmd);
 	    let files = Buffer.contents files in
 	    run (sprintf "ocamlfind install extlib %s META" files);
 	| Dir install_dir ->

@@ -19,10 +19,8 @@ What is ExtLib ?
 ----------------
 
 ExtLib is a set of additional useful functions and modules for OCaml.
-You can watch the SourceForge project page here :
-	http://sourceforge.net/projects/ocaml-lib/
-The web site is here :
-	http://ocaml-lib.sourceforge.net/
+Project page :
+	http://code.google.com/p/ocaml-extlib
 and you can join the mailing list here :
 	http://lists.sourceforge.net/lists/listinfo/ocaml-lib-devel
 
