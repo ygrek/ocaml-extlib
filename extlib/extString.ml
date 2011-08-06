@@ -32,19 +32,26 @@ let init len f =
 	s
 
 let starts_with str p =
-	let len = length p in
-	if length str < len then 
+	if length str < length p then 
 		false
 	else
-		sub str 0 len = p
+    let rec loop str p i =
+      if i = length p then true else
+      if unsafe_get str i <> unsafe_get p i then false
+      else loop str p (i+1)
+    in
+    loop str p 0
 
 let ends_with s e =
-	let el = length e in
-	let sl = length s in
-	if sl < el then
+	if length s < length e then
 		false
 	else
-		sub s (sl-el) el = e
+    let rec loop s e i =
+      if i = length e then true else
+      if unsafe_get s (length s - length e + i) <> unsafe_get e i then false
+      else loop s e (i+1)
+    in
+    loop s e 0
 
 let find str sub =
 	let sublen = length sub in
