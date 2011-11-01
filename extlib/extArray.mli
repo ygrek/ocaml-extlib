@@ -38,7 +38,14 @@ sig
   val iter2 : ('a -> 'b -> unit) -> 'a array -> 'b array -> unit
     (** [Array.iter2 f [|a1; ...; an|] [|b1; ...; bn|]] performs
     calls [f a1 b1; ...; f an bn] in that order.
-    
+
+    @raise Invalid_argument if the length of [a1] does not equal the
+    length of [a2]. *)
+
+  val map2 : ('a -> 'b -> 'c) -> 'a array -> 'b array -> 'c array
+    (** [Array.map2 f [|a1; ...; an|] [|b1; ...; bn|]] creates new array
+    [[|f a1 b1; ...; f an bn|]].
+
     @raise Invalid_argument if the length of [a1] does not equal the
     length of [a2]. *)
 

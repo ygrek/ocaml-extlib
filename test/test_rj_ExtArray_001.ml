@@ -130,6 +130,13 @@ let test_enum () =
   let a = Array.of_enum e in
   assert (a = Array.of_list l)
 
+let test_map2 () =
+  let a = Array.init 100 (fun i -> i) in
+  let b = Array.init 100 (fun i -> 99 - i) in
+  assert (Array.make 100 99 = Array.map2 (+) a b);
+  assert (try let _ = Array.map2 (+) [||] [|1|] in false with Invalid_argument _ -> true);
+  assert (Array.map2 (-) a b = Array.of_list (List.map2 (-) (Array.to_list a) (Array.to_list b)))
+
 let test () =
   Util.run_test ~test_name:"rj_ExtArray_001.rev" test_rev;
   Util.run_test ~test_name:"rj_ExtArray_001.rev_in_place" test_rev_in_place;
@@ -142,3 +149,4 @@ let test () =
   Util.run_test ~test_name:"rj_ExtArray_001.filter" test_filter;
   Util.run_test ~test_name:"rj_ExtArray_001.partition" test_partition;
   Util.run_test ~test_name:"rj_ExtArray_001.enum" test_enum;
+  Util.run_test ~test_name:"y_ExtArray_001.map2" test_map2
