@@ -32,6 +32,7 @@ module Hashtbl =
 	}
 
 	include Hashtbl
+	let create n = Hashtbl.create (* no seed *) n
 
 	external h_conv : ('a, 'b) t -> ('a, 'b) h_t = "%identity"
 	external h_make : ('a, 'b) h_t -> ('a, 'b) t = "%identity"
