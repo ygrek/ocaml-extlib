@@ -7,24 +7,27 @@ MODULES = \
 # the list is topologically sorted
 
 MLI = $(MODULES:=.mli)
+CMI = $(MODULES:=.cmi)
+CMX = $(MODULES:=.cmx)
 SRC = $(MLI) $(MODULES:=.ml) extLib.ml
+
+.PHONY: all opt cmxs doc install uninstall clean
 
 all: 
 	ocamlc -a -o extLib.cma $(SRC)
 opt: 
 	ocamlopt -a -o extLib.cmxa $(SRC)
+cmxs: opt
+	ocamlopt -shared -linkall extLib.cmxa -o extLib.cmxs
 doc:
-	ocamlc -c $(MODULES:=.mli)
-	mkdir -p doc/
-	ocamldoc -sort -html -d doc/ $(MODULES:=.mli)
-	cp odoc_style.css doc/style.css
+	ocamlc -c $(MLI)
+	ocamldoc -sort -html -d doc/ $(MLI)
 
 install:
-	ocamlfind install extlib META *.cmi *.cma $(MLI) $(wildcard *.cmxa) $(wildcard *.a)
+	ocamlfind install extlib META extLib.cma $(MLI) $(CMI) -optional extLib.cmxa $(CMX) extLib.cmxs extLib.a extLib.lib
 
 uninstall:
 	ocamlfind remove extlib
 
 clean:
-	rm -f *.cmo *.cmx *.o *.cmi *.cma *.cmxa *.a
-	rm -Rf doc
+	rm -f *.cmo *.cmx *.o *.obj *.cmi *.cma *.cmxa *.cmxs *.a *.lib doc/*.html
