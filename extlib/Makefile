@@ -24,7 +24,7 @@ doc:
 	ocamldoc -sort -html -d doc/ $(MLI)
 
 install:
-	ocamlfind install extlib META extLib.cma $(MLI) $(CMI) -optional extLib.cmxa $(CMX) extLib.cmxs extLib.a extLib.lib
+	ocamlfind install extlib META extLib.cma extLib.cmi $(MLI) $(CMI) -optional extLib.cmxa $(CMX) extLib.cmxs extLib.a extLib.lib
 
 uninstall:
 	ocamlfind remove extlib
