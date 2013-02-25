@@ -173,9 +173,10 @@ let install() =
 	end;
 	if !autodoc then begin
 		run (sprintf "ocamldoc -sort -html -d %s %s" doc_dir (m_list ".mli"));
-		run ((match path_type with
-				| PathDos -> sprintf "%s odoc_style.css %s\\style.css";
-				| PathUnix -> sprintf "%s odoc_style.css %s/style.css") cp_cmd doc_dir);
+		if doc_dir <> "doc" then (* style.css is already there *)
+      run ((match path_type with
+				| PathDos -> sprintf "%s doc\\style.css %s\\style.css";
+				| PathUnix -> sprintf "%s doc/style.css %s/style.css") cp_cmd doc_dir);
 	end;
 	match install_dir with
 	  Findlib ->
