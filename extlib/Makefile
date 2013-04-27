@@ -37,4 +37,5 @@ clean:
 release:
 	svn export . extlib-$(VERSION)
 	tar czf extlib-$(VERSION).tar.gz extlib-$(VERSION)
+	gpg -a -b extlib-$(VERSION).tar.gz
 	@echo make tag: svn copy https://ocaml-extlib.googlecode.com/svn/trunk https://ocaml-extlib.googlecode.com/svn/tags/extlib-$(VERSION)
