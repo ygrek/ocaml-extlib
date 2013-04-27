@@ -1,5 +1,7 @@
 # Makefile contributed by Alain Frisch
 
+VERSION = 1.5.4
+
 MODULES = \
  enum bitSet dynArray extArray extHashtbl extList extString global IO option \
  pMap std uChar uTF8 base64 unzip refList optParse dllist
@@ -11,7 +13,7 @@ CMI = $(MODULES:=.cmi)
 CMX = $(MODULES:=.cmx)
 SRC = $(MLI) $(MODULES:=.ml) extLib.ml
 
-.PHONY: all opt cmxs doc install uninstall clean
+.PHONY: all opt cmxs doc install uninstall clean release
 
 all: 
 	ocamlc -a -o extLib.cma $(SRC)
@@ -24,10 +26,15 @@ doc:
 	ocamldoc -sort -html -d doc/ $(MLI)
 
 install:
-	ocamlfind install extlib META extLib.cma extLib.cmi $(MLI) $(CMI) -optional extLib.cmxa $(CMX) extLib.cmxs extLib.a extLib.lib
+	ocamlfind install -patch-version $(VERSION) extlib META extLib.cma extLib.cmi $(MLI) $(CMI) -optional extLib.cmxa $(CMX) extLib.cmxs extLib.a extLib.lib
 
 uninstall:
 	ocamlfind remove extlib
 
 clean:
 	rm -f *.cmo *.cmx *.o *.obj *.cmi *.cma *.cmxa *.cmxs *.a *.lib doc/*.html
+
+release:
+	svn export . extlib-$(VERSION)
+	tar czf extlib-$(VERSION).tar.gz extlib-$(VERSION)
+	@echo make tag: svn copy https://ocaml-extlib.googlecode.com/svn/trunk https://ocaml-extlib.googlecode.com/svn/tags/extlib-$(VERSION)
