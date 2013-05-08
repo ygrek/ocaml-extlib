@@ -29,16 +29,22 @@ module String :
 
 	val init : int -> (int -> char) -> string
 	(** [init l f] returns the string of length [l] with the chars
-		f 0 , f 1 , f 2 ... f (l-1). *)
+			f 0 , f 1 , f 2 ... f (l-1). *)
 
 	val find : string -> string -> int
 	(** [find s x] returns the starting index of the string [x]
 	    within the string [s] or raises [Invalid_string] if [x]
 	    is not a substring of [s]. *)
 
+	val find_from : string -> int -> string -> int
+	(** [find s i x] returns the starting index of the string [x]
+			within the string [s] (starting search from position [i]) or
+			raises [Invalid_string] if no such substring exists.
+			[find s x] is equivalent to [find_from s 0 x]. *)
+
 	val split : string -> string -> string * string
 	(** [split s sep] splits the string [s] between the first
-		occurrence of [sep].
+			occurrence of [sep].
 	    raises [Invalid_string] if the separator is not found. *)
 
 	val nsplit : string -> string -> string list

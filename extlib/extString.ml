@@ -53,7 +53,7 @@ let ends_with s e =
     in
     loop s e 0
 
-let find str sub =
+let find_from str pos sub =
 	let sublen = length sub in
 	if sublen = 0 then
 		0
@@ -61,7 +61,7 @@ let find str sub =
 		let found = ref 0 in
 		let len = length str in
 		try
-			for i = 0 to len - sublen do
+			for i = pos to len - sublen do
 				let j = ref 0 in
 				while unsafe_get str (i + !j) = unsafe_get sub !j do
 					incr j;
@@ -71,6 +71,8 @@ let find str sub =
 			raise Invalid_string
 		with
 			Exit -> !found
+
+let find str sub = find_from str 0 sub
 
 let exists str sub =
 	try
