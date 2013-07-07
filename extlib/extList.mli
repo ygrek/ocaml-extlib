@@ -51,7 +51,7 @@ module List :
 	(** Returns the last element of the list, or raise [Empty_list] if
 	 the list is empty. This function takes linear time. *)
 
-	val iteri : (int -> 'a -> 'b) -> 'a list -> unit
+	val iteri : (int -> 'a -> unit) -> 'a list -> unit
 	(** [iteri f l] will call [(f 0 a0);(f 1 a1) ... (f n an)] where
 	 [a0..an] are the elements of the list [l]. *)
 
