@@ -16,9 +16,9 @@ SRC = $(MLI) $(MODULES:=.ml) extLib.ml
 .PHONY: all opt cmxs doc install uninstall clean release
 
 all: 
-	ocamlc -a -o extLib.cma $(SRC)
+	ocamlc -g -a -o extLib.cma $(SRC)
 opt: 
-	ocamlopt -a -o extLib.cmxa $(SRC)
+	ocamlopt -g -a -o extLib.cmxa $(SRC)
 cmxs: opt
 	ocamlopt -shared -linkall extLib.cmxa -o extLib.cmxs
 doc:
