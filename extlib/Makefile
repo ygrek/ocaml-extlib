@@ -15,9 +15,12 @@ SRC = $(MLI) $(MODULES:=.ml) extLib.ml
 
 .PHONY: all opt cmxs doc install uninstall clean release
 
-all: 
+build: all opt
+extHashtbl.ml: extHashtbl.mlpp
+	camlp4of $(shell ocaml configure.ml) -impl $< -o $@
+all: $(SRC)
 	ocamlc -g -a -o extLib.cma $(SRC)
-opt: 
+opt: $(SRC)
 	ocamlopt -g -a -o extLib.cmxa $(SRC)
 cmxs: opt
 	ocamlopt -shared -linkall extLib.cmxa -o extLib.cmxs
@@ -32,7 +35,7 @@ uninstall:
 	ocamlfind remove extlib
 
 clean:
-	rm -f *.cmo *.cmx *.o *.obj *.cmi *.cma *.cmxa *.cmxs *.a *.lib doc/*.html
+	rm -f *.cmo *.cmx *.o *.obj *.cmi *.cma *.cmxa *.cmxs *.a *.lib doc/*.html extHashtbl.ml
 
 release:
 	svn export . extlib-$(VERSION)

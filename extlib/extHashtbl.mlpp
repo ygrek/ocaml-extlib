@@ -22,14 +22,28 @@
 module Hashtbl =
   struct
 
+IFDEF OCAML4 THEN
+  external old_hash_param :
+    int -> int -> 'a -> int = "caml_hash_univ_param" "noalloc"
+END
+
 	type ('a, 'b) h_bucketlist =
 		| Empty
 		| Cons of 'a * 'b * ('a, 'b) h_bucketlist
 
+IFDEF OCAML4 THEN
+	type ('a, 'b) h_t = {
+		mutable size: int;
+		mutable data: ('a, 'b) h_bucketlist array;
+    mutable seed: int;
+    initial_size: int;
+	}
+ELSE
 	type ('a, 'b) h_t = {
 		mutable size: int;
 		mutable data: ('a, 'b) h_bucketlist array
 	}
+END
 
 	include Hashtbl
 	let create n = Hashtbl.create (* no seed *) n
@@ -87,10 +101,20 @@ module Hashtbl =
 			| Empty -> Empty
 			| Cons (k,v,next) -> Cons (k,f v,loop next)
 		in
-		h_make {
-			size = (h_conv h).size;
+		h_make { (h_conv h) with
 			data = Array.map loop (h_conv h).data; 
 		}
+
+IFDEF OCAML4 THEN
+  (* copied from stdlib :( *)
+  let key_index h key =
+    (* compatibility with old hash tables *)
+    if Obj.size (Obj.repr h) >= 3
+    then (seeded_hash_param 10 100 (h_conv h).seed key) land (Array.length (h_conv h).data - 1)
+    else (old_hash_param 10 100 key) mod (Array.length (h_conv h).data)
+ELSE
+  let key_index h key = (hash key) mod (Array.length (h_conv h).data)
+END
 
 	let remove_all h key =
 		let hc = h_conv h in
@@ -103,7 +127,7 @@ module Hashtbl =
 				end else
 					Cons(k,v,loop next)
 		in
-		let pos = (hash key) mod (Array.length hc.data) in
+		let pos = key_index h key in
 		Array.unsafe_set hc.data pos (loop (Array.unsafe_get hc.data pos))
 
 	let find_default h key defval =
@@ -112,7 +136,7 @@ module Hashtbl =
 			| Cons (k,v,next) ->
 				if k = key then v else loop next
 		in
-		let pos = (hash key) mod (Array.length (h_conv h).data) in
+    let pos = key_index h key in
 		loop (Array.unsafe_get (h_conv h).data pos)
 
 	let find_option h key =
@@ -121,7 +145,7 @@ module Hashtbl =
 			| Cons (k,v,next) ->
 				if k = key then Some v else loop next
 		in
-		let pos = (hash key) mod (Array.length (h_conv h).data) in
+    let pos = key_index h key in
 		loop (Array.unsafe_get (h_conv h).data pos)
 
 	let of_enum e =
