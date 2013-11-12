@@ -88,6 +88,10 @@ val get : 'a t -> 'a option
 (** [get e] returns [None] if [e] is empty or [Some x] where [x] is
   the next element of [e], in which case the element is removed from the enumeration. *)
 
+val next : 'a t -> 'a
+(** [next e] returns the next element of [e] (and removes it from enumeration).
+  @raise No_more_elements if enumeration is empty *)
+
 val push : 'a t -> 'a -> unit
 (** [push e x] will add [x] at the beginning of [e]. *)
 

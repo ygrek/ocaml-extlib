@@ -124,6 +124,8 @@ let from2 next clone =
 	e.count <- (fun () -> force e; e.count());
 	e
 
+let next t = t.next ()
+
 let get t =
 	try
 		Some (t.next())
