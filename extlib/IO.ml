@@ -491,6 +491,9 @@ let read_i64 ch =
 	let big = Int64.of_int32 (read_real_i32 ch) in
 	Int64.logor (Int64.shift_left big 32) small
 
+let read_float32 ch =
+	Int32.float_of_bits (read_real_i32 ch)
+
 let read_double ch =
 	Int64.float_of_bits (read_i64 ch)
 
@@ -535,6 +538,9 @@ let write_real_i32 ch n =
 let write_i64 ch n =
 	write_real_i32 ch (Int64.to_int32 n);
 	write_real_i32 ch (Int64.to_int32 (Int64.shift_right_logical n 32))
+
+let write_float32 ch f =
+	write_real_i32 ch (Int32.bits_of_float f)
 
 let write_double ch f =
 	write_i64 ch (Int64.bits_of_float f)
@@ -589,6 +595,9 @@ let read_i64 ch =
 	let small = Int64.logor base (Int64.shift_left (Int64.of_int ch4) 24) in
 	Int64.logor (Int64.shift_left big 32) small
 
+let read_float32 ch =
+	Int32.float_of_bits (read_real_i32 ch)
+
 let read_double ch =
 	Int64.float_of_bits (read_i64 ch)
 
@@ -621,6 +630,9 @@ let write_real_i32 ch n =
 let write_i64 ch n =
 	write_real_i32 ch (Int64.to_int32 (Int64.shift_right_logical n 32));
 	write_real_i32 ch (Int64.to_int32 n)
+
+let write_float32 ch f =
+	write_real_i32 ch (Int32.bits_of_float f)
 
 let write_double ch f =
 	write_i64 ch (Int64.bits_of_float f)
