@@ -172,9 +172,15 @@ let install() =
 	  match install_dir with
 	    Findlib -> "extlib-doc"
 	  | Dir install_dir ->
-	      sprintf "%sextlib-doc" install_dir in
+	      sprintf "%sextlib-doc" install_dir
+  in
 	if !autodoc && not (Sys.file_exists doc_dir) then run (sprintf "mkdir %s" doc_dir);
+  (* generate extHashtbl.ml *)
+  let camlp4_flags = if Sys.ocaml_version >= "4.00.0" then "-D OCAML4" else "" in
+	run (sprintf "camlp4of pr_o.cmo %s -impl extHashtbl.mlpp -o extHashtbl.ml" camlp4_flags);
+  (* compile mli *)
 	run (sprintf "ocamlc -c %s" (m_list ".mli"));
+  (* compile ml *)
 	if !autobyte then begin
 		List.iter (fun m -> run (sprintf "ocamlc -c %s.ml" m)) modules;
 		run (sprintf "ocamlc -a -o extLib.cma %s extLib.ml" (m_list ".cmo"));
