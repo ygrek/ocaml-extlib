@@ -441,7 +441,7 @@ module OptParser :
 
     (** {6 Output and error handling} *)
 
-    val error : t -> ?chn: out_channel -> ?status: int -> string -> unit
+    val error : t -> ?chn: out_channel -> ?status: int -> string -> 'a
     (** Display an error message and exit the program. The error
       message is printed to the channel [chn] (default is
       [Pervasives.stderr]) and the program exits with exit status
