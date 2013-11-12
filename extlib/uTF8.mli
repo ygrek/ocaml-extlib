@@ -66,6 +66,10 @@ val last : t -> index
    returns the Unicode character of the location [i] in the string [s]. *)
 val look : t -> index -> uchar
 
+(** [substring s i len] returns the substring made of the Unicode locations [i] to [i + len - 1] inclusive.
+   The string is always copied *)
+val substring : t -> int -> int -> t
+
 (** [out_of_range s i]
    tests whether [i] is a position inside of [s]. *)
 val out_of_range : t -> index -> bool

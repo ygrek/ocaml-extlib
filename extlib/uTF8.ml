@@ -108,6 +108,11 @@ let rec nth_aux s i n =
 
 let nth s n = nth_aux s 0 n
 
+let substring s i n =
+  let j = nth s i in
+  let j' = (nth_aux s j n) - 1 in
+  String.sub s j (j' - j + 1)
+
 let last s = search_head_backward s (String.length s - 1)
 
 let out_of_range s i = i < 0 || i >= String.length s
