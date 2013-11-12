@@ -141,6 +141,9 @@ val create_out :
 
 (** {6 Utilities} *)
 
+val scanf : input -> ('a, 'b, 'c, 'd) Scanf.scanner
+(** The scanf function works for any input. *)
+
 val printf : 'a output -> ('b, unit, string, unit) format4 -> 'b
 (** The printf function works for any output. *)
 

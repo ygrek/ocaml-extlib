@@ -145,6 +145,10 @@ let output o s p l =
 	if p + l > sl || p < 0 || l < 0 then invalid_arg "IO.output";
 	o.out_output s p l
 
+let scanf i fmt =
+	let ib = Scanf.Scanning.from_function (fun () -> try read i with No_more_input -> raise End_of_file) in
+	Scanf.kscanf ib (fun _ exn -> raise exn) fmt
+
 let printf o fmt =
 	Printf.kprintf (fun s -> nwrite o s) fmt
 
