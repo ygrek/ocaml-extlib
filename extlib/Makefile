@@ -17,7 +17,7 @@ SRC = $(MLI) $(MODULES:=.ml) extLib.ml
 
 build: all opt
 extHashtbl.ml: extHashtbl.mlpp
-	camlp4of $(shell ocaml configure.ml) -impl $< -o $@
+	camlp4of pr_o.cmo $(shell ocaml configure.ml) -impl $< -o $@
 all: $(SRC)
 	ocamlc -g -a -o extLib.cma $(SRC)
 opt: $(SRC)
