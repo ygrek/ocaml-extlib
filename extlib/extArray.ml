@@ -46,14 +46,14 @@ let for_all p xs =
   in
   loop 0
 
+exception Exists
+
 let exists p xs =
-  let n = length xs in
-  let rec loop i =
-    if i = n then false
-    else if p xs.(i) then true
-    else loop (succ i)
-  in
-  loop 0
+  try
+    for i = 0 to Array.length xs - 1 do
+      if p xs.(i) then raise Exists
+    done; false
+  with Exists -> true
 
 let mem a xs =
   let n = length xs in
