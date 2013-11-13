@@ -101,18 +101,17 @@ let split str sep =
 	sub str 0 p, sub str (p + len) (slen - p - len)
 
 let nsplit str sep =
-	if str = "" then []
-	else if sep = "" then raise Invalid_string
-	else (
-		let rec nsplit str sep =
-			try
-				let s1 , s2 = split str sep in
-				s1 :: nsplit s2 sep
-			with
-				Invalid_string -> [str]
+  if str = "" then []
+  else if sep = "" then raise Invalid_string
+  else
+    let rec loop acc pos =
+      if pos > String.length str then
+        List.rev acc
+      else
+        let i = try find_from str pos sep with Invalid_string -> String.length str in
+        loop (String.sub str pos (i - pos) :: acc) (i + String.length sep)
 		in
-		nsplit str sep
-	)
+    loop [] 0
 
 let join = concat
 
