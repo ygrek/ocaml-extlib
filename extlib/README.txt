@@ -30,16 +30,29 @@ they might have with ExtLib by using the mailing list.
 Installation :
 --------------
 
-Unzip or untar in any directory, then simply run
+Unzip or untar in any directory and run
 
-> ocaml install.ml
+  make build install
 
-and follow the instructions.
+This will build and install bytecode and native libraries.
+On bytecode-only architecture run
+
+  make all install
+
+Since release 1.6.0 extlib will install two packages : extlib and extlib_min,
+the latter one excludes several modules (potentially) conflicting with other
+well established OCaml libraries.
+
+Alternatively, run 
+
+  ocaml install.ml
+
+and follow the instructions (this will install only extlib package).
 
 Usage :
 -------
 
-Generate and watch the documentation.
+Generate and read the documentation.
 
 Contributors :
 --------------
@@ -47,6 +60,9 @@ Contributors :
 Nicolas Cannasse (ncannasse@motion-twin.com)
 Brian Hurt (brian.hurt@qlogic.com)
 Yamagata Yoriyuki (yori@users.sourceforge.net)
+Janne Hellsten <jjhellst AT gmail DOT com>
+Richard W.M. Jones <rjones AT redhat DOT com>
+ygrek <ygrek AT autistici DOT org>
 
 License :
 ---------
