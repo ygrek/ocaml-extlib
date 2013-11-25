@@ -1,7 +1,0 @@
-description="Extended standard library (stripped of potentially conflicting modules)"
-archive(byte)="extLib_min.cma"
-archive(native)="extLib_min.cmxa"
-archive(byte, plugin) = "extLib_min.cma"
-archive(native, plugin) = "extLib_min.cmxs"
-exists_if = "extLib_min.cma"
-error(pkg_extlib) = "extlib_min and extlib shouldn't be used together"

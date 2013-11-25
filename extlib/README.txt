@@ -32,22 +32,22 @@ Installation :
 
 Unzip or untar in any directory and run
 
-  make build install
+  make minimal=1 build install
 
 This will build and install bytecode and native libraries.
 On bytecode-only architecture run
 
-  make all install
+  make minimal=1 all install
 
-Since release 1.6.0 extlib will install two packages : extlib and extlib_min,
-the latter one excludes several modules (potentially) conflicting with other
-well established OCaml libraries.
+`minimal=1` will exclude from build several modules (potentially) conflicting
+with other well established OCaml libraries. If your code is using such modules,
+omit this parameter, and consider dropping this dependency in future.
 
 Alternatively, run 
 
   ocaml install.ml
 
-and follow the instructions (this will install only extlib package).
+and follow the instructions.
 
 Usage :
 -------
