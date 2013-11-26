@@ -24,7 +24,7 @@ type path =
 	| PathUnix
 	| PathDos
 
-let modules = [
+let modules_min = [
 	"enum";
 	"bitSet";
 	"dynArray";
@@ -37,17 +37,17 @@ let modules = [
 	"option";
 	"pMap";
 	"std";
-	"uChar";
-	"uTF8";
 	"base64";
-	"unzip";
 	"refList";
 	"optParse";
-    "dllist";
+  "dllist";
 ]
 
-let m_list suffix =
-	String.concat " " (List.map (fun m -> m ^ suffix) modules)
+let modules_compat = [
+	"uChar";
+	"uTF8";
+	"unzip";
+]
 
 let obj_ext , lib_ext , cp_cmd , path_type = match Sys.os_type with
 	| "Unix" | "Cygwin" | "MacOS" -> ".o" , ".a" , "cp", PathUnix
@@ -110,35 +110,37 @@ type install_dir = Findlib | Dir of string
 
 let install() =
 	let autodir = ref None in
-	let docflag = ref None in
-	let autodoc = ref false in
+	let autodoc = ref None in
 	let autobyte = ref false in
 	let autonative = ref false in
+  let autofull = ref None in
 	let version = get_version () in
 	let usage = sprintf "ExtLib installation program v%s\n(C) 2003 Nicolas Cannasse" version in
 	Arg.parse [
 		("-d", Arg.String (fun s -> autodir := Some s) , "<dir> : install in target directory");
 		("-b", Arg.Unit (fun () -> autobyte := true) , ": byte code installation");
 		("-n", Arg.Unit (fun () -> autonative := true) , ": native code installation");
-		("-doc", Arg.Unit (fun () -> docflag := Some true) , ": documentation installation");
-		("-nodoc", Arg.Unit (fun () -> docflag := Some false) , ": documentation installation");
+		("-min", Arg.Unit (fun () -> autofull := Some false) , ": exclude potentially conflicting modules (recommended)");
+		("-full", Arg.Unit (fun () -> autofull := Some true) , ": include all modules (compatibility)");
+		("-doc", Arg.Unit (fun () -> autodoc := Some true) , ": documentation installation");
+		("-nodoc", Arg.Unit (fun () -> autodoc := Some false) , ": disable documentation installation");
 	] (fun s -> raise (Arg.Bad s)) usage;
 	let findlib = is_findlib () in
 	let install_dir = (
 		match !autodir with
 		| Some dir ->
-			if not !autobyte && not !autonative && not !autodoc then failwith "Nothing to do.";
+			if not !autobyte && not !autonative && !autodoc = None then failwith "Nothing to do.";
 			Dir (complete_path dir)
 		| None ->
 			let byte, native =
 			  if !autobyte || !autonative then
 			    (!autobyte, !autonative)
 			  else begin
-			printf "Choose one of the following :\n1- Bytecode installation only\n2- Native installation only\n3- Both Native and Bytecode installation\n> ";
+			printf "Choose one of the following :\n1- Bytecode installation only\n2- Native installation only\n[3]- Both Native and Bytecode installation\n> ";
 			  (match read_line() with
 				| "1" -> true, false
 				| "2" -> false, true
-				| "3" -> true, true
+				| "" | "3"  -> true, true
 				| _ -> failwith "Invalid choice, exit.")
 			  end
 			in
@@ -157,24 +159,38 @@ let install() =
 			autonative := native;
 			dest
 	) in
+	let modules =
+		let full =
+      match !autofull with
+      | Some f -> f
+      | None ->
+        printf "Do you want to exclude potentially conflicting modules (Unzip UChar UTF8) from build ([Y]/N) ?\n> ";
+        (match read_line() with
+        | "" | "y" | "Y" -> false
+        | "n" | "N" -> true
+        | _ -> failwith "Invalid choice, exit.")
+    in
+    match full with
+    | true -> modules_min @ modules_compat
+    | false -> modules_min
+	in
+  let m_list suffix = String.concat " " (List.map (fun m -> m ^ suffix) modules) in
 	let doc =
-		match !docflag with
-		Some doc -> doc
+		match !autodoc with
+		| Some doc -> doc
 		| None ->
-			printf "Do you want to generate ocamldoc documentation (Y/N) ?\n> ";
+			printf "Do you want to generate ocamldoc documentation ([Y]/N) ?\n> ";
 			(match read_line() with
-			| "y" | "Y" -> true
+			| "" | "y" | "Y" -> true
 			| "n" | "N" -> false
 			| _ -> failwith "Invalid choice, exit.")
 	in
-	autodoc := doc;
 	let doc_dir =
 	  match install_dir with
-	    Findlib -> "extlib-doc"
-	  | Dir install_dir ->
-	      sprintf "%sextlib-doc" install_dir
+	  | Findlib -> "doc"
+	  | Dir install_dir -> Filename.concat install_dir "extlib-doc"
   in
-	if !autodoc && not (Sys.file_exists doc_dir) then run (sprintf "mkdir %s" doc_dir);
+	if doc && not (Sys.file_exists doc_dir) then run (sprintf "mkdir %s" doc_dir);
   (* generate extHashtbl.ml *)
   let camlp4_flags = if Sys.ocaml_version >= "4.00.0" then "-D OCAML4" else "" in
 	run (sprintf "camlp4of pr_o.cmo %s -impl extHashtbl.mlpp -o extHashtbl.ml" camlp4_flags);
@@ -182,18 +198,18 @@ let install() =
 	run (sprintf "ocamlc -c %s" (m_list ".mli"));
   (* compile ml *)
 	if !autobyte then begin
-		List.iter (fun m -> run (sprintf "ocamlc -c %s.ml" m)) modules;
-		run (sprintf "ocamlc -a -o extLib.cma %s extLib.ml" (m_list ".cmo"));
+		List.iter (fun m -> run (sprintf "ocamlc -g -c %s.ml" m)) modules;
+		run (sprintf "ocamlc -g -a -o extLib.cma %s extLib.ml" (m_list ".cmo"));
 		List.iter (fun m -> remove (m ^ ".cmo")) modules;
 		remove "extLib.cmo";
 	end;
 	if !autonative then begin
-		List.iter (fun m -> run (sprintf "ocamlopt -c %s.ml" m)) modules;
-		run (sprintf "ocamlopt -a -o extLib.cmxa %s extLib.ml" (m_list ".cmx"));
+		List.iter (fun m -> run (sprintf "ocamlopt -g -c %s.ml" m)) modules;
+		run (sprintf "ocamlopt -g -a -o extLib.cmxa %s extLib.ml" (m_list ".cmx"));
 		List.iter (fun m -> remove (m ^ obj_ext)) modules;
 		remove ("extLib" ^ obj_ext);
 	end;
-	if !autodoc then begin
+	if doc then begin
 		run (sprintf "ocamldoc -sort -html -d %s %s" doc_dir (m_list ".mli"));
 		if doc_dir <> "doc" then (* style.css is already there *)
       run ((match path_type with
