@@ -1,6 +1,6 @@
 # Makefile contributed by Alain Frisch
 
-VERSION = 1.6.0
+VERSION = 1.6.1
 
 # the list is topologically sorted
 MODULES := \

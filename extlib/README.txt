@@ -39,9 +39,9 @@ On bytecode-only architecture run
 
   make minimal=1 all install
 
-`minimal=1` will exclude from build several modules (potentially) conflicting
-with other well established OCaml libraries. If your code is using such modules,
-omit this parameter, and consider dropping this dependency in future.
+`minimal=1` will exclude from build several modules (namely Unzip UChar UTF8) potentially
+conflicting with other well established OCaml libraries. If your code is expecting to find
+these modules in extlib - omit this parameter during build to produce the full library.
 
 Alternatively, run 
 
