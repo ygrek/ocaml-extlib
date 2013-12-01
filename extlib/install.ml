@@ -49,6 +49,7 @@ let modules_compat = [
 	"unzip";
 ]
 
+(* ocaml/mingw uses unix extensions but will have Sys.os_type = "Win32" :( *)
 let obj_ext , lib_ext , cp_cmd , path_type = match Sys.os_type with
 	| "Unix" | "Cygwin" | "MacOS" -> ".o" , ".a" , "cp", PathUnix
 	| "Win32" -> ".obj" , ".lib" , "copy", PathDos
@@ -220,19 +221,18 @@ let install() =
 	  Findlib ->
 	    let files = Buffer.create 0 in
 	    List.iter (fun m ->
-	      Buffer.add_string files (m ^ ".cmi");
-	      Buffer.add_char files ' ';
-	      Buffer.add_string files (m ^ ".mli");
-	      Buffer.add_char files ' ')
+	      Buffer.add_string files (m ^ ".cmi ");
+	      Buffer.add_string files (m ^ ".mli "))
 	      modules;
 	    Buffer.add_string files "extLib.cmi ";
 	    if !autobyte then Buffer.add_string files "extLib.cma ";
 	    if !autonative then begin
-	      Buffer.add_string files "extLib.cmxa ";
-	      Buffer.add_string files ("extLib" ^ lib_ext^ " ");
-	    end;
+	      Buffer.add_string files "extLib.cmxa extLib.cmx ";
+        List.iter (fun m -> Buffer.add_string files (m ^ ".cmx ")) modules;
+        end;
+      let optional = if !autonative then "-optional extLib.lib extLib.a" else "" in
 	    let files = Buffer.contents files in
-	    run (sprintf "ocamlfind install -patch-version %s extlib META %s" version files);
+	    run (sprintf "ocamlfind install -patch-version %s extlib META %s %s" version files optional);
 	| Dir install_dir ->
 	    List.iter (fun m ->
 			copy (m ^ ".cmi") install_dir;
