@@ -1,0 +1,51 @@
+
+1.6.1 (2013-11-26 - trunk @ r436)
+ * Drop `extlib_min` package
+ * Choose at build-time whether to build full or reduced library
+
+1.6.0 (2013-11-25 - trunk @ r429)
+ * Fix OCaml 4 Hashtbl compatibility
+ * Install additionally `extlib_min` with reduced set of modules (to mitigate linking conflicts)
+ * Build with debugging information by default
+ * Fix signature for `ExtList.iteri` and `OptParse.OptParser.error`
+ * Speed up `String.nsplit`
+ * New functions:
+  * `String.find_from` (by Alexander Markov)
+  * `IO.output_strings` (by Mehdi Dogguy)
+  * `IO.read_float32` and `IO.write_float32` (by Philippe Strauss)
+  * `IO.scanf` (by Warren Harris)
+  * `UTF8.substring` (by Berke Durak)
+  * `Enum.next`
+
+1.5.4 (2013-05-08 - trunk @ r407)
+ * Fix installation
+ * Streamline release process
+
+1.5.3 (2012-08-12 - trunk @ r397)
+ * Bug fixes / improvements:
+  * OCaml 4.00 compatibility (Hashtbl)
+  * Std.dump: handle float array, never throw
+ * New functions:
+  * `Array.map2`
+ * Install `*`.cmx
+ * Build extLib.cmxs
+
+1.5.2 (2011-08-06 - trunk @ r389)
+ * Bug fixes / improvements:
+  * memory corruption in `DynArray.insert`
+  * `ExtList.make` is now tail-recursive
+  * stack overflow in `ExtString.nsplit`
+  * `ExtList.(@)` is now in scope after `open ExtLib`
+  * `DynArray` will not attempt to grow past `Sys.max_array_length`
+  * faster `ExtString.starts_with` and `ExtString.ends_with`
+  * some documentation comments
+ * New functions:
+  * `List.find_map`
+
+1.5.1 (2007-12-29 - trunk @ r363)
+ * First release from http://code.google.com/p/ocaml-extlib
+ * Bug fixes / improvements: 
+  * Add `ExtArray.Array.iter2`
+  * `Unzip` module fix & test case as reported by Robert Atkey
+  * `BitSet.enum` problem reported by Pascal Zimmer
+  * `nsplit "" _` ==> `[]`
