@@ -1,8 +1,6 @@
 
 RESULT:=extlib_test
 
-EXTLIB_DIR:=../extlib-dev
-
 TEST_OPTS=
 ifdef USE_OCAMLFIND
 TEST_OPTS=--use-ocamlfind

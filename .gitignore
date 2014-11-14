@@ -1,31 +1,17 @@
-
-# /extlib/
-/extlib/*.cmi
-/extlib/*.cmo
-/extlib/*.cmx
-/extlib/*.o
-/extlib/*.obj
-/extlib/*.a
-/extlib/*.lib
-/extlib/*.cma
-/extlib/*.cmxa
-/extlib/*.cmxs
-/extlib/extHashtbl.ml
-
-# /extlib/doc/
-/extlib/doc/*.html
-
-# /test/
-/test/*.swp
-/test/._d
-/test/*.cmi
-/test/*.cmo
-/test/*.cma
-/test/*.cmx
+*.cmi
+*.cmo
+*.cmx
+*.o
+*.obj
+*.a
+*.lib
+*.cma
+*.cmxa
+*.cmxs
+/src/extHashtbl.ml
+/src/doc/*.html
 /test/extlib_test
 /test/extlib_test.exe
 /test/mktest
 /test/build-tmp
-
-# /test/util/zlib-test/
 /test/util/zlib-test/zlib-test

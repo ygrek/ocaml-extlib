@@ -1,13 +1,13 @@
 
 all:
 ifndef USE_OCAMLFIND
-	cd ../extlib && make all
+	cd ../src && make all
 endif
 	make -f test.mak all
 
 opt:
 ifndef USE_OCAMLFIND
-	cd ../extlib && make opt
+	cd ../src && make opt
 endif
 	make -f test.mak opt
 

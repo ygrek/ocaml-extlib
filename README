@@ -32,18 +32,18 @@ Installation :
 
 Unzip or untar in any directory and run
 
-  make minimal=1 build install
+  make -C src minimal=1 build install
 
 This will build and install bytecode and native libraries.
 On bytecode-only architecture run
 
-  make minimal=1 all install
+  make -C src minimal=1 all install
 
 `minimal=1` will exclude from build several modules (namely Unzip UChar UTF8) potentially
 conflicting with other well established OCaml libraries. If your code is expecting to find
 these modules in extlib - omit this parameter during build to produce the full library.
 
-Alternatively, run 
+Alternatively, change to src directory and run 
 
   ocaml install.ml
 
