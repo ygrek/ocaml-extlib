@@ -49,6 +49,8 @@ let random_string_len len =
 (* For  counting the success ratio *)
 let test_run_count = ref 0 
 let test_success_count = ref 0 
+let g_test_run_count = ref 0 
+let g_test_success_count = ref 0 
 
 let test_module name f = 
   P.printf "%s\n" name;
@@ -59,18 +61,48 @@ let test_module name f =
   if !test_run_count <> 0 then
     P.printf "  %i/%i tests succeeded.\n" 
       !test_success_count !test_run_count
-  
 
-let run_test ?(test_name="<unknown>") f = 
+let run_test ~test_name f = 
   try
+    incr g_test_run_count;
     incr test_run_count;
     P.printf "  %s" test_name;
     flush stdout;
-    f ();
+    let () = f () in
+    incr g_test_success_count;
     incr test_success_count;
-    P.printf ", OK\n"
+    P.printf " - OK\n"
   with 
     Assert_failure (file,line,column) ->
-      P.printf ", FAILED\n    reason: ";
+      P.printf " - FAILED\n    reason: ";
       P.printf " %s:%i:%i\n" file line column;
       flush stdout
+
+let all_tests = Hashtbl.create 10
+
+let register modname l =
+  let existing = try Hashtbl.find all_tests modname with Not_found -> [] in
+  Hashtbl.replace all_tests modname (l @ existing)
+
+let register1 modname name f = register modname [name,f]
+
+let run_all filter =
+  let allowed name =
+    match filter with
+    | None -> true
+    | Some l -> List.mem (String.lowercase name) l
+  in
+  g_test_run_count := 0;
+  g_test_success_count := 0;
+  Hashtbl.iter begin fun modname tests ->
+    let allowed_module = allowed modname in
+    test_module modname begin fun () ->
+      List.iter begin fun (test_name,f) ->
+        if allowed_module || allowed (modname^"."^test_name) then run_test ~test_name f
+      end tests
+    end
+  end all_tests;
+  if !g_test_run_count <> 0 then
+    P.printf "\nOverall %i/%i tests succeeded.\n" 
+      !g_test_success_count !g_test_run_count;
+  !g_test_run_count = !g_test_success_count

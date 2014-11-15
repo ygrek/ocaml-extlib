@@ -71,5 +71,5 @@ let test_substring () =
   in
   List.iter test substring_inputs
 
-let test () =
-  Util.run_test ~test_name:"bd_UTF.substring" test_substring
+let () =
+  Util.register1 "UTF" "substring" test_substring

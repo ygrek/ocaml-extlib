@@ -18,6 +18,23 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
+(* test_unzip_bug1 test case was contributed by Robert Atkey on
+   ocaml-lib-devel@lists.sourceforge.net on Nov 26, 2007.  
+   Thanks Rob! *)
+
+let test_unzip_bug1 () =
+  let test data =
+    let input    = IO.input_string data in
+    let unzipped = Unzip.inflate input in
+    try
+      let str      = IO.read_all unzipped in
+      assert (str = "XY")
+    with Unzip.Error Unzip.Invalid_data -> assert false
+  in
+  (* this is "XY" compressed by zlib at level 9 *)
+  test "\x78\xda\x8b\x88\x04\x00\x01\x0b\x00\xb2";
+  (* this is "XY" compressed by zlib at level 0 *)
+  test "\x78\x01\x01\x02\x00\xfd\xff\x58\x59\x01\x0b\x00\xb2"
 
 (* Some zlib compressed strings with various compression levels.  See
    extlib-test/util/zlib-test/gen_ml.sh for more info.  This is not
@@ -85,5 +102,8 @@ let test_unzip_gen_inputs () =
        test orig compressed)
     inputs
 
-let test () = 
-  Util.run_test ~test_name:"jh_Unzip.unzip_gen_inputs" test_unzip_gen_inputs
+let () = 
+  Util.register "Unzip" [
+    "bug1", test_unzip_bug1;
+    "gen_inputs", test_unzip_gen_inputs;
+  ]

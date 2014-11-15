@@ -137,16 +137,18 @@ let test_map2 () =
   assert (try let _ = Array.map2 (+) [||] [|1|] in false with Invalid_argument _ -> true);
   assert (Array.map2 (-) a b = Array.of_list (List.map2 (-) (Array.to_list a) (Array.to_list b)))
 
-let test () =
-  Util.run_test ~test_name:"rj_ExtArray_001.rev" test_rev;
-  Util.run_test ~test_name:"rj_ExtArray_001.rev_in_place" test_rev_in_place;
-  Util.run_test ~test_name:"rj_ExtArray_001.for_all" test_for_all;
-  Util.run_test ~test_name:"rj_ExtArray_001.exists" test_exists;
-  Util.run_test ~test_name:"rj_ExtArray_001.mem" test_mem;
-  Util.run_test ~test_name:"rj_ExtArray_001.memq" test_memq;
-  Util.run_test ~test_name:"rj_ExtArray_001.find" test_find;
-  Util.run_test ~test_name:"rj_ExtArray_001.findi" test_findi;
-  Util.run_test ~test_name:"rj_ExtArray_001.filter" test_filter;
-  Util.run_test ~test_name:"rj_ExtArray_001.partition" test_partition;
-  Util.run_test ~test_name:"rj_ExtArray_001.enum" test_enum;
-  Util.run_test ~test_name:"y_ExtArray_001.map2" test_map2
+let () =
+  Util.register "ExtArray" [
+    "rev", test_rev;
+    "rev_in_place", test_rev_in_place;
+    "for_all", test_for_all;
+    "exists", test_exists;
+    "mem", test_mem;
+    "memq", test_memq;
+    "find", test_find;
+    "findi", test_findi;
+    "filter", test_filter;
+    "partition", test_partition;
+    "enum", test_enum;
+    "map2", test_map2;
+  ]

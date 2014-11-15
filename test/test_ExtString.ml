@@ -1,6 +1,7 @@
 (*
  * ExtLib Testing Suite
  * Copyright (C) 2004 Janne Hellsten
+ * Copyright (C) 2011 ygrek
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -112,12 +113,21 @@ let t_strip () =
   assert (S.ends_with (S.strip ~chars:"86" s) "567");
   assert (S.ends_with (S.strip ~chars:"" s) "5678")
 
-let test () = 
-  Util.run_test ~test_name:"jh_ExtString_001.t_starts_with" t_starts_with;
-  Util.run_test ~test_name:"jh_ExtString_001.t_ends_with" t_ends_with;
-  Util.run_test ~test_name:"jh_ExtString_001.t_map" t_map;
-  Util.run_test ~test_name:"jh_ExtString_001.t_lchop" t_lchop;
-  Util.run_test ~test_name:"jh_ExtString_001.t_rchop" t_rchop;
-  Util.run_test ~test_name:"jh_ExtString_001.t_split" t_split;
-  Util.run_test ~test_name:"jh_ExtString_001.t_replace_1" t_replace1;
-  Util.run_test ~test_name:"jh_ExtString_001.t_strip" t_strip
+let t_nsplit () =
+  let s = "testsuite" in
+  assert (S.nsplit s "t" = ["";"es";"sui";"e"]);
+  assert (S.nsplit s "te" = ["";"stsui";""]);
+  assert (try let _ = S.nsplit s "" in false with Invalid_string -> true)
+
+let () = 
+  Util.register "ExtString" [
+    "starts_with", t_starts_with;
+    "ends_with", t_ends_with;
+    "map", t_map;
+    "lchop", t_lchop;
+    "rchop", t_rchop;
+    "split", t_split;
+    "replace_1", t_replace1;
+    "strip", t_strip;
+    "nsplit", t_nsplit;
+  ]

@@ -1,5 +1,6 @@
 (*
  * ExtLib Testing Suite
+ * Copyright (C) 2004 John Skaller 
  * Copyright (C) 2004 Janne Hellsten
  *
  * This library is free software; you can redistribute it and/or
@@ -49,9 +50,25 @@ let test_insert () =
     Printf.ifprintf stdout "%d %d\n" i (DynArray.length !d); flush stdout;
     DynArray.insert !d 0 (Array.create 42 "")
   done
-  
-let test () = 
-  Util.run_test ~test_name:"jh_DynArray.triv" test_triv;
-  Util.run_test ~test_name:"jh_DynArray.regr_1" test_regr_1;
-  Util.run_test ~test_name:"jh_DynArray.test_insert" test_insert
 
+(* Issue 2: Error in DynArray exponential resizer *)
+let test_dynarray1 () =
+  let a = DynArray.create () in
+  for i = 1 to 2817131 do
+    DynArray.add a i
+  done
+
+let test_dynarray2 () =
+  let a = DynArray.make 2817131 in
+  for i = 1 to 2817131 do
+    DynArray.add a i
+  done
+ 
+let () = 
+  Util.register "DynArray" [
+    "triv", test_triv;
+    "regr_1", test_regr_1;
+    "insert", test_insert;
+    "simple_1",test_dynarray1;
+    "simple_2",test_dynarray2;
+  ]

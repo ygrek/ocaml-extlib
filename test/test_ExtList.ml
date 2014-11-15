@@ -1,6 +1,8 @@
 (*
  * ExtLib Testing Suite
  * Copyright (C) 2004 Janne Hellsten
+ * Copyright (C) 2008 Red Hat, Inc.
+ * Copyright (C) 2010 ygrek
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -121,12 +123,55 @@ let test_map () =
     assert (a = b)
   done
 
-let test () = 
-  Util.run_test ~test_name:"jh_ExtList_001.iteri" test_iteri;
-  Util.run_test ~test_name:"jh_ExtList_001.mapi" test_mapi;
-  Util.run_test ~test_name:"jh_ExtList_001.exceptions" test_exceptions;
-  Util.run_test ~test_name:"jh_ExtList_001.find_exc" test_find_exc;
-  Util.run_test ~test_name:"jh_ExtList_001.findi" test_findi;
-  Util.run_test ~test_name:"jh_ExtList_001.fold_right" test_fold_right;
-  Util.run_test ~test_name:"jh_ExtList_001.fold_right2" test_fold_right2;
-  Util.run_test ~test_name:"jh_ExtList_001.map" test_map
+let test_find_map () =
+  let f = function "this", v -> Some v | _ -> None in
+  (try
+     let r = List.find_map f [ "a", 1; "b", 2; "this", 3; "d", 4 ] in
+     assert (3 = r);
+     let r = List.find_map f [ "this", 1; "b", 2; "c", 3; "d", 4 ] in
+     assert (1 = r);
+     let r = List.find_map f [ "a", 1; "b", 2; "c", 3; "this", 4 ] in
+     assert (4 = r);
+     let r = List.find_map f [ "this", 1; "b", 2; "c", 3; "this", 4 ] in
+     assert (1 = r);
+     let r = List.find_map f [ "a", 1; "b", 2; "this", 3; "this", 4 ] in
+     assert (3 = r);
+     let r = List.find_map f [ "this", 5 ] in
+     assert (5 = r)
+   with
+     Not_found -> assert false
+  );
+  (try
+     ignore (List.find_map f []); assert false
+   with
+     Not_found -> ()
+  );
+  (try
+     ignore (List.find_map f [ "a", 1 ]); assert false
+   with
+     Not_found -> ()
+  );
+  (try
+     ignore (List.find_map f [ "a", 1; "b", 2 ]); assert false
+   with
+     Not_found -> ()
+  )
+
+(* Issue 12: List.make not tail-recursive *)
+let test_make () =
+  let l = List.make 10_000_000 1 in
+  assert (List.length l = 10_000_000)
+
+let () =
+  Util.register "ExtList" [
+    "iteri", test_iteri;
+    "mapi", test_mapi;
+    "exceptions", test_exceptions;
+    "find_exc", test_find_exc;
+    "findi", test_findi;
+    "fold_right", test_fold_right;
+    "fold_right2", test_fold_right2;
+    "map", test_map;
+    "find_map", test_find_map;
+    "make", test_make;
+  ]

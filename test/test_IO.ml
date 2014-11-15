@@ -1,6 +1,6 @@
 (*
  * ExtLib Testing Suite
- * Copyright (C) 2004 Janne Hellsten
+ * Copyright (C) 2004, 2007 Janne Hellsten
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,31 +18,31 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
-let in_range c a b = 
-  let i = int_of_char c 
-  and ai = int_of_char a 
-  and bi = int_of_char b in
-  (i >= ai && i <= bi)
+(* NOTE The IO module test case was contributed by Robert Atkey on
+   ocaml-lib-devel@lists.sourceforge.net on Nov 26, 2007.  
+   Thanks Rob! *)
 
-let check_chars s =
-  let len = String.length s in
-  if len > 0 then
-    begin
-      for i = 0 to len-1 do
-        let c = s.[i] in
-        if not (in_range c 'A' 'Z') then
-          if not (in_range c 'a' 'z') then
-            if not (in_range c '0' '9') then
-              assert (c = '/' || c = '+')
-      done
-    end
+let test_write_i16 () =
+  (* Bug was that write_i16 did not accept -0x8000 *)
+  let out = IO.output_string () in
+  let ()  =
+    try 
+      (* -32768 is a valid 16-bit signed int *)
+      IO.write_i16 out (-0x8000)
+    with 
+      IO.Overflow _ -> 
+        assert false
+  in
+  let ()  =
+    try 
+      (* Ditto for BigEndian *)
+      IO.BigEndian.write_i16 out (-0x8000)
+    with IO.Overflow _ -> 
+      assert false
+  in
+  let _ = IO.close_out out in
+    ()
 
-let test () =
-  Util.run_test ~test_name:"jh_Base64.test" 
-    (fun () -> 
-       for i = 0 to 64 do
-         let s = Util.random_string () in
-         let enc = Base64.str_encode s in
-         assert ((Base64.str_decode enc) = s);
-         check_chars enc
-       done)
+let () = 
+  Util.register1 "IO" "write_i16" test_write_i16
+

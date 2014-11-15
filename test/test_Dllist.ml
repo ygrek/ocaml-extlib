@@ -46,9 +46,10 @@ let test_regression_2 () =
   ignore (Dllist.append lst 2);
   ignore (Dllist.promote lst);
   assert (Dllist.length lst = 2)  (* returned 1, but should return 2 *)
-  
 
-let test () = 
-  Util.run_test ~test_name:"jh_Dllist.test_simple" test_simple;
-  Util.run_test ~test_name:"jh_Dllist.test_regression_1" test_regression_1;
-  Util.run_test ~test_name:"jh_Dllist.test_regression_2" test_regression_2
+let () = 
+  Util.register "Dllist" [
+    "simple", test_simple;
+    "regression_1", test_regression_1;
+    "regression_2", test_regression_2;
+  ]

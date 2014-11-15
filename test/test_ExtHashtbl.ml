@@ -1,6 +1,6 @@
 (*
  * ExtLib Testing Suite
- * Copyright (C) 2004, 2007 Janne Hellsten
+ * Copyright (C) 2013 ygrek
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,31 +18,16 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
-(* NOTE The IO module test case was contributed by Robert Atkey on
-   ocaml-lib-devel@lists.sourceforge.net on Nov 26, 2007.  
-   Thanks Rob! *)
+open ExtHashtbl
 
-let test_write_i16 () =
-  (* Bug was that write_i16 did not accept -0x8000 *)
-  let out = IO.output_string () in
-  let ()  =
-    try 
-      (* -32768 is a valid 16-bit signed int *)
-      IO.write_i16 out (-0x8000)
-    with 
-      IO.Overflow _ -> 
-        assert false
-  in
-  let ()  =
-    try 
-      (* Ditto for BigEndian *)
-      IO.BigEndian.write_i16 out (-0x8000)
-    with IO.Overflow _ -> 
-      assert false
-  in
-  let _   = IO.close_out out in
-    ()
+(* Issue 26: Hashtbl.map is broken in OCaml >= 4.00 *)
+let test_map () =
+  let h = Hashtbl.create 1 in
+  Hashtbl.add h "test" 1;
+  let h1 = Hashtbl.map (fun x -> x + 1) h in
+  let find h k = try Some (Hashtbl.find h k) with Not_found -> None in
+  assert (find h "test" = Some 1);
+  assert (find h1 "test" = Some 2)
 
-let test () = 
-  Util.run_test ~test_name:"jh_IO.write_i16" test_write_i16
-
+let () = 
+  Util.register1 "ExtHashtbl" "map" test_map
