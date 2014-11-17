@@ -9,6 +9,7 @@
 *.cmxa
 *.cmxs
 /src/extHashtbl.ml
+/src/extBuffer.ml
 /src/doc/*.html
 /test/extlib_test
 /test/extlib_test.exe

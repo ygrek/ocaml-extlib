@@ -27,7 +27,7 @@
 
 module Buffer : sig
 
-type t
+type t = Buffer.t
 
 val create : int -> t
 
