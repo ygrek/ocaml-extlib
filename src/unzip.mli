@@ -42,4 +42,4 @@ val inflate : ?header:bool -> IO.input -> IO.input
 type t
 
 val inflate_init : ?header:bool -> IO.input -> t
-val inflate_data : t -> string -> int -> int -> int
+val inflate_data : t -> Bytes.t -> int -> int -> int

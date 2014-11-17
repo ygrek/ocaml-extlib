@@ -49,22 +49,23 @@ let input_all ic =
   let rec loop acc total buf ofs =
     let n = input ic buf ofs (buf_len - ofs) in
     if n = 0 then
-      let res = String.create total in
+      let res = Bytes.create total in
       let pos = total - ofs in
-      let _ = String.blit buf 0 res pos ofs in
+      let _ = Bytes.blit buf 0 res pos ofs in
       let coll pos buf =
         let new_pos = pos - buf_len in
-        String.blit buf 0 res new_pos buf_len;
+        Bytes.blit buf 0 res new_pos buf_len;
         new_pos in
       let _ = List.fold_left coll pos acc in
-      res
+      (* [res] doesn't escape and will not be mutated again *)
+      Bytes.unsafe_to_string res
     else
       let new_ofs = ofs + n in
       let new_total = total + n in
       if new_ofs = buf_len then
-        loop (buf :: acc) new_total (String.create buf_len) 0
+        loop (buf :: acc) new_total (Bytes.create buf_len) 0
       else loop acc new_total buf new_ofs in
-  loop [] 0 (String.create buf_len) 0
+  loop [] 0 (Bytes.create buf_len) 0
 
 let input_file ?(bin=false) fname =
   let ch = (if bin then open_in_bin else open_in) fname in
