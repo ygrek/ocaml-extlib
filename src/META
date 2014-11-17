@@ -1,4 +1,5 @@
 description="Extended standard library"
+requires="bytes"
 archive(byte)="extLib.cma"
 archive(native)="extLib.cmxa"
 archive(byte, plugin) = "extLib.cma"

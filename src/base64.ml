@@ -65,7 +65,7 @@ let encode ?(tbl=chars) ch =
 	in
 	let output s p l =
 		for i = p to p + l - 1 do
-			write (String.unsafe_get s i)
+			write (Bytes.unsafe_get s i)
 		done;
 		l
 	in
@@ -95,7 +95,7 @@ let decode ?(tbl=inv_chars) ch =
 		let i = ref 0 in
 		try
 			while !i < l do
-				String.unsafe_set s (p + !i) (fetch());
+				Bytes.unsafe_set s (p + !i) (fetch());
 				incr i;
 			done;
 			l
@@ -110,10 +110,10 @@ let decode ?(tbl=inv_chars) ch =
 	IO.create_in ~read ~input ~close
 
 let str_encode ?(tbl=chars) s =
-	let ch = encode ~tbl (IO.output_string()) in
-	IO.nwrite ch s;
+	let ch = encode ~tbl (IO.output_bytes()) in
+	IO.nwrite_string ch s;
 	IO.close_out ch
 
 let str_decode ?(tbl=inv_chars) s =
-	let ch = decode ~tbl (IO.input_string s) in
-	IO.nread ch ((String.length s * 6) / 8)
+	let ch = decode ~tbl (IO.input_bytes s) in
+	IO.nread_string ch ((Bytes.length s * 6) / 8)

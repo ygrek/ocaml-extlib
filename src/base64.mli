@@ -41,11 +41,11 @@ type encoding_table = char array
 type decoding_table = int array
 
 (** Encode a string into Base64. *)
-val str_encode : ?tbl:encoding_table -> string -> string
+val str_encode : ?tbl:encoding_table -> string -> Bytes.t
 
 (** Decode a string encoded into Base64, raise [Invalid_char] if a
 	character in the input string is not a valid one. *)
-val str_decode : ?tbl:decoding_table -> string -> string
+val str_decode : ?tbl:decoding_table -> Bytes.t -> string
 
 (** Generic base64 encoding over an output. *)
 val encode : ?tbl:encoding_table -> 'a IO.output -> 'a IO.output

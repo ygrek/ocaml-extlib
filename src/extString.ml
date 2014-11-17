@@ -25,11 +25,12 @@ module String = struct
 include String
 
 let init len f =
-	let s = create len in
+	let s = Bytes.create len in
 	for i = 0 to len - 1 do
-		unsafe_set s i (f i)
+		Bytes.unsafe_set s i (f i)
 	done;
-	s
+        (* 's' doesn't escape and will never be mutated again *)
+	Bytes.unsafe_to_string s
 
 let starts_with str p =
 	if length str < length p then 
@@ -123,7 +124,7 @@ let slice ?(first=0) ?(last=Sys.max_string_length) s =
 		(if (last<0) then (length s) + last else last)
 	in
 	if i>=j || i=length s then
-		create 0
+		make 0 ' '
         else
           	sub s i (j-i)
 
@@ -170,18 +171,20 @@ let enum s =
 
 let of_enum e =
 	let l = Enum.count e in
-	let s = create l in
+	let s = Bytes.create l in
 	let i = ref 0 in
-	Enum.iter (fun c -> unsafe_set s !i c; incr i) e;
-	s
+	Enum.iter (fun c -> Bytes.unsafe_set s !i c; incr i) e;
+        (* 's' doesn't escape and will never be mutated again *)
+	Bytes.unsafe_to_string s
 
 let map f s =
 	let len = length s in
-	let sc = create len in
+	let sc = Bytes.create len in
 	for i = 0 to len - 1 do
-		unsafe_set sc i (f (unsafe_get s i))
+		Bytes.unsafe_set sc i (f (unsafe_get s i))
 	done;
-	sc
+        (* 'sc' doesn't escape and will never be mutated again *)
+	Bytes.unsafe_to_string sc
 
 (* fold_left and fold_right by Eric C. Cooper *)
 let fold_left f init str =
@@ -209,12 +212,13 @@ let explode s =
   exp (String.length s - 1) []
 
 let implode l =
-  let res = String.create (List.length l) in
+  let res = Bytes.create (List.length l) in
   let rec imp i = function
   | [] -> res
-  | c :: l -> res.[i] <- c; imp (i + 1) l in
-  imp 0 l
-
+  | c :: l -> Bytes.set res i c; imp (i + 1) l in
+  let s = imp 0 l in
+  (* 's' doesn't escape and will never be mutated again *)
+  Bytes.unsafe_to_string s
 
 let replace_chars f s =
 	let len = String.length s in
@@ -228,7 +232,7 @@ let replace_chars f s =
 			loop (i+1) (s :: acc)
 	in
 	let strs = loop 0 [] in
-	let sbuf = create !tlen in
+	let sbuf = Bytes.create !tlen in
 	let pos = ref !tlen in
 	let rec loop2 = function
 		| [] -> ()
@@ -239,7 +243,8 @@ let replace_chars f s =
 			loop2 acc
 	in
 	loop2 strs;
-	sbuf
+        (* 'sbuf' doesn't escape and will never be mutated again *)
+	Bytes.unsafe_to_string sbuf
 
 let replace ~str ~sub ~by =
 	try
@@ -247,6 +252,6 @@ let replace ~str ~sub ~by =
 		(true, (slice ~last:i str) ^ by ^ 
                    (slice ~first:(i+(String.length sub)) str))
         with
-		Invalid_string -> (false, String.copy str)
+		Invalid_string -> (false, String.sub str 0 (String.length str))
 
 end

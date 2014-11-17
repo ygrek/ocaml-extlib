@@ -20,13 +20,13 @@
 
 type intern
 
-let bcreate : int -> intern = Obj.magic String.create
+let bcreate : int -> intern = Obj.magic Bytes.create
 external fast_get : intern -> int -> int = "%string_unsafe_get"
 external fast_set : intern -> int -> int -> unit = "%string_unsafe_set"
 external fast_bool : int -> bool = "%identity"
-let fast_blit : intern -> int -> intern -> int -> int -> unit = Obj.magic String.blit
-let fast_fill : intern -> int -> int -> int -> unit = Obj.magic String.fill
-let fast_length : intern -> int= Obj.magic String.length
+let fast_blit : intern -> int -> intern -> int -> int -> unit = Obj.magic Bytes.blit
+let fast_fill : intern -> int -> int -> int -> unit = Obj.magic Bytes.fill
+let fast_length : intern -> int= Obj.magic Bytes.length
 
 let bget s ndx =
   assert (ndx >= 0 && ndx < fast_length s);

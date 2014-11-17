@@ -4,15 +4,15 @@ VERSION = 1.6.1
 
 # the list is topologically sorted
 MODULES := \
- enum bitSet dynArray extArray extHashtbl extList extString global IO option \
- pMap std uChar uTF8 base64 unzip refList optParse dllist extLib
+ enum bitSet dynArray extArray extHashtbl extList extString extBuffer \
+ global IO option pMap std uChar uTF8 base64 unzip refList optParse dllist extLib
 
 ifdef minimal
 MODULES := $(filter-out unzip uChar uTF8, $(MODULES))
 endif
 
-OCAMLC = ocamlc -g
-OCAMLOPT = ocamlopt -g
+OCAMLC = ocamlfind ocamlc -g -package bytes
+OCAMLOPT = ocamlfind ocamlopt -g -package bytes
 
 MLI = $(filter-out extLib.mli, $(MODULES:=.mli))
 CMI = $(MODULES:=.cmi)
@@ -48,6 +48,8 @@ extLib.cmx: extLib.ml
 	$(OCAMLOPT) -c $<
 extHashtbl.ml: extHashtbl.mlpp
 	camlp4of pr_o.cmo $(shell ocaml configure.ml) -impl $< -o $@
+extBuffer.ml: extBuffer.mlpp
+	camlp4of pr_o.cmo $(shell ocaml configure.ml) -impl $< -o $@
 
 install:
 	ocamlfind install -patch-version $(VERSION) extlib META extLib.cma $(MLI) $(CMI) -optional extLib.cmxa $(CMX) extLib.cmxs extLib.a extLib.lib
@@ -56,7 +58,7 @@ uninstall:
 	ocamlfind remove extlib
 
 clean:
-	rm -f *.cmo *.cmx *.o *.obj *.cmi *.cma *.cmxa *.cmxs *.a *.lib doc/*.html extHashtbl.ml
+	rm -f *.cmo *.cmx *.o *.obj *.cmi *.cma *.cmxa *.cmxs *.a *.lib doc/*.html extHashtbl.ml extBuffer.ml
 
 release:
 	svn export . extlib-$(VERSION)
