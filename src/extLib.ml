@@ -37,6 +37,7 @@ module List = ExtList.List
 module String = ExtString.String
 module Hashtbl = ExtHashtbl.Hashtbl
 module Array = ExtArray.Array
+module Buffer = ExtBuffer.Buffer
 
 exception Invalid_string = ExtString.Invalid_string
 
