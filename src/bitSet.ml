@@ -18,6 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA	02111-1307	USA
  *)
 
+open ExtBytes
+
 type intern
 
 let bcreate : int -> intern = Obj.magic Bytes.create
