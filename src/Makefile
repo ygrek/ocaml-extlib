@@ -4,7 +4,7 @@ VERSION = 1.6.1
 
 # the list is topologically sorted
 MODULES := \
- enum bitSet dynArray extArray extHashtbl extList extString extBuffer \
+ extBytes enum bitSet dynArray extArray extHashtbl extList extString extBuffer \
  global IO option pMap std uChar uTF8 base64 unzip refList optParse dllist extLib
 
 ifdef minimal
@@ -46,9 +46,9 @@ extLib.cmo: extLib.ml
 	$(OCAMLC) -c $<
 extLib.cmx: extLib.ml
 	$(OCAMLOPT) -c $<
-extHashtbl.ml: extHashtbl.mlpp
-	camlp4of pr_o.cmo $(shell ocaml configure.ml) -impl $< -o $@
-extBuffer.ml: extBuffer.mlpp
+extBytes.mli: extBytes.ml
+	ocamlc -i $< > $@
+%.ml: %.mlpp
 	camlp4of pr_o.cmo $(shell ocaml configure.ml) -impl $< -o $@
 
 install:
@@ -58,7 +58,7 @@ uninstall:
 	ocamlfind remove extlib
 
 clean:
-	rm -f *.cmo *.cmx *.o *.obj *.cmi *.cma *.cmxa *.cmxs *.a *.lib doc/*.html extHashtbl.ml extBuffer.ml
+	rm -f *.cmo *.cmx *.o *.obj *.cmi *.cma *.cmxa *.cmxs *.a *.lib doc/*.html extHashtbl.ml extBuffer.ml extBytes.ml
 
 release:
 	svn export . extlib-$(VERSION)

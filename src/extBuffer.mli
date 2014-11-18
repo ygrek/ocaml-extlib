@@ -25,6 +25,8 @@
    bytes-specific functions backported.
 *)
 
+open ExtBytes
+
 module Buffer : sig
 
 type t = Buffer.t

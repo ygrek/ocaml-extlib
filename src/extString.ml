@@ -20,6 +20,8 @@
 
 exception Invalid_string
 
+open ExtBytes
+
 module String = struct
 
 include String

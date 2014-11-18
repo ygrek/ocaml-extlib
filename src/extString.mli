@@ -20,6 +20,8 @@
 
 (** Additional functions for string manipulations. *)
 
+open ExtBytes
+
 exception Invalid_string
 
 module String :

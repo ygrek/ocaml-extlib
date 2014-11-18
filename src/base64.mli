@@ -25,6 +25,8 @@
 	(in that order). 
 *)
 
+open ExtBytes
+
 (** This exception is raised when reading an invalid character
 	from a base64 input. *)
 exception Invalid_char

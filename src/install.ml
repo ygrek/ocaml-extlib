@@ -25,6 +25,7 @@ type path =
 	| PathDos
 
 let modules_min = [
+	"extBytes";
 	"enum";
 	"bitSet";
 	"dynArray";
@@ -33,6 +34,7 @@ let modules_min = [
 	"extList";
 	"extString";
 	"global";
+	"extBuffer";
 	"IO";
 	"option";
 	"pMap";
@@ -175,7 +177,7 @@ let install() =
     | true -> modules_min @ modules_compat
     | false -> modules_min
 	in
-  let m_list suffix = String.concat " " (List.map (fun m -> m ^ suffix) modules) in
+  let m_list suffix = String.concat " " (List.map (fun m -> m ^ "." ^ suffix) modules) in
 	let doc =
 		match !autodoc with
 		| Some doc -> doc
@@ -192,26 +194,33 @@ let install() =
 	  | Dir install_dir -> Filename.concat install_dir "extlib-doc"
   in
 	if doc && not (Sys.file_exists doc_dir) then run (sprintf "mkdir %s" doc_dir);
-  (* generate extHashtbl.ml *)
-  let camlp4_flags = if Sys.ocaml_version >= "4.00.0" then "-D OCAML4" else "" in
+  (* generate *)
+  let camlp4_flags =
+    (if Sys.ocaml_version >= "4.00.0" then "-D OCAML4" else "")
+    ^ " " ^
+    (if Sys.ocaml_version >= "4.02.0" then "-D OCAML4_02" else "")
+  in
+	run (sprintf "camlp4of pr_o.cmo %s -impl extBytes.mlpp -o extBytes.ml" camlp4_flags);
+  run "ocamlc -i extBytes.ml > extBytes.mli";
 	run (sprintf "camlp4of pr_o.cmo %s -impl extHashtbl.mlpp -o extHashtbl.ml" camlp4_flags);
+	run (sprintf "camlp4of pr_o.cmo %s -impl extBuffer.mlpp -o extBuffer.ml" camlp4_flags);
   (* compile mli *)
-	run (sprintf "ocamlc -c %s" (m_list ".mli"));
+	run (sprintf "ocamlc -c %s" (m_list "mli"));
   (* compile ml *)
 	if !autobyte then begin
 		List.iter (fun m -> run (sprintf "ocamlc -g -c %s.ml" m)) modules;
-		run (sprintf "ocamlc -g -a -o extLib.cma %s extLib.ml" (m_list ".cmo"));
+		run (sprintf "ocamlc -g -a -o extLib.cma %s extLib.ml" (m_list "cmo"));
 		List.iter (fun m -> remove (m ^ ".cmo")) modules;
 		remove "extLib.cmo";
 	end;
 	if !autonative then begin
 		List.iter (fun m -> run (sprintf "ocamlopt -g -c %s.ml" m)) modules;
-		run (sprintf "ocamlopt -g -a -o extLib.cmxa %s extLib.ml" (m_list ".cmx"));
+		run (sprintf "ocamlopt -g -a -o extLib.cmxa %s extLib.ml" (m_list "cmx"));
 		List.iter (fun m -> remove (m ^ obj_ext)) modules;
 		remove ("extLib" ^ obj_ext);
 	end;
 	if doc then begin
-		run (sprintf "ocamldoc -sort -html -d %s %s" doc_dir (m_list ".mli"));
+		run (sprintf "ocamldoc -sort -html -d %s %s" doc_dir (m_list "mli"));
 		if doc_dir <> "doc" then (* style.css is already there *)
       run ((match path_type with
 				| PathDos -> sprintf "%s doc\\style.css %s\\style.css";
@@ -246,7 +255,7 @@ let install() =
 ;;
 try
 	install();
-	printf "Done.";
+	print_endline "Done.";
 with
 	Failure msg ->
 		prerr_endline msg;
