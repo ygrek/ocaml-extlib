@@ -162,8 +162,6 @@ let rec dump r =
 		opaque "abstract"
 	| x when x = Obj.custom_tag ->
 		opaque "custom"
-	| x when x = Obj.final_tag ->
-		opaque "final"
 	| x when x = Obj.double_array_tag ->
 		let l = ExtList.List.init s (fun i -> string_of_float (Obj.double_field r i)) in
 		"[| " ^ String.concat "; " l ^ " |]"
