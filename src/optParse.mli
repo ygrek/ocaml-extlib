@@ -365,7 +365,7 @@ module OptParser :
 
     (** {6 Option parser creation} *)
 
-    val make : ?usage: string -> ?description: string -> ?version: string ->
+    val make : ?usage: string -> ?status: int -> ?description: string -> ?version: string ->
       ?suppress_usage: bool -> ?suppress_help: bool -> ?prog: string ->
       ?formatter: Formatter.t -> unit -> t
     (** Creates a new option parser with the given options.
@@ -379,6 +379,8 @@ module OptParser :
       executable.
 
       @param suppress_usage Suppress the usage message if set.
+
+      @param status Set the program exit status (default is 1).
 
       @param suppress_help Suppress the 'help' option which is
       otherwise added by default.
@@ -445,7 +447,7 @@ module OptParser :
     (** Display an error message and exit the program. The error
       message is printed to the channel [chn] (default is
       [Pervasives.stderr]) and the program exits with exit status
-      [status] (default is 1). *)
+      [status] (default depends on [t] : see [make]). *)
 
     val usage : t -> ?chn: out_channel -> unit -> unit
     (** Display the usage message to the channel [chn] (default is
