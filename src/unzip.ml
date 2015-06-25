@@ -31,7 +31,7 @@ type adler32 = {
 }
 
 type window = {
-	mutable wbuffer : Bytes.t;
+	mutable wbuffer : ExtBytes.Bytes.t;
 	mutable wpos : int;
 	wcrc : adler32;
 }
@@ -56,7 +56,7 @@ type t = {
 	mutable zlen : int;
 	mutable zdist : int;
 	mutable zneeded : int;
-	mutable zoutput : Bytes.t;
+	mutable zoutput : ExtBytes.Bytes.t;
 	mutable zoutpos : int;
 	zinput : IO.input;
 	zlengths : int array;
@@ -146,7 +146,7 @@ let adler32_create() = {
 let adler32_update a s p l =
 	let p = ref p in
 	for i = 0 to l - 1 do
-		let c = int_of_char (Bytes.unsafe_get s !p) in
+		let c = int_of_char (ExtBytes.Bytes.unsafe_get s !p) in
 		a.a1 <- (a.a1 + c) mod 65521;
 		a.a2 <- (a.a2 + a.a1) mod 65521;
 		incr p;
@@ -169,30 +169,30 @@ let window_size = 1 lsl 15
 let buffer_size = 1 lsl 16
 
 let window_create size = {
-		wbuffer = Bytes.create buffer_size;
+		wbuffer = ExtBytes.Bytes.create buffer_size;
 		wpos = 0;
 		wcrc = adler32_create()
 	}
 
 let window_slide w = 
 	adler32_update w.wcrc w.wbuffer 0 window_size;
-	let b = Bytes.create buffer_size in
+	let b = ExtBytes.Bytes.create buffer_size in
 	w.wpos <- w.wpos - window_size;
-	Bytes.unsafe_blit w.wbuffer window_size b 0 w.wpos;
+	ExtBytes.Bytes.unsafe_blit w.wbuffer window_size b 0 w.wpos;
 	w.wbuffer <- b
 
 let window_add_bytes w s p len =
 	if w.wpos + len > buffer_size then window_slide w;
-	Bytes.unsafe_blit s p w.wbuffer w.wpos len;
+	ExtBytes.Bytes.unsafe_blit s p w.wbuffer w.wpos len;
 	w.wpos <- w.wpos + len
 
 let window_add_char w c =
 	if w.wpos = buffer_size then window_slide w;
-	Bytes.unsafe_set w.wbuffer w.wpos c;
+	ExtBytes.Bytes.unsafe_set w.wbuffer w.wpos c;
 	w.wpos <- w.wpos + 1
 
 let window_get_last_char w =
-	Bytes.unsafe_get w.wbuffer (w.wpos - 1)
+	ExtBytes.Bytes.unsafe_get w.wbuffer (w.wpos - 1)
 
 let window_available w =
 	w.wpos
@@ -250,19 +250,19 @@ let reset_bits z =
 
 let add_bytes z s p l =
 	window_add_bytes z.zwindow s p l;
-	Bytes.unsafe_blit s p z.zoutput z.zoutpos l;
+	ExtBytes.Bytes.unsafe_blit s p z.zoutput z.zoutpos l;
 	z.zneeded <- z.zneeded - l;
 	z.zoutpos <- z.zoutpos + l
 
 let add_char z c =
 	window_add_char z.zwindow c;
-	Bytes.unsafe_set z.zoutput z.zoutpos c;
+	ExtBytes.Bytes.unsafe_set z.zoutput z.zoutpos c;
 	z.zneeded <- z.zneeded - 1;
 	z.zoutpos <- z.zoutpos + 1
 
 let add_dist_one z n =
 	let c = window_get_last_char z.zwindow in
-	let s = Bytes.make n c in
+	let s = ExtBytes.Bytes.make n c in
 	add_bytes z s 0 n
 
 let add_dist z d l =
@@ -362,7 +362,7 @@ let rec inflate_loop z =
 	| Flat ->
 		let rlen = min z.zlen z.zneeded in
 		let str = IO.nread z.zinput rlen in
-		let len = Bytes.length str in
+		let len = ExtBytes.Bytes.length str in
 		z.zlen <- z.zlen - len;
 		add_bytes z str 0 len;
 		if z.zlen = 0 then z.zstate <- (if z.zfinal then Crc else Block);
@@ -403,7 +403,7 @@ let rec inflate_loop z =
 			inflate_loop z
 
 let inflate_data z s pos len =
-	if pos < 0 || len < 0 || pos + len > Bytes.length s then invalid_arg "inflate_data";
+	if pos < 0 || len < 0 || pos + len > ExtBytes.Bytes.length s then invalid_arg "inflate_data";
 	z.zneeded <- len;
 	z.zoutpos <- pos;
 	z.zoutput <- s;
@@ -425,7 +425,7 @@ let inflate_init ?(header=true) ch =
 		zbits = 0;
 		znbits = 0;
 		zneeded = 0;
-		zoutput = Bytes.empty;
+		zoutput = ExtBytes.Bytes.empty;
 		zoutpos = 0;
 		zlengths = Array.make 19 (-1);
 		zwindow = window_create (1 lsl 15)
@@ -433,11 +433,11 @@ let inflate_init ?(header=true) ch =
 
 let inflate ?(header=true) ch =
 	let z = inflate_init ~header ch in
-	let s = Bytes.create 1 in
+	let s = ExtBytes.Bytes.create 1 in
 	IO.create_in
 		~read:(fun() ->
 			let l = inflate_data z s 0 1 in
-			if l = 1 then Bytes.unsafe_get s 0 else raise IO.No_more_input
+			if l = 1 then ExtBytes.Bytes.unsafe_get s 0 else raise IO.No_more_input
 		)
 		~input:(fun s p l ->
 			let n = inflate_data z s p l in
