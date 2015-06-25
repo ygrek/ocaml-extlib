@@ -11,8 +11,8 @@ ifdef minimal
 MODULES := $(filter-out unzip uChar uTF8, $(MODULES))
 endif
 
-OCAMLC = ocamlfind ocamlc -g -package bytes
-OCAMLOPT = ocamlfind ocamlopt -g -package bytes
+OCAMLC = ocamlfind ocamlc -g
+OCAMLOPT = ocamlfind ocamlopt -g
 
 MLI = $(filter-out extLib.mli, $(MODULES:=.mli))
 CMI = $(MODULES:=.cmi)
@@ -49,7 +49,7 @@ extLib.cmx: extLib.ml
 extBytes.mli: extBytes.ml
 	ocamlc -i $< > $@
 %.ml: %.mlpp
-	camlp4of pr_o.cmo $(shell ocaml configure.ml) -impl $< -o $@
+	cppo $(shell ocaml configure.ml) $< > $@
 
 install:
 	ocamlfind install -patch-version $(VERSION) extlib META extLib.cma $(MLI) $(CMI) -optional extLib.cmxa $(CMX) extLib.cmxs extLib.a extLib.lib
