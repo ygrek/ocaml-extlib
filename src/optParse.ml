@@ -542,6 +542,7 @@ module OptParser =
 
     type t = { 
       op_usage : string;
+      op_status : int;
       op_suppress_usage : bool;
       op_prog : string;
 
@@ -620,12 +621,13 @@ module OptParser =
       in
       RefList.add parent.og_children g; g
 
-    let make ?(usage = "%prog [options]") ?description ?version
+    let make ?(usage = "%prog [options]") ?(status = 1) ?description ?version
       ?(suppress_usage = false) ?(suppress_help = false) ?prog 
       ?(formatter = Formatter.indented_formatter ()) () =
       let optparser =
         {
           op_usage = usage; 
+          op_status = status;
           op_suppress_usage = suppress_usage;
           op_prog = Option.default (Filename.basename Sys.argv.(0)) prog;
           op_formatter = formatter; 
@@ -658,11 +660,11 @@ module OptParser =
           unprogify optparser
             (optparser.op_formatter.format_usage optparser.op_usage) ^ eol
 
-    let error optparser ?(chn = stderr) ?(status = 1) message =
+    let error optparser ?(chn = stderr) ?status message =
       fprintf chn "%s%s: %s\n" (format_usage optparser "\n") optparser.op_prog
         message;
       flush chn;
-      exit status
+      exit (Option.default optparser.op_status status)
 
     let usage optparser ?(chn = stdout) () =
       let rec loop g =
