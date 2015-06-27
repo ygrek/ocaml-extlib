@@ -58,7 +58,7 @@ uninstall:
 	ocamlfind remove extlib
 
 clean:
-	rm -f *.cmo *.cmx *.o *.obj *.cmi *.cma *.cmxa *.cmxs *.a *.lib doc/*.html extHashtbl.ml extBuffer.ml extBytes.ml
+	rm -f *.cmo *.cmx *.o *.obj *.cmi *.cma *.cmxa *.cmxs *.a *.lib doc/*.html extHashtbl.ml extBuffer.ml extBytes.ml extBytes.mli
 
 release:
 	svn export . extlib-$(VERSION)
