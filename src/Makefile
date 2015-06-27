@@ -49,7 +49,7 @@ extLib.cmx: extLib.ml
 extBytes.mli: extBytes.ml
 	ocamlc -i $< > $@
 %.ml: %.mlpp
-	camlp4of pr_o.cmo $(shell ocaml configure.ml) -impl $< -o $@
+	cppo $(shell ocaml configure.ml) $< -o $@
 
 install:
 	ocamlfind install -patch-version $(VERSION) extlib META extLib.cma $(MLI) $(CMI) -optional extLib.cmxa $(CMX) extLib.cmxs extLib.a extLib.lib

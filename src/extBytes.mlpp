@@ -1,6 +1,6 @@
-IFDEF OCAML4_02 THEN
+#ifdef OCAML4_02
 module Bytes = Bytes
-ELSE
+#else
 module Bytes = struct
 
 include String
@@ -16,4 +16,4 @@ let unsafe_to_string : t -> string = fun s -> s
 let unsafe_of_string : string -> t = fun s -> s
 
 end
-ENDIF
+#endif
