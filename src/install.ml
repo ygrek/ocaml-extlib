@@ -195,15 +195,15 @@ let install() =
   in
 	if doc && not (Sys.file_exists doc_dir) then run (sprintf "mkdir %s" doc_dir);
   (* generate *)
-  let camlp4_flags =
+  let defines =
     (if Sys.ocaml_version >= "4.00.0" then "-D OCAML4" else "")
     ^ " " ^
     (if Sys.ocaml_version >= "4.02.0" then "-D OCAML4_02" else "")
   in
-	run (sprintf "camlp4of pr_o.cmo %s -impl extBytes.mlpp -o extBytes.ml" camlp4_flags);
+	run (sprintf "cppo %s extBytes.mlpp -o extBytes.ml" defines);
   run "ocamlc -i extBytes.ml > extBytes.mli";
-	run (sprintf "camlp4of pr_o.cmo %s -impl extHashtbl.mlpp -o extHashtbl.ml" camlp4_flags);
-	run (sprintf "camlp4of pr_o.cmo %s -impl extBuffer.mlpp -o extBuffer.ml" camlp4_flags);
+	run (sprintf "cppo %s extHashtbl.mlpp -o extHashtbl.ml" defines);
+	run (sprintf "cppo %s extBuffer.mlpp -o extBuffer.ml" defines);
   (* compile mli *)
 	run (sprintf "ocamlc -c %s" (m_list "mli"));
   (* compile ml *)
