@@ -4,7 +4,7 @@ module Buffer = struct
 
   include Buffer
 
-  IFNDEF OCAML4_02 THEN
+#ifndef OCAML4_02
   (* The uses of unsafe_{of,to}_string above are not semantically
      justified, as the Buffer implementation may very well capture and
      share parts of its internal buffer, or of input string given as
@@ -20,5 +20,5 @@ module Buffer = struct
     add_substring b (Bytes.unsafe_to_string s) offset len
 
   let add_bytes b s = add_string b (Bytes.unsafe_to_string s)
-  END
+#endif
 end

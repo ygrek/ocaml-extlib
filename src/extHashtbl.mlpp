@@ -22,28 +22,28 @@
 module Hashtbl =
   struct
 
-IFDEF OCAML4 THEN
+#ifdef OCAML4 
   external old_hash_param :
     int -> int -> 'a -> int = "caml_hash_univ_param" "noalloc"
-END
+#endif
 
 	type ('a, 'b) h_bucketlist =
 		| Empty
 		| Cons of 'a * 'b * ('a, 'b) h_bucketlist
 
-IFDEF OCAML4 THEN
+#ifdef OCAML4 
 	type ('a, 'b) h_t = {
 		mutable size: int;
 		mutable data: ('a, 'b) h_bucketlist array;
     mutable seed: int;
     initial_size: int;
 	}
-ELSE
+#else
 	type ('a, 'b) h_t = {
 		mutable size: int;
 		mutable data: ('a, 'b) h_bucketlist array
 	}
-END
+#endif
 
 	include Hashtbl
 	let create n = Hashtbl.create (* no seed *) n
@@ -105,16 +105,16 @@ END
 			data = Array.map loop (h_conv h).data; 
 		}
 
-IFDEF OCAML4 THEN
+#ifdef OCAML4 
   (* copied from stdlib :( *)
   let key_index h key =
     (* compatibility with old hash tables *)
     if Obj.size (Obj.repr h) >= 3
     then (seeded_hash_param 10 100 (h_conv h).seed key) land (Array.length (h_conv h).data - 1)
     else (old_hash_param 10 100 key) mod (Array.length (h_conv h).data)
-ELSE
+#else
   let key_index h key = (hash key) mod (Array.length (h_conv h).data)
-END
+#endif
 
 	let remove_all h key =
 		let hc = h_conv h in
