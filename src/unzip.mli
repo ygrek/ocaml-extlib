@@ -26,6 +26,8 @@
 	This format is also the one used by the popular ZLib library.	
 *)
 
+open ExtBytes
+
 type error_msg =
 	| Invalid_huffman
 	| Invalid_data
