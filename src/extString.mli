@@ -112,10 +112,16 @@ module String :
 
 	val of_enum : char Enum.t -> string
 	(** Creates a string from a character enumeration. *)
-	
+
 	val map : (char -> char) -> string -> string
 	(** [map f s] returns a string where all characters [c] in [s] have been
 		replaced by [f c]. **)
+
+  val mapi : (int -> char -> char) -> string -> string
+	(** [map f s] returns a string where all characters [c] in [s] have been replaced by [f i s.\[i\]]. **)
+
+  val iteri : (int -> char -> unit) -> string -> unit
+	(** Call [f i s.\[i\]] for every position [i] in string *)
 
 	val fold_left : ('a -> char -> 'a) -> 'a -> string -> 'a
 	  (** [fold_left f a s] is
@@ -147,6 +153,12 @@ module String :
 		and a string where the first occurrence of the string [sub]
 		within [str] has been replaced by the string [by]. The boolean
 		is true if a subtitution has taken place. *)
+
+  (** Return a copy of the argument, without leading and trailing
+     whitespace.  The characters regarded as whitespace are: [' '],
+     ['\012'], ['\n'], ['\r'], and ['\t'].
+     (Note that it is different from {!strip} defaults). *)
+  val trim : string -> string
 
 	(** {6 Older Functions} *)
 

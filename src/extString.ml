@@ -97,6 +97,8 @@ let strip ?(chars=" \t\r\n") s =
 	done;
 	sub s p (!l - p + 1)
 
+let trim s = strip ~chars:" \t\r\n\012" s
+
 let split str sep =
 	let p = find str sep in
 	let len = length sep in
@@ -187,6 +189,20 @@ let map f s =
 	done;
         (* 'sc' doesn't escape and will never be mutated again *)
 	Bytes.unsafe_to_string sc
+
+let mapi f s =
+	let len = length s in
+	let sc = Bytes.create len in
+	for i = 0 to len - 1 do
+		Bytes.unsafe_set sc i (f i (unsafe_get s i))
+	done;
+        (* 'sc' doesn't escape and will never be mutated again *)
+	Bytes.unsafe_to_string sc
+
+let iteri f s =
+  for i = 0 to length s - 1 do
+    let () = f i (unsafe_get s i) in ()
+  done
 
 (* fold_left and fold_right by Eric C. Cooper *)
 let fold_left f init str =
