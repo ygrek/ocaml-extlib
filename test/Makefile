@@ -1,6 +1,6 @@
 
 .SUFFIXES:
-.PHONY: all opt run clean default
+.PHONY: all opt run clean
 
 all:
 ifndef USE_OCAMLFIND
