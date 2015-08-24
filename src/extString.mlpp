@@ -26,6 +26,7 @@ module String = struct
 
 include String
 
+#ifndef OCAML4_02
 let init len f =
 	let s = Bytes.create len in
 	for i = 0 to len - 1 do
@@ -33,6 +34,7 @@ let init len f =
 	done;
         (* 's' doesn't escape and will never be mutated again *)
 	Bytes.unsafe_to_string s
+#endif
 
 let starts_with str p =
 	if length str < length p then 
@@ -97,7 +99,9 @@ let strip ?(chars=" \t\r\n") s =
 	done;
 	sub s p (!l - p + 1)
 
+#ifndef OCAML4
 let trim s = strip ~chars:" \t\r\n\012" s
+#endif
 
 let split str sep =
 	let p = find str sep in
@@ -181,6 +185,7 @@ let of_enum e =
         (* 's' doesn't escape and will never be mutated again *)
 	Bytes.unsafe_to_string s
 
+#ifndef OCAML4
 let map f s =
 	let len = length s in
 	let sc = Bytes.create len in
@@ -189,7 +194,9 @@ let map f s =
 	done;
         (* 'sc' doesn't escape and will never be mutated again *)
 	Bytes.unsafe_to_string sc
+#endif
 
+#ifndef OCAML4_02
 let mapi f s =
 	let len = length s in
 	let sc = Bytes.create len in
@@ -198,11 +205,14 @@ let mapi f s =
 	done;
         (* 'sc' doesn't escape and will never be mutated again *)
 	Bytes.unsafe_to_string sc
+#endif
 
+#ifndef OCAML4
 let iteri f s =
   for i = 0 to length s - 1 do
     let () = f i (unsafe_get s i) in ()
   done
+#endif
 
 (* fold_left and fold_right by Eric C. Cooper *)
 let fold_left f init str =
