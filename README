@@ -20,12 +20,10 @@ What is ExtLib ?
 
 ExtLib is a set of additional useful functions and modules for OCaml.
 Project page :
-	http://code.google.com/p/ocaml-extlib
-and you can join the mailing list here :
-	http://lists.sourceforge.net/lists/listinfo/ocaml-lib-devel
+  https://github.com/ygrek/ocaml-extlib
 
-People are encouraged to contribute and to report any bug or problem
-they might have with ExtLib by using the mailing list.
+People are encouraged to contribute and to report any bugs or problem
+they might have with ExtLib by using github issues and pull requests.
 
 Installation :
 --------------
@@ -42,12 +40,6 @@ On bytecode-only architecture run
 `minimal=1` will exclude from build several modules (namely Unzip UChar UTF8) potentially
 conflicting with other well established OCaml libraries. If your code is expecting to find
 these modules in extlib - omit this parameter during build to produce the full library.
-
-Alternatively, change to src directory and run 
-
-  ocaml install.ml
-
-and follow the instructions.
 
 Usage :
 -------
