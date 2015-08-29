@@ -20,6 +20,16 @@
 
 open ExtBytes
 
+let finally handler f x =
+	let r = (
+		try
+			f x
+		with
+			e -> handler (); raise e
+	) in
+	handler ();
+	r
+
 let input_lines ch =
   Enum.from (fun () ->
     try input_line ch with End_of_file -> raise Enum.No_more_elements)
@@ -71,14 +81,11 @@ let input_all ic =
 
 let input_file ?(bin=false) fname =
   let ch = (if bin then open_in_bin else open_in) fname in
-  let str = input_all ch in
-  close_in ch;
-  str
+  finally (fun () -> close_in ch) input_all ch
 
 let output_file ~filename ~text =
   let ch = open_out filename in
-  output_string ch text;
-  close_out ch
+  finally (fun () -> close_out ch) (output_string ch) text
 
 let print_bool = function
   | true -> print_string "true"
@@ -172,18 +179,8 @@ let dump v = dump (Obj.repr v)
 
 let print v = print_endline (dump v)
 
-let finally handler f x =
-	let r = (
-		try
-			f x
-		with
-			e -> handler(); raise e
-	) in
-	handler();
-	r
-
 let __unique_counter = ref 0
 
-let unique() =
+let unique () =
   incr __unique_counter;
   !__unique_counter
