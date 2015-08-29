@@ -3,19 +3,19 @@
 .PHONY: all opt run clean
 
 all:
-ifndef USE_OCAMLFIND
+ifndef INSTALLED
 	$(MAKE) -C ../src all
-	ocamlc -I ../src extLib.cma util.ml test_*.ml runner.ml -o extlib_test
+	ocamlfind ocamlc -linkall -linkpkg -package bytes -I ../src extLib.cma util.ml test_*.ml runner.ml -o extlib_test
 else
-	ocamlfind ocamlc -linkpkg -package extlib util.ml test_*.ml -o extlib_test
+	ocamlfind ocamlc -linkall -linkpkg -package extlib util.ml test_*.ml runner.ml -o extlib_test
 endif
 
 opt:
-ifndef USE_OCAMLFIND
+ifndef INSTALLED
 	$(MAKE) -C ../src opt
-	ocamlopt -I ../src extLib.cmxa util.ml test_*.ml runner.ml -o extlib_test
+	ocamlfind ocamlopt -linkall -linkpkg -package bytes -I ../src extLib.cmxa util.ml test_*.ml runner.ml -o extlib_test
 else
-	ocamlfind ocamlopt -linkpkg -package extlib util.ml test_*.ml -o extlib_test
+	ocamlfind ocamlopt -linkall -linkpkg -package extlib util.ml test_*.ml runner.ml -o extlib_test
 endif
 
 run:
