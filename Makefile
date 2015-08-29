@@ -1,8 +1,9 @@
 
-VERSION=$(shell git describe --always --long)
+VERSION:=$(shell git describe --always --long)
+RELEASE:=1.7.0
 
 ifndef VERSION
-VERSION=1.7.0
+VERSION:=$(RELEASE)
 endif
 
 .SUFFIXES:
@@ -25,9 +26,10 @@ clean:
 	$(MAKE) -C src clean
 	$(MAKE) -C test clean
 
-NAME=ocaml-extlib-$(VERSION)
+NAME=extlib-$(RELEASE)
 
 release:
-	git tag -a -m $(VERSION) $(VERSION)
-	git archive --prefix=$(NAME)/ $(VERSION) | gzip > $(NAME).tar.gz
-	gpg -a -b $(NAME).tar.gz
+	git tag -a -m $(RELEASE) $(RELEASE)
+	# using github archive - it will have different checksum
+	#git archive --prefix=$(NAME)/ $(RELEASE) | gzip > $(NAME).tar.gz
+	# gpg -a -b $(NAME).tar.gz

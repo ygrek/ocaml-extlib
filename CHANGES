@@ -1,3 +1,9 @@
+1.7.0 (2015-08-29)
+ * Switch to git and move repo to github
+ * `-safe-string` compatibility
+ * use cppo instead of camlp4
+ * allow to set the exit code in optParse
+ * add new upstream functions in String
 
 1.6.1 (2013-11-26 - trunk @ r436)
  * Drop `extlib_min` package
