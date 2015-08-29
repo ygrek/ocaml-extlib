@@ -45,7 +45,7 @@ extLib.cmo: extLib.ml
 extLib.cmx: extLib.ml
 	$(OCAMLOPT) -c $<
 extBytes.mli: extBytes.ml
-	ocamlc -i $< > $@
+	$(OCAMLC) -i $< > $@
 %.ml: %.mlpp
 	cppo $(shell ocaml configure.ml) $< -o $@
 

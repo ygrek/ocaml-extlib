@@ -25,6 +25,12 @@ Project page :
 People are encouraged to contribute and to report any bugs or problem
 they might have with ExtLib by using github issues and pull requests.
 
+Dependencies :
+--------------
+
+cppo - enables conditional compilation to ensure compatibility with various OCaml versions
+ocamlfind >= 1.5.1 - provides bytes package
+
 Installation :
 --------------
 

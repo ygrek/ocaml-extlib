@@ -1,4 +1,4 @@
-#ifdef OCAML4_02
+#if defined OCAML4_02 || defined WITH_BYTES
 module Bytes = Bytes
 #else
 module Bytes = struct
