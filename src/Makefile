@@ -1,7 +1,5 @@
 # Makefile contributed by Alain Frisch
 
-VERSION = 1.6.1
-
 # the list is topologically sorted
 MODULES := \
  extBytes enum bitSet dynArray extArray extHashtbl extList extString extBuffer \
@@ -58,10 +56,5 @@ uninstall:
 	ocamlfind remove extlib
 
 clean:
-	rm -f *.cmo *.cmx *.o *.obj *.cmi *.cma *.cmxa *.cmxs *.a *.lib doc/*.html extHashtbl.ml extBuffer.ml extBytes.ml extBytes.mli
-
-release:
-	svn export . extlib-$(VERSION)
-	tar czf extlib-$(VERSION).tar.gz extlib-$(VERSION)
-	gpg -a -b extlib-$(VERSION).tar.gz
-	@echo make tag: svn copy https://ocaml-extlib.googlecode.com/svn/trunk https://ocaml-extlib.googlecode.com/svn/tags/extlib-$(VERSION)
+	rm -f *.cmo *.cmx *.o *.obj *.cmi *.cma *.cmxa *.cmxs *.a *.lib doc/*.html
+	rm -rf extHashtbl.ml extBuffer.ml extBytes.ml extBytes.mli extString.ml
