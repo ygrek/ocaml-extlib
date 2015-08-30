@@ -93,7 +93,7 @@ let test_findi () =
   assert (7 = Array.findi ((=) 12) a);
   assert (try ignore (Array.findi ((=) 13) a); false with Not_found -> true);
   assert (try ignore (Array.findi ((=) 13) [| |]); false
-	  with Not_found -> true)
+    with Not_found -> true)
 
 let test_filter () =
   let a = [| 0; 1; 2; 3; 4; 5; 6; 7; 8; 9 |] in

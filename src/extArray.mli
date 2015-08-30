@@ -20,9 +20,9 @@
 
 (** Additional and modified functions for arrays.
 
-	The OCaml standard library provides a module of array functions.
-	This ExtArray module can be used to override the Array module or
-	as a standalone module. It provides some additional functions.
+  The OCaml standard library provides a module of array functions.
+  This ExtArray module can be used to override the Array module or
+  as a standalone module. It provides some additional functions.
 *)
 
 module Array :
@@ -51,14 +51,14 @@ sig
 
   val for_all : ('a -> bool) -> 'a array -> bool
     (** [for_all p [a1; ...; an]] checks if all elements of the array
-	satisfy the predicate [p].  That is, it returns
-	[ (p a1) && (p a2) && ... && (p an)].
+  satisfy the predicate [p].  That is, it returns
+  [ (p a1) && (p a2) && ... && (p an)].
     *)
 
   val exists : ('a -> bool) -> 'a array -> bool
     (** [exists p [a1; ...; an]] checks if at least one element of
-	the array satisfies the predicate [p].  That is, it returns
-	[ (p a1) || (p a2) || ... || (p an)].
+  the array satisfies the predicate [p].  That is, it returns
+  [ (p a1) || (p a2) || ... || (p an)].
     *)
 
   val mem : 'a -> 'a array -> bool
@@ -66,37 +66,37 @@ sig
 
   val memq : 'a -> 'a array -> bool
     (** Same as {!Array.mem} but uses physical equality instead of
-	structural equality to compare array elements.
+  structural equality to compare array elements.
     *)
 
   val find : ('a -> bool) -> 'a array -> 'a
     (** [find p a] returns the first element of array [a]
-	that satisfies the predicate [p].
-	Raise [Not_found] if there is no value that satisfies [p] in the
-	array [a].
+  that satisfies the predicate [p].
+  Raise [Not_found] if there is no value that satisfies [p] in the
+  array [a].
     *)
 
   val findi : ('a -> bool) -> 'a array -> int
     (** [findi p a] returns the index of the first element of array [a]
-	that satisfies the predicate [p].
-	Raise [Not_found] if there is no value that satisfies [p] in the
-	array [a].
+  that satisfies the predicate [p].
+  Raise [Not_found] if there is no value that satisfies [p] in the
+  array [a].
     *)
 
   val filter : ('a -> bool) -> 'a array -> 'a array
     (** [filter p a] returns all the elements of the array [a]
-	that satisfy the predicate [p].  The order of the elements
-	in the input array is preserved.  *)
+  that satisfy the predicate [p].  The order of the elements
+  in the input array is preserved.  *)
 
   val find_all : ('a -> bool) -> 'a array -> 'a array
     (** [find_all] is another name for {!Array.filter}. *)
 
   val partition : ('a -> bool) -> 'a array -> 'a array * 'a array
     (** [partition p a] returns a pair of arrays [(a1, a2)], where
-	[a1] is the array of all the elements of [a] that
-	satisfy the predicate [p], and [a2] is the array of all the
-	elements of [a] that do not satisfy [p].
-	The order of the elements in the input array is preserved. *)
+  [a1] is the array of all the elements of [a] that
+  satisfy the predicate [p], and [a2] is the array of all the
+  elements of [a] that do not satisfy [p].
+  The order of the elements in the input array is preserved. *)
 
   (** {6 Enumerations} *)
 

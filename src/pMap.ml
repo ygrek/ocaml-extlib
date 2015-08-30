@@ -81,7 +81,7 @@ let create cmp = { cmp = cmp; map = Empty }
 let empty = { cmp = compare; map = Empty }
 
 let is_empty x = 
-	x.map = Empty
+  x.map = Empty
 
 let add x d { cmp = cmp; map = map } =
   let rec loop = function
@@ -136,31 +136,31 @@ let map f { cmp = cmp; map = map } =
   let rec loop = function
     | Empty -> Empty
     | Node (l, k, v, r, h) -> 
-	  let l = loop l in
-	  let r = loop r in
-	  Node (l, k, f v, r, h) in
+    let l = loop l in
+    let r = loop r in
+    Node (l, k, f v, r, h) in
   { cmp = cmp; map = loop map }
 
 let mapi f { cmp = cmp; map = map } =
   let rec loop = function
     | Empty -> Empty
     | Node (l, k, v, r, h) ->
-	  let l = loop l in
-	  let r = loop r in
-	  Node (l, k, f k v, r, h) in
+    let l = loop l in
+    let r = loop r in
+    Node (l, k, f k v, r, h) in
   { cmp = cmp; map = loop map }
 
 let fold f { cmp = cmp; map = map } acc =
   let rec loop acc = function
     | Empty -> acc
     | Node (l, k, v, r, _) ->
-	  loop (f v (loop acc l)) r in
+    loop (f v (loop acc l)) r in
   loop acc map
 
 let foldi f { cmp = cmp; map = map } acc =
   let rec loop acc = function
     | Empty -> acc
-	| Node (l, k, v, r, _) ->
+  | Node (l, k, v, r, _) ->
        loop (f k v (loop acc l)) r in
   loop acc map
 
@@ -185,10 +185,10 @@ let rec enum m =
         done;
         assert false
       with
-		Enum.No_more_elements -> l := r; !n
+    Enum.No_more_elements -> l := r; !n
     in
     let clone() = make !l in
-	Enum.make ~next ~count ~clone
+  Enum.make ~next ~count ~clone
   in
   make [m.map]
 

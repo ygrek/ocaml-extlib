@@ -10,12 +10,12 @@
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the GNU
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA	02111-1307	USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
 open ExtBytes
@@ -49,85 +49,85 @@ let bfill dst start len c =
 exception Negative_index of string
 
 type t = {
-	mutable data : intern;
-	mutable len : int;
+  mutable data : intern;
+  mutable len : int;
 }
 
 let error fname = raise (Negative_index fname)
 
 let empty() =
-	{
-		data = bcreate 0;
-		len = 0;
-	}
+  {
+    data = bcreate 0;
+    len = 0;
+  }
 
 let int_size = 7 (* value used to round up index *)
 let log_int_size = 3 (* number of shifts *)
 
 let create n =
-	if n < 0 then error "create";
-	let size = (n+int_size) lsr log_int_size in
-	let b = bcreate size in
-	bfill b 0 size 0;
-	{
-		data = b;
-		len = size;
-	}
+  if n < 0 then error "create";
+  let size = (n+int_size) lsr log_int_size in
+  let b = bcreate size in
+  bfill b 0 size 0;
+  {
+    data = b;
+    len = size;
+  }
 
 let copy t =
-	let b = bcreate t.len in
-	bblit t.data 0 b 0 t.len;
-	{
-		data = b;
-		len = t.len
-	}
+  let b = bcreate t.len in
+  bblit t.data 0 b 0 t.len;
+  {
+    data = b;
+    len = t.len
+  }
 
 let clone = copy
 
 let set t x =
-	if x < 0 then error "set";
-	let pos = x lsr log_int_size and delta = x land int_size in
-	let size = t.len in
-	if pos >= size then begin
-		let b = bcreate (pos+1) in
-		bblit t.data 0 b 0 size;
-		bfill b size (pos - size + 1) 0;
-		t.len <- pos + 1;
-		t.data <- b;
-	end;
-	bset t.data pos ((bget t.data pos) lor (1 lsl delta))
+  if x < 0 then error "set";
+  let pos = x lsr log_int_size and delta = x land int_size in
+  let size = t.len in
+  if pos >= size then begin
+    let b = bcreate (pos+1) in
+    bblit t.data 0 b 0 size;
+    bfill b size (pos - size + 1) 0;
+    t.len <- pos + 1;
+    t.data <- b;
+  end;
+  bset t.data pos ((bget t.data pos) lor (1 lsl delta))
 
 let unset t x =
-	if x < 0 then error "unset";
-	let pos = x lsr log_int_size and delta = x land int_size in
-	if pos < t.len then
-		bset t.data pos ((bget t.data pos) land (0xFF lxor (1 lsl delta)))
+  if x < 0 then error "unset";
+  let pos = x lsr log_int_size and delta = x land int_size in
+  if pos < t.len then
+    bset t.data pos ((bget t.data pos) land (0xFF lxor (1 lsl delta)))
 
 let toggle t x =
-	if x < 0 then error "toggle";
-	let pos = x lsr log_int_size and delta = x land int_size in
-	let size = t.len in
-	if pos >= size then begin
-		let b = bcreate (pos+1) in
-		bblit t.data 0 b 0 size;
-		bfill b size (pos - size + 1) 0;
-		t.len <- pos + 1;
-		t.data <- b;
-	end;
-	bset t.data pos ((bget t.data pos) lxor (1 lsl delta))
+  if x < 0 then error "toggle";
+  let pos = x lsr log_int_size and delta = x land int_size in
+  let size = t.len in
+  if pos >= size then begin
+    let b = bcreate (pos+1) in
+    bblit t.data 0 b 0 size;
+    bfill b size (pos - size + 1) 0;
+    t.len <- pos + 1;
+    t.data <- b;
+  end;
+  bset t.data pos ((bget t.data pos) lxor (1 lsl delta))
 
 let put t = function
-	| true -> set t
-	| false -> unset t
+  | true -> set t
+  | false -> unset t
 
 let is_set t x =
   if x < 0 then error "is_set";
   let pos = x lsr log_int_size and delta = x land int_size in
   let size = t.len in
   if pos < size then
-	fast_bool (((bget t.data pos) lsr delta) land 1)
+  fast_bool (((bget t.data pos) lsr delta) land 1)
   else
-	false
+  false
 
 
 exception Break_int of int
@@ -181,30 +181,30 @@ let compare t1 t2 =
         end
 
 let equals t1 t2 =
-	compare t1 t2 = 0
+  compare t1 t2 = 0
 
 let partial_count t x =
-	let rec nbits x =
-		if x = 0 then
-			0
-		else if fast_bool (x land 1) then
-			1 + (nbits (x lsr 1))
-		else
-			nbits (x lsr 1)
-	in
-	let size = t.len in
-	let pos = x lsr log_int_size and delta = x land int_size in
-	let rec loop n acc =
-		if n = size then
-			acc
-		else
-			let x = bget t.data n in
-			loop (n+1) (acc + nbits x)
-	in
-	if pos >= size then
-		0
-	else
-		loop (pos+1) (nbits ((bget t.data pos) lsr delta))
+  let rec nbits x =
+    if x = 0 then
+      0
+    else if fast_bool (x land 1) then
+      1 + (nbits (x lsr 1))
+    else
+      nbits (x lsr 1)
+  in
+  let size = t.len in
+  let pos = x lsr log_int_size and delta = x land int_size in
+  let rec loop n acc =
+    if n = size then
+      acc
+    else
+      let x = bget t.data n in
+      loop (n+1) (acc + nbits x)
+  in
+  if pos >= size then
+    0
+  else
+    loop (pos+1) (nbits ((bget t.data pos) lsr delta))
 
 let count t =
   partial_count t 0

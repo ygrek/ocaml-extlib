@@ -19,18 +19,18 @@
  *)
 
 (* 
-	Note:
-	
-	Since ExtLib is provided for namespace convenience for
-	users who wants to keep the usage of the original
-	Ocaml Standard Library, no MLI CMI nor documentation will
-	be provided for this module.
+  Note:
+  
+  Since ExtLib is provided for namespace convenience for
+  users who wants to keep the usage of the original
+  Ocaml Standard Library, no MLI CMI nor documentation will
+  be provided for this module.
 
-	Users can simply do an "open ExtLib" to import all Ext*
-	namespaces instead of doing "open ExtList" for example.
+  Users can simply do an "open ExtLib" to import all Ext*
+  namespaces instead of doing "open ExtList" for example.
 
-	The trade-off is that they'll have to link all the modules
-	included below so the resulting binary is bigger.
+  The trade-off is that they'll have to link all the modules
+  included below so the resulting binary is bigger.
 *)
 
 module List = ExtList.List

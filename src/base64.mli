@@ -20,19 +20,19 @@
 
 (** Base64 codec.
 
-	8-bit characters are encoded into 6-bit ones using ASCII lookup tables.
-	Default tables maps 0..63 values on characters A-Z, a-z, 0-9, '+' and '/'
-	(in that order). 
+  8-bit characters are encoded into 6-bit ones using ASCII lookup tables.
+  Default tables maps 0..63 values on characters A-Z, a-z, 0-9, '+' and '/'
+  (in that order). 
 *)
 
 open ExtBytes
 
 (** This exception is raised when reading an invalid character
-	from a base64 input. *)
+  from a base64 input. *)
 exception Invalid_char
 
 (** This exception is raised if the encoding or decoding table
-	size is not correct. *)
+  size is not correct. *)
 exception Invalid_table
 
 (** An encoding table maps integers 0..63 to the corresponding char. *)
@@ -46,7 +46,7 @@ type decoding_table = int array
 val str_encode : ?tbl:encoding_table -> string -> Bytes.t
 
 (** Decode a string encoded into Base64, raise [Invalid_char] if a
-	character in the input string is not a valid one. *)
+  character in the input string is not a valid one. *)
 val str_decode : ?tbl:decoding_table -> Bytes.t -> string
 
 (** Generic base64 encoding over an output. *)

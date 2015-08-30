@@ -21,10 +21,10 @@
 (** Functions for the option type.
 
     Options are an Ocaml standard type that can be either [None] (undefined)
-	or [Some x] where x can be any value. Options are widely used in Ocaml
-	to represent undefined values (a little like NULL in C, but in a type
-	and memory safe way). This module adds some functions for working with
-	options.
+  or [Some x] where x can be any value. Options are widely used in Ocaml
+  to represent undefined values (a little like NULL in C, but in a type
+  and memory safe way). This module adds some functions for working with
+  options.
 *)
 
 val may : ('a -> unit) -> 'a option -> unit
@@ -38,7 +38,7 @@ val default : 'a -> 'a option -> 'a
 
 val map_default : ('a -> 'b) -> 'b -> 'a option -> 'b
 (** [map_default f x (Some v)] returns [f v] and [map_default f x None]
-	returns [x]. *)
+  returns [x]. *)
 
 val is_none : 'a option -> bool
 (** [is_none None] returns [true] otherwise it returns [false]. *)

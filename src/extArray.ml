@@ -139,17 +139,17 @@ let enum xs =
     let n = length xs in
     Enum.make
       ~next:(fun () ->
-	       if !start < n then (
-		 let r = xs.(!start) in
-		 incr start;
-		 r
-	       ) else
-		 raise Enum.No_more_elements)
+         if !start < n then (
+     let r = xs.(!start) in
+     incr start;
+     r
+         ) else
+     raise Enum.No_more_elements)
       ~count:(fun () ->
-		n - !start)
+    n - !start)
       ~clone:(fun () ->
-		let xs' = Array.sub xs !start (n - !start) in
-		make (ref 0) xs')
+    let xs' = Array.sub xs !start (n - !start) in
+    make (ref 0) xs')
   in
   make (ref 0) xs
 

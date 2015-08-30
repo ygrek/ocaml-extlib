@@ -21,19 +21,19 @@
 
 (** Decompression algorithm.
 
-	Unzip decompression algorithm is compliant with RFC 1950 and 1951 which
-	are describing the "inflate" algorithm used in most popular file formats.
-	This format is also the one used by the popular ZLib library.	
+  Unzip decompression algorithm is compliant with RFC 1950 and 1951 which
+  are describing the "inflate" algorithm used in most popular file formats.
+  This format is also the one used by the popular ZLib library.  
 *)
 
 open ExtBytes
 
 type error_msg =
-	| Invalid_huffman
-	| Invalid_data
-	| Invalid_crc
-	| Truncated_data
-	| Unsupported_dictionary
+  | Invalid_huffman
+  | Invalid_data
+  | Invalid_crc
+  | Truncated_data
+  | Unsupported_dictionary
 
 exception Error of error_msg
 
