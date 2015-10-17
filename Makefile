@@ -6,6 +6,7 @@ ifndef VERSION
 VERSION:=$(RELEASE)
 endif
 
+.NOTPARALLEL:
 .SUFFIXES:
 .PHONY: build clean test doc release install
 

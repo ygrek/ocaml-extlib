@@ -17,6 +17,7 @@ CMI = $(MODULES:=.cmi)
 CMO = $(MODULES:=.cmo)
 CMX = $(MODULES:=.cmx)
 
+.NOTPARALLEL:
 .SUFFIXES:
 .PHONY: build all opt cmxs doc install uninstall clean release
 

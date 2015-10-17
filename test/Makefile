@@ -1,4 +1,5 @@
 
+.NOTPARALLEL:
 .SUFFIXES:
 .PHONY: all opt run clean
 
