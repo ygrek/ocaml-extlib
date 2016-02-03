@@ -200,6 +200,15 @@ let map2 f l1 l2 =
   loop dummy l1 l2;
   dummy.tl
 
+let rev_map2 f l1 l2 =
+  let rec loop acc l1 l2 =
+    match l1, l2 with
+    | [], [] -> acc
+    | h1 :: t1, h2 :: t2 -> loop (f h1 h2 :: acc) t1 t2
+    | _ -> raise (Different_list_size "rev_map2")
+  in
+  loop [] l1 l2
+
 let rec iter2 f l1 l2 =
   match l1, l2 with
   | [], [] -> ()

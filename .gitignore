@@ -12,6 +12,7 @@
 /src/extBuffer.ml
 /src/extBytes.ml
 /src/extBytes.mli
+/src/extList.mli
 /src/doc/*.html
 /test/extlib_test
 /test/extlib_test.exe

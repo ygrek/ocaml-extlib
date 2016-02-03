@@ -50,6 +50,9 @@ extBytes.mli: extBytes.ml
 %.ml: %.mlpp
 	cppo $(shell ocaml configure.ml) $< -o $@
 
+%.mli: %.mlipp
+	cppo $(shell ocaml configure.ml) $< -o $@
+
 install:
 	ocamlfind install -patch-version $(VERSION) extlib META extLib.cma $(MLI) $(CMI) -optional extLib.cmxa $(CMX) extLib.cmxs extLib.a extLib.lib
 

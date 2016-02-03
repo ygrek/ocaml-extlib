@@ -203,6 +203,7 @@ let install() =
   run (sprintf "cppo %s extBytes.mlpp -o extBytes.ml" defines);
   run "ocamlc -i extBytes.ml > extBytes.mli";
   run (sprintf "cppo %s extString.mlpp -o extString.ml" defines);
+  run (sprintf "cppo %s extList.mlipp -o extList.mli" defines);
   run (sprintf "cppo %s extHashtbl.mlpp -o extHashtbl.ml" defines);
   run (sprintf "cppo %s extBuffer.mlpp -o extBuffer.ml" defines);
   (* compile mli *)
