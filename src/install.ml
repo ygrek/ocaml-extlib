@@ -74,11 +74,11 @@ let copy file dest =
   end
 
 let get_version () =
-  let ch = open_in "Makefile" in
+  let ch = open_in "../Makefile" in
   let rec loop () =
     let s = input_line ch in
     try
-      Scanf.sscanf s " VERSION = %s %!" (fun s -> s)
+      Scanf.sscanf s " RELEASE := %s %!" (fun s -> s)
     with
       _ -> loop ()
   in
@@ -86,7 +86,7 @@ let get_version () =
     let s = loop () in close_in_noerr ch; s
   with _ ->
     close_in_noerr ch;
-    failwith "No VERSION present in Makefile"
+    failwith "No RELEASE present in ../Makefile"
 
 let complete_path p =
   if p = "" then
