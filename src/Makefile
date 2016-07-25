@@ -27,7 +27,7 @@ all: extLib.cma
 opt: extLib.cmxa
 cmxs: extLib.cmxs
 
-doc:
+doc: $(MLI)
 	$(OCAMLC) -c $(MLI)
 	ocamldoc -sort -html -d doc/ $(MLI) extLib.ml
 

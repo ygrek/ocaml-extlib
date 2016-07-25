@@ -22,6 +22,9 @@ ExtLib is a set of additional useful functions and modules for OCaml.
 Project page :
   https://github.com/ygrek/ocaml-extlib
 
+Online API documentation :
+  http://ygrek.org.ua/p/extlib/doc/
+
 People are encouraged to contribute and to report any bugs or problem
 they might have with ExtLib by using github issues and pull requests.
 
