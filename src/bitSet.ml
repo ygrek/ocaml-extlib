@@ -24,7 +24,7 @@ type intern
 
 let bcreate : int -> intern = Obj.magic Bytes.create
 external fast_get : intern -> int -> int = "%string_unsafe_get"
-external fast_set : intern -> int -> int -> unit = "%string_unsafe_set"
+let fast_set : intern -> int -> int -> unit = Obj.magic Bytes.unsafe_set
 external fast_bool : int -> bool = "%identity"
 let fast_blit : intern -> int -> intern -> int -> int -> unit = Obj.magic Bytes.blit
 let fast_fill : intern -> int -> int -> int -> unit = Obj.magic Bytes.fill
