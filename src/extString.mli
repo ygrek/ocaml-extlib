@@ -195,8 +195,8 @@ module String :
   (**/**)
 
   external unsafe_get : string -> int -> char = "%string_unsafe_get"
-  external unsafe_set : Bytes.t -> int -> char -> unit = "%string_unsafe_set"
-  external unsafe_blit : string -> int -> Bytes.t -> int -> int -> unit = "caml_blit_string" "noalloc"
-  external unsafe_fill : Bytes.t -> int -> int -> char -> unit = "caml_fill_string" "noalloc"
+  val unsafe_set : Bytes.t -> int -> char -> unit
+  val unsafe_blit : string -> int -> Bytes.t -> int -> int -> unit
+  val unsafe_fill : Bytes.t -> int -> int -> char -> unit
 
   end
