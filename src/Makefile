@@ -61,4 +61,4 @@ uninstall:
 
 clean:
 	rm -f *.cmo *.cmx *.o *.obj *.cmi *.cma *.cmxa *.cmxs *.a *.lib doc/*.html
-	rm -rf extHashtbl.ml extBuffer.ml extBytes.ml extBytes.mli extString.ml
+	rm -rf extHashtbl.ml extBuffer.ml extBytes.ml extBytes.mli extString.ml extList.mli
