@@ -108,5 +108,78 @@ module Hashtbl :
   val iter : ('a -> 'b -> unit) -> ('a, 'b) t -> unit
   val fold : ('a -> 'b -> 'c -> 'c) -> ('a, 'b) t -> 'c -> 'c
   val hash : 'a -> int
+  val hash_param : int -> int -> 'a -> int
+
+(** Functor interface forwards directly to stdlib implementation (i.e. no enum functions) *)
+
+module type HashedType =
+  sig
+    type t
+    val equal : t -> t -> bool
+    val hash : t -> int
+   end
+
+module type S =
+  sig
+    type key
+    type 'a t
+    val create : int -> 'a t
+    val clear : 'a t -> unit
+#ifdef OCAML4
+    val reset : 'a t -> unit
+#endif
+    val copy : 'a t -> 'a t
+    val add : 'a t -> key -> 'a -> unit
+    val remove : 'a t -> key -> unit
+    val find : 'a t -> key -> 'a
+    val find_all : 'a t -> key -> 'a list
+    val replace : 'a t -> key -> 'a -> unit
+    val mem : 'a t -> key -> bool
+    val iter : (key -> 'a -> unit) -> 'a t -> unit
+#ifdef OCAML4_03
+    val filter_map_inplace: (key -> 'a -> 'a option) -> 'a t -> unit
+#endif
+    val fold : (key -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
+    val length : 'a t -> int
+#ifdef OCAML4
+    val stats: 'a t -> statistics
+#endif
+  end
+
+module Make (H : HashedType) : S with type key = H.t
+
+#ifdef OCAML4
+module type SeededHashedType =
+  sig
+    type t
+    val equal: t -> t -> bool
+    val hash: int -> t -> int
+  end
+
+module type SeededS =
+  sig
+    type key
+    type 'a t
+    val create : ?random:bool -> int -> 'a t
+    val clear : 'a t -> unit
+    val reset : 'a t -> unit
+    val copy : 'a t -> 'a t
+    val add : 'a t -> key -> 'a -> unit
+    val remove : 'a t -> key -> unit
+    val find : 'a t -> key -> 'a
+    val find_all : 'a t -> key -> 'a list
+    val replace : 'a t -> key -> 'a -> unit
+    val mem : 'a t -> key -> bool
+    val iter : (key -> 'a -> unit) -> 'a t -> unit
+#ifdef OCAML4_03
+    val filter_map_inplace: (key -> 'a -> 'a option) -> 'a t -> unit
+#endif
+    val fold : (key -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
+    val length : 'a t -> int
+    val stats: 'a t -> statistics
+  end
+
+module MakeSeeded (H : SeededHashedType) : SeededS with type key = H.t
+#endif
 
   end
