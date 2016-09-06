@@ -106,6 +106,21 @@ sig
   val of_enum : 'a Enum.t -> 'a array
     (** Build an array from an enumeration. *)
 
+  (** {6 Compatibility functions} *)
+
+  (** These functions are reimplemented in extlib when they are missing from the stdlib *)
+
+#ifdef OCAML4_03
+  external create_float : int -> float array = "caml_make_float_vect"
+  val make_float : int -> float array
+#else
+#ifdef OCAML4_02
+  external make_float : int -> float array = "caml_make_float_vect"
+#else
+  val make_float : int -> float array
+#endif
+#endif
+
   (** {6 Old functions} *)
 
   (** These functions are already part of the Ocaml standard library
