@@ -200,29 +200,27 @@ let install() =
     ^ " " ^
     (if Sys.ocaml_version >= "4.02.0" then "-D OCAML4_02" else "")
   in
-  run (sprintf "cppo %s extBytes.mlpp -o extBytes.ml" defines);
-  run "ocamlc -i extBytes.ml > extBytes.mli";
-  run (sprintf "cppo %s extString.mlpp -o extString.ml" defines);
-  run (sprintf "cppo %s extList.mlipp -o extList.mli" defines);
-  run (sprintf "cppo %s extHashtbl.mlpp -o extHashtbl.ml" defines);
-  run (sprintf "cppo %s extBuffer.mlpp -o extBuffer.ml" defines);
+  let pp = sprintf "-pp \"cppo %s\"" defines in
+  let ocamlc fmt = ksprintf (fun s -> run (sprintf "ocamlc %s %s" pp s)) fmt in
+  let ocamlopt fmt = ksprintf (fun s -> run (sprintf "ocamlopt %s %s" pp s)) fmt in
+  ocamlc "-i extBytes.ml > extBytes.mli";
   (* compile mli *)
-  run (sprintf "ocamlc -c %s" (m_list "mli"));
+  ocamlc "-c %s" (m_list "mli");
   (* compile ml *)
   if !autobyte then begin
-    List.iter (fun m -> run (sprintf "ocamlc -g -c %s.ml" m)) modules;
-    run (sprintf "ocamlc -g -a -o extLib.cma %s extLib.ml" (m_list "cmo"));
+    List.iter (fun m -> ocamlc "-g -c %s.ml" m) modules;
+    ocamlc "-g -a -o extLib.cma %s extLib.ml" (m_list "cmo");
     List.iter (fun m -> remove (m ^ ".cmo")) modules;
     remove "extLib.cmo";
   end;
   if !autonative then begin
-    List.iter (fun m -> run (sprintf "ocamlopt -g -c %s.ml" m)) modules;
-    run (sprintf "ocamlopt -g -a -o extLib.cmxa %s extLib.ml" (m_list "cmx"));
+    List.iter (fun m -> ocamlopt "-g -c %s.ml" m) modules;
+    ocamlopt "-g -a -o extLib.cmxa %s extLib.ml" (m_list "cmx");
     List.iter (fun m -> remove (m ^ obj_ext)) modules;
     remove ("extLib" ^ obj_ext);
   end;
   if doc then begin
-    run (sprintf "ocamldoc -sort -html -d %s %s" doc_dir (m_list "mli"));
+    run (sprintf "ocamldoc %s -sort -html -d %s %s" pp doc_dir (m_list "mli"));
     if doc_dir <> "doc" then (* style.css is already there *)
       run ((match path_type with
         | PathDos -> sprintf "%s doc\\style.css %s\\style.css";

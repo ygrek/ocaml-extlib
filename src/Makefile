@@ -9,8 +9,12 @@ ifdef minimal
 MODULES := $(filter-out unzip uChar uTF8, $(MODULES))
 endif
 
-OCAMLC = ocamlfind ocamlc -g -package bytes
-OCAMLOPT = ocamlfind ocamlopt -g -package bytes
+CPPO_ARGS := $(shell ocaml configure.ml)
+CPPO = cppo $(CPPO_ARGS)
+
+OCAMLC = ocamlfind ocamlc -pp "$(CPPO)" -g -package bytes
+OCAMLOPT = ocamlfind ocamlopt -pp "$(CPPO)" -g -package bytes
+OCAMLDOC = ocamldoc -pp "$(CPPO)"
 
 MLI = $(filter-out extLib.mli, $(MODULES:=.mli))
 CMI = $(MODULES:=.cmi)
@@ -29,7 +33,7 @@ cmxs: extLib.cmxs
 
 doc: $(MLI)
 	$(OCAMLC) -c $(MLI)
-	ocamldoc -sort -html -d doc/ $(MLI) extLib.ml
+	$(OCAMLDOC) -sort -html -d doc/ $(MLI) extLib.ml
 
 extLib.cma: $(CMO)
 	$(OCAMLC) -a -o $@ $^
@@ -47,11 +51,6 @@ extLib.cmx: extLib.ml
 	$(OCAMLOPT) -c $<
 extBytes.mli: extBytes.ml
 	$(OCAMLC) -i $< > $@
-%.ml: %.mlpp
-	cppo $(shell ocaml configure.ml) $< -o $@
-
-%.mli: %.mlipp
-	cppo $(shell ocaml configure.ml) $< -o $@
 
 install:
 	ocamlfind install -patch-version $(VERSION) extlib META extLib.cma $(MLI) $(CMI) -optional extLib.cmxa $(CMX) extLib.cmxs extLib.a extLib.lib
@@ -60,5 +59,4 @@ uninstall:
 	ocamlfind remove extlib
 
 clean:
-	rm -f *.cmo *.cmx *.o *.obj *.cmi *.cma *.cmxa *.cmxs *.a *.lib doc/*.html
-	rm -rf extHashtbl.ml extBuffer.ml extBytes.ml extBytes.mli extString.ml extList.mli
+	rm -f *.cmo *.cmx *.o *.obj *.cmi *.cma *.cmxa *.cmxs *.a *.lib doc/*.html extBytes.mli
