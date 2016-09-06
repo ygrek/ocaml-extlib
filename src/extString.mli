@@ -160,6 +160,15 @@ module String :
      (Note that it is different from {!strip} defaults). *)
   val trim : string -> string
 
+  (** {6 Compatibility Functions} *)
+
+  val uppercase_ascii : string -> string
+  val lowercase_ascii : string -> string
+  val capitalize_ascii : string -> string
+  val uncapitalize_ascii : string -> string
+
+  val split_on_char : char -> string -> string list
+
   (** {6 Older Functions} *)
 
   (** Please refer to the Ocaml Manual for documentation of these
@@ -191,6 +200,7 @@ module String :
 
   type t = string
   val compare : t -> t -> int
+  val equal : t -> t -> bool
 
   (**/**)
 

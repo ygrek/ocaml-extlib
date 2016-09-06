@@ -396,16 +396,17 @@ let mapi f = function
   | h :: t ->
     let rec loop dst n = function
       | [] -> ()
-      | h :: t -> 
+      | h :: t ->
         let r = { hd = f n h; tl = [] } in
         dst.tl <- inj r;
         loop r (n+1) t
-    in  
+    in
     let r = { hd = f 0 h; tl = [] } in
     loop r 1 t;
     inj r
 
-let iteri f l = 
+#ifndef OCAML4
+let iteri f l =
   let rec loop n = function
     | [] -> ()
     | h :: t ->
@@ -413,6 +414,7 @@ let iteri f l =
       loop (n+1) t
   in
   loop 0 l
+#endif
 
 let first = hd
 
@@ -518,6 +520,10 @@ let of_enum e =
     acc.tl <- inj r;
     r) h e in
   h.tl
+
+#ifndef OCAML4_03
+let cons x l = x :: l
+#endif
 
 end
 

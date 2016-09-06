@@ -282,4 +282,26 @@ let replace ~str ~sub ~by =
         with
     Invalid_string -> (false, String.sub str 0 (String.length str))
 
+#ifndef OCAML4_03
+let uppercase_ascii = uppercase
+let lowercase_ascii = lowercase
+let capitalize_ascii = capitalize
+let uncapitalize_ascii = uncapitalize
+
+let equal = (=)
+#endif
+
+#ifndef OCAML4_04
+let split_on_char sep s =
+  let r = ref [] in
+  let j = ref (length s) in
+  for i = length s - 1 downto 0 do
+    if unsafe_get s i = sep then begin
+      r := sub s (i + 1) (!j - i - 1) :: !r;
+      j := i
+    end
+  done;
+  sub s 0 !j :: !r
+#endif
+
 end

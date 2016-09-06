@@ -135,6 +135,10 @@ module List :
   val of_enum : 'a Enum.t -> 'a list
   (** Build a list from an enumeration. *)
 
+  (** {6 Compatibility functions} *)
+
+  val cons : 'a -> 'a list -> 'a list
+
   (** {6 Modified functions} *)
 
   (** Some minor modifications have been made to the specification of some

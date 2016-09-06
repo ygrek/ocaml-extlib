@@ -46,7 +46,10 @@ module Hashtbl =
 #endif
 
   include Hashtbl
-  let create n = Hashtbl.create (* no seed *) n
+
+#ifndef OCAML4
+  let create ?random:_ n = Hashtbl.create (* no seed *) n
+#endif
 
   external h_conv : ('a, 'b) t -> ('a, 'b) h_t = "%identity"
   external h_make : ('a, 'b) h_t -> ('a, 'b) t = "%identity"
@@ -69,7 +72,7 @@ module Hashtbl =
       let rec next() =
         force();
         match !buck with
-        | Empty ->          
+        | Empty ->
           if !hcount = 0 then raise Enum.No_more_elements;
           incr pos;
           buck := Array.unsafe_get !hdata !pos;
@@ -87,7 +90,7 @@ module Hashtbl =
         make !pos !buck !hdata !hcount
       in
       Enum.make ~next ~count ~clone
-    in    
+    in
     make (-1) Empty (Obj.magic()) (-1)
 
   let keys h =
@@ -152,7 +155,7 @@ module Hashtbl =
     let h = create (if Enum.fast_count e then Enum.count e else 0) in
     Enum.iter (fun (k,v) -> add h k v) e;
     h
-  
+
   let length h =
     (h_conv h).size
 

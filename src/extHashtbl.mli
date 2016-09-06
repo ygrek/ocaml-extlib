@@ -66,14 +66,37 @@ module Hashtbl :
   val length : ('a,'b) t -> int
   (** Return the number of elements inserted into the Hashtbl 
     (including duplicates) *)
-  
+
+#ifdef OCAML4
+  val reset : ('a,'b) t -> unit
+  val randomize : unit -> unit
+
+  type statistics = {
+    num_bindings: int;
+    num_buckets: int;
+    max_bucket_length: int;
+    bucket_histogram: int array;
+  }
+
+  val stats : ('a,'b) t -> statistics
+
+  val seeded_hash_param : int -> int -> int -> 'a -> int
+  val seeded_hash : int -> 'a -> int
+#endif
+
+#ifdef OCAML4_03
+  val is_randomized : unit -> bool
+  val filter_map_inplace : ('a -> 'b -> 'b option) -> ('a, 'b) t -> unit
+#endif
+
   (** {6 Older Functions} *)
 
   (** Please refer to the Ocaml Manual for documentation of these
     functions. (note : functor support removed to avoid code
     duplication). *)
 
-  val create : int -> ('a, 'b) t
+  (** @before 4.00.0 [random] is ignored *)
+  val create : ?random:bool -> int -> ('a, 'b) t
   val clear : ('a, 'b) t -> unit
   val add : ('a, 'b) t -> 'a -> 'b -> unit
   val copy : ('a, 'b) t -> ('a, 'b) t
