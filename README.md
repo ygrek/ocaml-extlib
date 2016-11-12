@@ -59,6 +59,16 @@ Usage
 
 Generate and read the documentation.
 
+Release
+-------
+
+* Review `git log` and update CHANGES
+* Update version in Makefile
+* Commit
+* `make release`
+* upload tarball and make release on github
+* opam publish
+
 Contributors
 ------------
 

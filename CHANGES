@@ -1,3 +1,7 @@
+1.7.1 (2016-11-11)
+ * sync with OCaml 4.04
+ * add Hashtbl.Make for better compatibility
+
 1.7.0 (2015-08-29)
  * Switch to git and move repo to github
  * `-safe-string` compatibility

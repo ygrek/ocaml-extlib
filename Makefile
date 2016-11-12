@@ -1,6 +1,6 @@
 
 VERSION:=$(shell git describe --always --long)
-RELEASE:=1.7.0
+RELEASE:=1.7.1
 
 ifndef VERSION
 VERSION:=$(RELEASE)
@@ -31,6 +31,5 @@ NAME=extlib-$(RELEASE)
 
 release:
 	git tag -a -m $(RELEASE) $(RELEASE)
-	# using github archive - it will have different checksum
-	#git archive --prefix=$(NAME)/ $(RELEASE) | gzip > $(NAME).tar.gz
-	# gpg -a -b $(NAME).tar.gz
+	git archive --prefix=$(NAME)/ $(RELEASE) | gzip > $(NAME).tar.gz
+	gpg -a -b $(NAME).tar.gz
