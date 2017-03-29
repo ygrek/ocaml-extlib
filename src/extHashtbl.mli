@@ -132,6 +132,9 @@ module type S =
     val add : 'a t -> key -> 'a -> unit
     val remove : 'a t -> key -> unit
     val find : 'a t -> key -> 'a
+#ifdef OCAML4_05
+    val find_opt : 'a t -> key -> 'a option
+#endif
     val find_all : 'a t -> key -> 'a list
     val replace : 'a t -> key -> 'a -> unit
     val mem : 'a t -> key -> bool
@@ -167,6 +170,9 @@ module type SeededS =
     val add : 'a t -> key -> 'a -> unit
     val remove : 'a t -> key -> unit
     val find : 'a t -> key -> 'a
+#ifdef OCAML4_05
+    val find_opt : 'a t -> key -> 'a option
+#endif
     val find_all : 'a t -> key -> 'a list
     val replace : 'a t -> key -> 'a -> unit
     val mem : 'a t -> key -> bool
