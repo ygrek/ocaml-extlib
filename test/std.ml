@@ -10,8 +10,8 @@ module XS = (struct
   external set : bytes -> int -> char -> unit = "%string_safe_set"
   external create : int -> bytes = "caml_create_string"
   external unsafe_set : bytes -> int -> char -> unit = "%string_unsafe_set"
-  external unsafe_blit : string -> int -> bytes -> int -> int -> unit = "caml_blit_string" "noalloc"
-  external unsafe_fill : bytes -> int -> int -> char -> unit = "caml_fill_string" "noalloc"
+  external unsafe_blit : string -> int -> bytes -> int -> int -> unit = "caml_blit_string" [@@noalloc]
+  external unsafe_fill : bytes -> int -> int -> char -> unit = "caml_fill_string" [@@noalloc]
 end : module type of String)
 
 module XL = (struct

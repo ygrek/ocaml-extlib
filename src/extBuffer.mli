@@ -67,4 +67,10 @@ val add_channel : t -> in_channel -> int -> unit
 
 val output_buffer : out_channel -> t -> unit
 
+#ifdef OCAML4_05
+
+val truncate : t -> int -> unit
+
+#endif
+
 end

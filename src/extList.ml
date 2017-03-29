@@ -50,7 +50,7 @@ let nth l index =
   if index < 0 then raise (Invalid_index index);
   let rec loop n = function
     | [] -> raise (Invalid_index index);
-    | h :: t -> 
+    | h :: t ->
       if n = 0 then h else loop (n - 1) t
   in
   loop index l
@@ -523,6 +523,36 @@ let of_enum e =
 
 #ifndef OCAML4_03
 let cons x l = x :: l
+#endif
+
+#ifndef OCAML4_05
+
+let assoc_opt k l = try Some (assoc k l) with Not_found -> None
+let assq_opt k l = try Some (assq k l) with Not_found -> None
+let find_opt p l = try Some (find p l) with Not_found -> None
+
+let nth_opt =
+  let rec loop n = function
+    | [] -> None
+    | h :: t ->
+      if n = 0 then Some h else loop (n - 1) t
+  in
+  fun l index -> if index < 0 then None else loop index l
+
+let rec compare_lengths l1 l2 =
+  match l1, l2 with
+  | [], [] -> 0
+  | [], _ -> -1
+  | _, [] -> 1
+  | _ :: l1, _ :: l2 -> compare_lengths l1 l2
+
+let rec compare_length_with l n =
+  match l, n with
+  | [], 0 -> 0
+  | [], _ -> if n > 0 then -1 else 1
+  | _, 0 -> 1
+  | _ :: l, n -> compare_length_with l (n-1)
+
 #endif
 
 end

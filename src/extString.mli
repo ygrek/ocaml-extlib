@@ -187,9 +187,13 @@ module String :
   val iter : (char -> unit) -> string -> unit
   val escaped : string -> string
   val index : string -> char -> int
+  val index_opt : string -> char -> int option
   val rindex : string -> char -> int
+  val rindex_opt : string -> char -> int option
   val index_from : string -> int -> char -> int
+  val index_from_opt : string -> int -> char -> int option
   val rindex_from : string -> int -> char -> int
+  val rindex_from_opt : string -> int -> char -> int option
   val contains : string -> char -> bool
   val contains_from : string -> int -> char -> bool
   val rcontains_from : string -> int -> char -> bool

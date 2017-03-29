@@ -139,6 +139,15 @@ module List :
 
   val cons : 'a -> 'a list -> 'a list
 
+  val assoc_opt : 'a -> ('a * 'b) list -> 'b option
+  val assq_opt : 'a -> ('a * 'b) list -> 'b option
+
+  val find_opt : ('a -> bool) -> 'a list -> 'a option
+  val nth_opt : 'a list -> int -> 'a option
+
+  val compare_lengths : 'a list -> 'b list -> int
+  val compare_length_with : 'a list -> int -> int
+
   (** {6 Modified functions} *)
 
   (** Some minor modifications have been made to the specification of some

@@ -304,4 +304,31 @@ let split_on_char sep s =
   sub s 0 !j :: !r
 #endif
 
+#ifndef OCAML4_05
+
+let rec index_rec_opt s lim i c =
+  if i >= lim then None else
+  if unsafe_get s i = c then Some i else index_rec_opt s lim (i + 1) c
+
+let index_opt s c = index_rec_opt s (length s) 0 c
+
+let index_from_opt s i c =
+  let l = length s in
+  if i < 0 || i > l then invalid_arg "ExtString.index_from_opt" else
+  index_rec_opt s l i c
+
+let rec rindex_rec_opt s i c =
+  if i < 0 then None else
+  if unsafe_get s i = c then Some i else rindex_rec_opt s (i - 1) c
+
+let rindex_opt s c = rindex_rec_opt s (length s - 1) c
+
+let rindex_from_opt s i c =
+  if i < -1 || i >= length s then
+    invalid_arg "ExtString.rindex_from_opt"
+  else
+    rindex_rec_opt s i c
+
+#endif
+
 end
