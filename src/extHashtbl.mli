@@ -51,9 +51,12 @@ module Hashtbl :
     (** Find a binding for the key, and return a default
       value if not found *)
 
-  val find_option : ('a,'b) Hashtbl.t -> 'a -> 'b option
+  val find_opt : ('a,'b) Hashtbl.t -> 'a -> 'b option
   (** Find a binding for the key, or return [None] if no
     value is found *)
+
+  val find_option : ('a,'b) Hashtbl.t -> 'a -> 'b option
+  (** compatibility, use [find_opt] *)
 
   val remove_all : ('a,'b) t -> 'a -> unit
   (** Remove all bindings for the given key *)

@@ -142,7 +142,8 @@ module Hashtbl =
     let pos = key_index h key in
     loop (Array.unsafe_get (h_conv h).data pos)
 
-  let find_option h key =
+#ifndef OCAML4_05
+  let find_opt h key =
     let rec loop = function
       | Empty -> None
       | Cons (k,v,next) ->
@@ -150,6 +151,9 @@ module Hashtbl =
     in
     let pos = key_index h key in
     loop (Array.unsafe_get (h_conv h).data pos)
+#endif
+
+  let find_option = find_opt
 
   let of_enum e =
     let h = create (if Enum.fast_count e then Enum.count e else 0) in
