@@ -20,6 +20,8 @@ MLI = $(filter-out extLib.mli, $(MODULES:=.mli))
 CMI = $(MODULES:=.cmi)
 CMO = $(MODULES:=.cmo)
 CMX = $(MODULES:=.cmx)
+CMT = $(MODULES:=.cmt)
+CMTI = $(MODULES:=.cmti)
 
 .NOTPARALLEL:
 .SUFFIXES:
@@ -53,7 +55,7 @@ extBytes.mli: extBytes.ml
 	$(OCAMLC) -i $< > $@
 
 install:
-	ocamlfind install -patch-version $(VERSION) extlib META extLib.cma $(MLI) $(CMI) -optional extLib.cmxa $(CMX) extLib.cmxs extLib.a extLib.lib
+	ocamlfind install -patch-version $(VERSION) extlib META extLib.cma $(MLI) $(CMI) -optional extLib.cmxa $(CMX) extLib.cmxs extLib.a extLib.lib $(CMT) $(CMTI)
 
 uninstall:
 	ocamlfind remove extlib
