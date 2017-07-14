@@ -12,8 +12,8 @@ endif
 CPPO_ARGS := $(shell ocaml configure.ml)
 CPPO = cppo $(CPPO_ARGS)
 
-OCAMLC = ocamlfind ocamlc -pp "$(CPPO)" -g -package bytes
-OCAMLOPT = ocamlfind ocamlopt -pp "$(CPPO)" -g -package bytes
+OCAMLC = ocamlfind ocamlc -pp "$(CPPO)" -g -package bytes -bin-annot
+OCAMLOPT = ocamlfind ocamlopt -pp "$(CPPO)" -g -package bytes -bin-annot
 OCAMLDOC = ocamldoc -pp "$(CPPO)"
 
 MLI = $(filter-out extLib.mli, $(MODULES:=.mli))
