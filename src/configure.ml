@@ -1,3 +1,6 @@
+let show_bytes s =
+    let (_:int) = Sys.command (Printf.sprintf "ocamlfind query -format %s bytes" (Filename.quote s)) in ()
+
 let () =
   match Sys.argv with
   | [|_;"-cppo-args"|] ->
@@ -6,9 +9,10 @@ let () =
     print_endline (if Sys.ocaml_version >= "4.03.0" then "-D OCAML4_03 " else "");
     print_endline (if Sys.ocaml_version >= "4.04.0" then "-D OCAML4_04 " else "");
     print_endline (if Sys.ocaml_version >= "4.05.0" then "-D OCAML4_05 " else "");
-    let (_:int) = Sys.command "ocamlfind query -format \"-D WITH_BYTES\" bytes" in ();
+    show_bytes "-D WITH_BYTES";
     exit 0
   | [|_;"-compile-args"|] ->
     if Sys.ocaml_version >= "4.00.0" then print_endline "-bin-annot";
+    show_bytes "-package bytes";
     exit 0
   | _ -> failwith "not gonna happen"

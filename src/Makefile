@@ -12,7 +12,7 @@ endif
 CPPO_ARGS := $(shell ocaml configure.ml -cppo-args)
 CPPO := cppo $(CPPO_ARGS)
 
-OCAML_ARGS := -pp "$(CPPO)" -g -package bytes
+OCAML_ARGS := -pp "$(CPPO)" -g
 OCAML_ARGS += $(shell ocaml configure.ml -compile-args)
 
 OCAMLC = ocamlfind ocamlc $(OCAML_ARGS)
