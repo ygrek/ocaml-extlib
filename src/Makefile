@@ -9,11 +9,14 @@ ifdef minimal
 MODULES := $(filter-out unzip uChar uTF8, $(MODULES))
 endif
 
-CPPO_ARGS := $(shell ocaml configure.ml)
-CPPO = cppo $(CPPO_ARGS)
+CPPO_ARGS := $(shell ocaml configure.ml -cppo-args)
+CPPO := cppo $(CPPO_ARGS)
 
-OCAMLC = ocamlfind ocamlc -pp "$(CPPO)" -g -package bytes -bin-annot
-OCAMLOPT = ocamlfind ocamlopt -pp "$(CPPO)" -g -package bytes -bin-annot
+OCAML_ARGS := -pp "$(CPPO)" -g -package bytes
+OCAML_ARGS += $(shell ocaml configure.ml -compile-args)
+
+OCAMLC = ocamlfind ocamlc $(OCAML_ARGS)
+OCAMLOPT = ocamlfind ocamlopt $(OCAML_ARGS)
 OCAMLDOC = ocamldoc -pp "$(CPPO)"
 
 MLI = $(filter-out extLib.mli, $(MODULES:=.mli))
