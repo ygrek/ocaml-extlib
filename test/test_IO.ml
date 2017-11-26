@@ -24,31 +24,74 @@
 
 let fail fmt = Printf.ksprintf failwith fmt
 
-let test_write_read write read values invalid =
+let test_write_read values invalid show write read =
   let s = IO.output_string () in
   List.iter begin fun x ->
-    if try write s x; true with IO.Overflow _ -> false then fail "write %d expected to fail, but didn't" x
+    if try write s x; true with IO.Overflow _ -> false then fail "write %s expected to fail, but didn't" (show x)
   end invalid;
   List.iter begin fun i ->
-    try write s i with exn -> fail "failed to write %d : %s" i (Printexc.to_string exn)
+    try write s i with exn -> fail "failed to write %s : %s" (show i) (Printexc.to_string exn)
   end values;
   let s = IO.close_out s in
   let s = IO.input_string s in
   List.iter begin fun expect ->
     let i = read s in
-    if i <> expect then fail "failed to read %d : got %d" expect i
+    if i <> expect then fail "failed to read %s : got %s" (show expect) (show i)
   end values;
   match IO.read_all s with
   | "" -> ()
   | s -> fail "expected empty input, got %S" s
 
+let test_i8 () =
+  let values = [~-0x80;-1;0;1;0x7F] in
+  let invalid = [] in (* never fails - truncates *)
+  test_write_read values invalid string_of_int IO.write_byte IO.read_signed_byte;
+  ()
+
+let test_u8 () =
+  let values = [0;1;0xFF] in
+  let invalid = [] in (* never fails *)
+  test_write_read values invalid string_of_int IO.write_byte IO.read_byte;
+  ()
+
 let test_i16 () =
   (* Bug was that write_i16 did not accept -0x8000 *)
   let values = [~-0x8000;-1;0;1;0x7FFF] in
   let invalid = [~-0x8001;0x8000] in
-  test_write_read IO.write_i16 IO.read_i16 values invalid;
-  test_write_read IO.BigEndian.write_i16 IO.BigEndian.read_i16 values invalid;
+  let test = test_write_read values invalid string_of_int in
+  test IO.write_i16 IO.read_i16;
+  test IO.BigEndian.write_i16 IO.BigEndian.read_i16;
+  ()
+
+let test_u16 () =
+  let values = [0;1;0xFFFF] in
+  let invalid = [~-1;0x10000] in
+  let test = test_write_read values invalid string_of_int in
+  test IO.write_ui16 IO.read_ui16;
+  test IO.BigEndian.write_ui16 IO.BigEndian.read_ui16;
+  ()
+
+let test_i31 () =
+  let values = [~-0x40000000;-1;0;1;0x3FFFFFFF] in
+  let invalid = [~-0x40000001;0x40000000] in
+  let test = test_write_read values invalid string_of_int in
+  test IO.write_i31 IO.read_i31;
+  test IO.BigEndian.write_i31 IO.BigEndian.read_i31;
+  ()
+
+let test_i32 () =
+  let values = [Int32.min_int;-1l;0l;1l;Int32.max_int] in
+  let invalid = [] in
+  let test = test_write_read values invalid Int32.to_string in
+  test IO.write_real_i32 IO.read_real_i32;
+  test IO.BigEndian.write_real_i32 IO.BigEndian.read_real_i32;
   ()
 
 let () =
-  Util.register1 "IO" "i16" test_i16
+  Util.register1 "IO" "i32" test_i32;
+  Util.register1 "IO" "i31" test_i31;
+  Util.register1 "IO" "u16" test_u16;
+  Util.register1 "IO" "i16" test_i16;
+  Util.register1 "IO" "u8" test_u8;
+  Util.register1 "IO" "i8" test_i8;
+  ()
