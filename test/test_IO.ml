@@ -22,27 +22,33 @@
    ocaml-lib-devel@lists.sourceforge.net on Nov 26, 2007.  
    Thanks Rob! *)
 
-let test_write_i16 () =
+let fail fmt = Printf.ksprintf failwith fmt
+
+let test_write_read write read values invalid =
+  let s = IO.output_string () in
+  List.iter begin fun x ->
+    if try write s x; true with IO.Overflow _ -> false then fail "write %d expected to fail, but didn't" x
+  end invalid;
+  List.iter begin fun i ->
+    try write s i with exn -> fail "failed to write %d : %s" i (Printexc.to_string exn)
+  end values;
+  let s = IO.close_out s in
+  let s = IO.input_string s in
+  List.iter begin fun expect ->
+    let i = read s in
+    if i <> expect then fail "failed to read %d : got %d" expect i
+  end values;
+  match IO.read_all s with
+  | "" -> ()
+  | s -> fail "expected empty input, got %S" s
+
+let test_i16 () =
   (* Bug was that write_i16 did not accept -0x8000 *)
-  let out = IO.output_string () in
-  let ()  =
-    try 
-      (* -32768 is a valid 16-bit signed int *)
-      IO.write_i16 out (-0x8000)
-    with 
-      IO.Overflow _ -> 
-        assert false
-  in
-  let ()  =
-    try 
-      (* Ditto for BigEndian *)
-      IO.BigEndian.write_i16 out (-0x8000)
-    with IO.Overflow _ -> 
-      assert false
-  in
-  let _ = IO.close_out out in
-    ()
+  let values = [~-0x8000;-1;0;1;0x7FFF] in
+  let invalid = [~-0x8001;0x8000] in
+  test_write_read IO.write_i16 IO.read_i16 values invalid;
+  test_write_read IO.BigEndian.write_i16 IO.BigEndian.read_i16 values invalid;
+  ()
 
-let () = 
-  Util.register1 "IO" "write_i16" test_write_i16
-
+let () =
+  Util.register1 "IO" "i16" test_i16
