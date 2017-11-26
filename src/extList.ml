@@ -369,6 +369,7 @@ let combine l1 l2 =
 
 let sort ?(cmp=compare) = List.sort cmp
 
+#ifndef OCAML4_06
 let rec init size f =
   if size = 0 then [] 
   else if size < 0 then invalid_arg "ExtList.init"
@@ -382,6 +383,7 @@ let rec init size f =
     let r = { hd = f 0; tl = [] } in
     loop r 1;
     inj r
+#endif
 
 let make i x =
   if i < 0 then invalid_arg "ExtList.List.make";

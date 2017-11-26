@@ -36,7 +36,9 @@ module List :
   val init : int -> (int -> 'a) -> 'a list
   (** Similar to [Array.init], [init n f] returns the list containing
    the results of (f 0),(f 1).... (f (n-1)).
-   Raise [Invalid_arg "ExtList.init"] if n < 0.*)
+   Raise [Invalid_arg "ExtList.init"] if n < 0.
+   Uses stdlib implementation in OCaml 4.06.0 and newer.
+  *)
 
   val make : int -> 'a -> 'a list
     (** Similar to [String.make], [make n x] returns a
