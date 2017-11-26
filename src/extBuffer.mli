@@ -73,4 +73,12 @@ val truncate : t -> int -> unit
 
 #endif
 
+#ifdef OCAML4_06
+
+val add_utf_8_uchar : t -> Uchar.t -> unit
+val add_utf_16le_uchar : t -> Uchar.t -> unit
+val add_utf_16be_uchar : t -> Uchar.t -> unit
+
+#endif
+
 end
