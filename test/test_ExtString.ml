@@ -78,8 +78,12 @@ let t_split () =
       begin
         let rpos = Random.int len in
         (* Insert separator and split based on that *)
-        s'.[rpos] <- '|';
-        let (half1, half2) = String.split s' "|" in
+        let modified =
+          let b = Bytes.of_string s' in
+          b.[rpos] <- '|';
+          Bytes.to_string b
+        in
+        let (half1, half2) = String.split modified "|" in
         if rpos > 1 then
           begin
             assert (String.length half1 = rpos);
@@ -90,7 +94,7 @@ let t_split () =
             assert (String.length half2 = len-rpos-1);
             assert (String.sub s' (rpos+1) (len-rpos-1) = half2);
           end;
-        assert (String.join "|" [half1; half2] = s');
+        assert (String.join "|" [half1; half2] = modified);
       end
   done
 

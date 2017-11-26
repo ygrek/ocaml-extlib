@@ -34,7 +34,7 @@ let random_string () =
     for i = 0 to (len-1) do
       str.[i] <- random_char ()
     done;
-  str
+  Bytes.unsafe_to_string str
 
 
 let random_string_len len = 
@@ -44,7 +44,7 @@ let random_string_len len =
     for i = 0 to (len-1) do
       str.[i] <- random_char ()
     done;
-  str
+  Bytes.unsafe_to_string str
 
 (* For  counting the success ratio *)
 let test_run_count = ref 0 
