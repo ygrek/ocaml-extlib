@@ -207,9 +207,12 @@ val read_ui16 : input -> int
 val read_i16 : input -> int
 (** Read a signed 16-bit word. *)
 
-val read_i32 : input -> int
+val read_i31 : input -> int
 (** Read a signed 32-bit integer. Raise [Overflow] if the
   read integer cannot be represented as a Caml 31-bit integer. *)
+
+val read_i32 : input -> int
+(** Deprecated, same as read_i31 *)
 
 val read_real_i32 : input -> int32
 (** Read a signed 32-bit integer as an OCaml int32. *)
@@ -240,6 +243,9 @@ val write_ui16 : 'a output -> int -> unit
 
 val write_i16 : 'a output -> int -> unit
 (** Write a signed 16-bit word. *)
+
+val write_i31 : 'a output -> int -> unit
+(** Write a signed 31-bit integer as 4 bytes. *)
 
 val write_i32 : 'a output -> int -> unit
 (** Write a signed 32-bit integer. *)
@@ -272,6 +278,7 @@ sig
 
   val read_ui16 : input -> int
   val read_i16 : input -> int
+  val read_i31 : input -> int
   val read_i32 : input -> int
   val read_real_i32 : input -> int32
   val read_i64 : input -> int64
@@ -280,6 +287,7 @@ sig
 
   val write_ui16 : 'a output -> int -> unit
   val write_i16 : 'a output -> int -> unit
+  val write_i31 : 'a output -> int -> unit
   val write_i32 : 'a output -> int -> unit
   val write_real_i32 : 'a output -> int32 -> unit
   val write_i64 : 'a output -> int64 -> unit
