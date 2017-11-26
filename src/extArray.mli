@@ -118,17 +118,17 @@ sig
 
   val make_float : int -> float array
 
+#ifdef OCAML4_06
   module Floatarray :
   sig
-#ifdef OCAML4_06
     external create : int -> floatarray = "caml_floatarray_create"
     external length : floatarray -> int = "%floatarray_length"
     external get : floatarray -> int -> float = "%floatarray_safe_get"
     external set : floatarray -> int -> float -> unit = "%floatarray_safe_set"
     external unsafe_get : floatarray -> int -> float = "%floatarray_unsafe_get"
     external unsafe_set : floatarray -> int -> float -> unit = "%floatarray_unsafe_set"
-#endif
   end
+#endif
 
   (** {6 Old functions} *)
 
