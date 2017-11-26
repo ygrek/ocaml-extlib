@@ -112,14 +112,11 @@ sig
 
 #ifdef OCAML4_03
   external create_float : int -> float array = "caml_make_float_vect"
-  val make_float : int -> float array
 #else
-#ifdef OCAML4_02
-  external make_float : int -> float array = "caml_make_float_vect"
-#else
+  val create_float : int -> float array
+#endif
+
   val make_float : int -> float array
-#endif
-#endif
 
   (** {6 Old functions} *)
 

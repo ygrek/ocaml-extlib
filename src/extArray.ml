@@ -184,6 +184,7 @@ let map2 f a1 a2 =
 let create_float = make_float
 #else
 let make_float n = make n 0.
+let create_float = make_float
 #endif
 #endif
 
