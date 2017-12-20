@@ -124,17 +124,16 @@ let nsplit str sep =
 
 let join = concat
 
-let slice ?(first=0) ?(last=Sys.max_string_length) s =
-  let clip _min _max x = max _min (min _max x) in
-  let i = clip 0 (length s)
-    (if (first<0) then (length s) + first else first)
-  and j = clip 0 (length s)
-    (if (last<0) then (length s) + last else last)
-  in
-  if i>=j || i=length s then
-    make 0 ' '
-        else
-            sub s i (j-i)
+let slice =
+  let clip max x = if x > max then max else if x < 0 then 0 else x in
+  fun ?(first=0) ?(last=Sys.max_string_length) s ->
+    let len = String.length s in
+    let i = if first = 0 then 0 else clip len (if first < 0 then len + first else first) in
+    let j = if last = Sys.max_string_length then len else clip len (if last < 0 then len + last else last) in
+    if i>=j || i=len then
+      make 0 ' '
+    else
+      sub s i (j-i)
 
 let lchop s =
   if s = "" then "" else sub s 1 (length s - 1)

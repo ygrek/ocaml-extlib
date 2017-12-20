@@ -58,23 +58,23 @@ module String :
   val join : string -> string list -> string
   (** Same as [concat] *)
 
-        val slice : ?first:int -> ?last:int -> string -> string
-        (** [slice ?first ?last s] returns a "slice" of the string
-          which corresponds to the characters [s.[first]],
-          [s.[first+1]], ..., [s[last-1]]. Note that the character at
-          index [last] is {b not} included! If [first] is omitted it
-          defaults to the start of the string, i.e. index 0, and if
-          [last] is omitted is defaults to point just past the end of
-          [s], i.e. [length s].  Thus, [slice s] is equivalent to
-          [copy s].
+  val slice : ?first:int -> ?last:int -> string -> string
+  (** [slice ?first ?last s] returns a "slice" of the string
+    which corresponds to the characters [s.[first]],
+    [s.[first+1]], ..., [s[last-1]]. Note that the character at
+    index [last] is {b not} included! If [first] is omitted it
+    defaults to the start of the string, i.e. index 0, and if
+    [last] is omitted is defaults to point just past the end of
+    [s], i.e. [length s].  Thus, [slice s] is equivalent to
+    [copy s].
 
-          Negative indexes are interpreted as counting from the end of
-          the string. For example, [slice ~last:-2 s] will return the
-          string [s], but without the last two characters.
+    Negative indexes are interpreted as counting from the end of
+    the string. For example, [slice ~last:-2 s] will return the
+    string [s], but without the last two characters.
 
-          This function {b never} raises any exceptions. If the
-          indexes are out of bounds they are automatically clipped.
-        *)
+    This function {b never} raises any exceptions. If the
+    indexes are out of bounds they are automatically clipped.
+  *)
 
   val lchop : string -> string
   (** Returns the same string but without the first character.
