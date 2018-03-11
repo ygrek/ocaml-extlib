@@ -42,12 +42,18 @@ type encoding_table = char array
  or -1 if the char is not accepted. *)
 type decoding_table = int array
 
-(** Encode a string into Base64. *)
+(** erroneous interface, kept for compatibility use [encode_string] instead *)
 val str_encode : ?tbl:encoding_table -> string -> Bytes.t
+
+(** erroneous interface, kept for compatibility use [decode_string] instead *)
+val str_decode : ?tbl:decoding_table -> Bytes.t -> string
+
+(** Encode a string into Base64. *)
+val encode_string : ?tbl:encoding_table -> string -> string
 
 (** Decode a string encoded into Base64, raise [Invalid_char] if a
   character in the input string is not a valid one. *)
-val str_decode : ?tbl:decoding_table -> Bytes.t -> string
+val decode_string : ?tbl:decoding_table -> string -> string
 
 (** Generic base64 encoding over an output. *)
 val encode : ?tbl:encoding_table -> 'a IO.output -> 'a IO.output

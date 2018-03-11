@@ -119,3 +119,12 @@ let str_encode ?(tbl=chars) s =
 let str_decode ?(tbl=inv_chars) s =
   let ch = decode ~tbl (IO.input_bytes s) in
   IO.nread_string ch ((Bytes.length s * 6) / 8)
+
+let encode_string ?(tbl=chars) s =
+  let ch = encode ~tbl (IO.output_string ()) in
+  IO.nwrite_string ch s;
+  IO.close_out ch
+
+let decode_string ?(tbl=inv_chars) s =
+  let ch = decode ~tbl (IO.input_string s) in
+  IO.nread_string ch ((String.length s * 6) / 8)
