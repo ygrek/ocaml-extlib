@@ -1,3 +1,11 @@
+1.7.3 (2018-03-11)
+ * String: faster slice
+ * sync with OCaml 4.06 (thx test/std.ml)
+ * IO: fix sign bug in read_i31
+ * IO: add write_i31 and bounds-checking on write_i32
+ * base64: add encode_string decode_string
+ * install cmt and cmti
+
 1.7.2 (2017-03-29)
  * sync with OCaml 4.05
 
