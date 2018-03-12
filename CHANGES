@@ -1,3 +1,6 @@
+1.7.4 (2018-03-12)
+ * fix tests with OCaml 4.06
+
 1.7.3 (2018-03-11)
  * String: faster slice
  * sync with OCaml 4.06 (thx test/std.ml)
