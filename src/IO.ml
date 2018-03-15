@@ -573,9 +573,15 @@ let write_i31 ch n =
   if n < -0x4000_0000 || n > 0x3FFF_FFFF then raise (Overflow "write_i31");
   write_32 ch n
 
-let write_i32 ch n =
-  if n < -0x8000_0000 || n > 0x7FFF_FFFF then raise (Overflow "write_i32");
-  write_32 ch n
+let write_i32 =
+  let f l ch n =
+    if n < l || n > 0x7FFF_FFFF then raise (Overflow "write_i32");
+    write_32 ch n
+  in
+  if Sys.word_size = 32 then
+    fun ch -> f min_int ch
+  else
+    fun ch -> f (Nativeint.to_int (-0x8000_0000n)) ch
 
 let write_real_i32 ch n =
   let base = Int32.to_int n in
@@ -677,9 +683,15 @@ let write_i31 ch n =
   if n < -0x4000_0000 || n > 0x3FFF_FFFF then raise (Overflow "write_i31");
   write_32 ch n
 
-let write_i32 ch n =
-  if n < -0x8000_0000 || n > 0x7FFF_FFFF then raise (Overflow "write_i32");
-  write_32 ch n
+let write_i32 =
+  let f l ch n =
+    if n < l || n > 0x7FFF_FFFF then raise (Overflow "write_i32");
+    write_32 ch n
+  in
+  if Sys.word_size = 32 then
+    fun ch -> f min_int ch
+  else
+    fun ch -> f (Nativeint.to_int (-0x8000_0000n)) ch
 
 let write_real_i32 ch n =
   let base = Int32.to_int n in
