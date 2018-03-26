@@ -73,7 +73,8 @@ let test_u16 () =
 
 let test_i31 () =
   let values = [~-0x40000000;-1;0;1;0x3FFFFFFF] in
-  let invalid = [~-0x40000001;0x40000000] in
+  (* check whether runtime supports 32 bit int *)
+  let invalid = if 0x40000000 > 0 then [~-0x40000001;0x40000000] else [] in
   let test = test_write_read values invalid string_of_int in
   test IO.write_i31 IO.read_i31;
   test IO.BigEndian.write_i31 IO.BigEndian.read_i31;
