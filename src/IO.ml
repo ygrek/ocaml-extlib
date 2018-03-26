@@ -574,7 +574,8 @@ let write_i31 ch n =
   write_32 ch n
 
 let write_i32 ch n =
-  if n < -0x8000_0000 || n > 0x7FFF_FFFF then raise (Overflow "write_i32");
+  let n32 = Int32.of_int n in
+  if n32 < Int32.min_int || n32 > Int32.max_int then raise (Overflow "write_i32");
   write_32 ch n
 
 let write_real_i32 ch n =
@@ -678,7 +679,8 @@ let write_i31 ch n =
   write_32 ch n
 
 let write_i32 ch n =
-  if n < -0x8000_0000 || n > 0x7FFF_FFFF then raise (Overflow "write_i32");
+  let n32 = Int32.of_int n in
+  if n32 < Int32.min_int || n32 > Int32.max_int then raise (Overflow "write_i32");
   write_32 ch n
 
 let write_real_i32 ch n =
