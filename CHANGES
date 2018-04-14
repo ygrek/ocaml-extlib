@@ -1,3 +1,6 @@
+Next (????-??-??)
+ * IO: restore compilation on 32-bit (broken in 1.7.3)
+
 1.7.4 (2018-03-12)
  * fix tests with OCaml 4.06
 
