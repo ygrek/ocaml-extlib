@@ -570,7 +570,9 @@ let write_32 ch n =
   write_byte ch (n asr 24)
 
 let write_i31 ch n =
+#ifndef WORD_SIZE_32
   if n < -0x4000_0000 || n > 0x3FFF_FFFF then raise (Overflow "write_i31");
+#endif
   write_32 ch n
 
 let write_i32 ch n =
@@ -676,7 +678,9 @@ let write_32 ch n =
   write_byte ch n
 
 let write_i31 ch n =
+#ifndef WORD_SIZE_32
   if n < -0x4000_0000 || n > 0x3FFF_FFFF then raise (Overflow "write_i31");
+#endif
   write_32 ch n
 
 let write_i32 ch n =
