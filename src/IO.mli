@@ -209,10 +209,13 @@ val read_i16 : input -> int
 
 val read_i31 : input -> int
 (** Read a signed 32-bit integer. Raise [Overflow] if the
-  read integer cannot be represented as a Caml 31-bit integer. *)
+  read integer cannot be represented as an OCaml 31-bit integer. *)
 
 val read_i32 : input -> int
 (** Deprecated, same as read_i31 *)
+
+val read_i32_as_int : input -> int
+(** Read a signed 32-bit integer, represented as OCaml integer, wrapping around 31-bit int on 32-bit architecture *)
 
 val read_real_i32 : input -> int32
 (** Read a signed 32-bit integer as an OCaml int32. *)
@@ -280,6 +283,7 @@ sig
   val read_i16 : input -> int
   val read_i31 : input -> int
   val read_i32 : input -> int
+  val read_i32_as_int : input -> int
   val read_real_i32 : input -> int32
   val read_i64 : input -> int64
   val read_float32 : input -> float

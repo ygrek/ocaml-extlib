@@ -496,18 +496,21 @@ let read_i16 i =
 
 let sign_bit_i32 = lnot 0x7FFF_FFFF
 
-let read_i31 ch =
+let read_32 ~i31 ch =
   let ch1 = read_byte ch in
   let ch2 = read_byte ch in
   let ch3 = read_byte ch in
   let ch4 = read_byte ch in
   if ch4 land 128 <> 0 then begin
-    if ch4 land 64 = 0 then raise (Overflow "read_i31");
+    if i31 && ch4 land 64 = 0 then raise (Overflow "read_i31");
     ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor ((ch4 land 127) lsl 24) lor sign_bit_i32
   end else begin
-    if ch4 land 64 <> 0 then raise (Overflow "read_i31");
+    if i31 && ch4 land 64 <> 0 then raise (Overflow "read_i31");
     ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor (ch4 lsl 24)
   end
+
+let read_i31 ch = read_32 ~i31:true ch
+let read_i32_as_int ch = read_32 ~i31:false ch
 
 let read_i32 = read_i31
 
@@ -620,18 +623,21 @@ let read_i16 i =
 
 let sign_bit_i32 = lnot 0x7FFF_FFFF
 
-let read_i31 ch =
+let read_32 ~i31 ch =
   let ch4 = read_byte ch in
   let ch3 = read_byte ch in
   let ch2 = read_byte ch in
   let ch1 = read_byte ch in
   if ch4 land 128 <> 0 then begin
-    if ch4 land 64 = 0 then raise (Overflow "read_i31");
+    if i31 && ch4 land 64 = 0 then raise (Overflow "read_i31");
     ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor ((ch4 land 127) lsl 24) lor sign_bit_i32
   end else begin
-    if ch4 land 64 <> 0 then raise (Overflow "read_i31");
+    if i31 && ch4 land 64 <> 0 then raise (Overflow "read_i31");
     ch1 lor (ch2 lsl 8) lor (ch3 lsl 16) lor (ch4 lsl 24)
   end
+
+let read_i31 ch = read_32 ~i31:true ch
+let read_i32_as_int ch = read_32 ~i31:false ch
 
 let read_i32 = read_i31
 

@@ -72,14 +72,24 @@ let test_u16 () =
   ()
 
 let test_i31 () =
-  let values = [~-0x40000000;-1;0;1;0x3FFFFFFF] in
-  let invalid = if Sys.word_size = 32 then [] else [~-0x40000001;0x40000000] in
+  let values = [~-0x4000_0000;-1;0;1;0x3FFF_FFFF] in
+  let invalid = if Sys.word_size = 32 then [] else [~-0x4000_0001;0x4000_0000] in
   let test = test_write_read values invalid string_of_int in
   test IO.write_i31 IO.read_i31;
   test IO.BigEndian.write_i31 IO.BigEndian.read_i31;
   ()
 
 let test_i32 () =
+  let min_i32 = Int32.to_int Int32.min_int in
+  let max_i32 = Int32.to_int Int32.max_int in
+  let values = [~-0x4000_0000;-1;0;1;0x3FFF_FFFF] @ if Sys.word_size = 32 then [] else [min_i32;max_i32] in
+  let invalid = if Sys.word_size = 32 then [] else [min_i32-1;max_i32+1] in
+  let test = test_write_read values invalid string_of_int in
+  test IO.write_i32 IO.read_i32_as_int;
+  test IO.BigEndian.write_i32 IO.BigEndian.read_i32_as_int;
+  ()
+
+let test_real_i32 () =
   let values = [Int32.min_int;-1l;0l;1l;Int32.max_int] in
   let invalid = [] in
   let test = test_write_read values invalid Int32.to_string in
@@ -89,6 +99,7 @@ let test_i32 () =
 
 let () =
   Util.register1 "IO" "i32" test_i32;
+  Util.register1 "IO" "real_i32" test_real_i32;
   Util.register1 "IO" "i31" test_i31;
   Util.register1 "IO" "u16" test_u16;
   Util.register1 "IO" "i16" test_i16;
