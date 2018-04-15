@@ -10,6 +10,7 @@ let () =
     print_endline (if Sys.ocaml_version >= "4.04.0" then "-D OCAML4_04 " else "");
     print_endline (if Sys.ocaml_version >= "4.05.0" then "-D OCAML4_05 " else "");
     print_endline (if Sys.ocaml_version >= "4.06.0" then "-D OCAML4_06 " else "");
+    print_endline (if Sys.word_size = 32 then "-D WORD_SIZE_32 " else "");
     show_bytes "-D WITH_BYTES";
     exit 0
   | [|_;"-compile-args"|] ->

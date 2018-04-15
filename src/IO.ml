@@ -574,7 +574,9 @@ let write_i31 ch n =
   write_32 ch n
 
 let write_i32 ch n =
+#ifndef WORD_SIZE_32
   if n < -0x8000_0000 || n > 0x7FFF_FFFF then raise (Overflow "write_i32");
+#endif
   write_32 ch n
 
 let write_real_i32 ch n =
@@ -678,7 +680,9 @@ let write_i31 ch n =
   write_32 ch n
 
 let write_i32 ch n =
+#ifndef WORD_SIZE_32
   if n < -0x8000_0000 || n > 0x7FFF_FFFF then raise (Overflow "write_i32");
+#endif
   write_32 ch n
 
 let write_real_i32 ch n =
