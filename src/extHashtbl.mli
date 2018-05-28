@@ -74,7 +74,7 @@ module Hashtbl :
   val reset : ('a,'b) t -> unit
   val randomize : unit -> unit
 
-  type statistics = {
+  type statistics = Hashtbl.statistics = {
     num_bindings: int;
     num_buckets: int;
     max_bucket_length: int;
@@ -95,8 +95,7 @@ module Hashtbl :
   (** {6 Older Functions} *)
 
   (** Please refer to the Ocaml Manual for documentation of these
-    functions. (note : functor support removed to avoid code
-    duplication). *)
+    functions. *)
 
   (** @before 4.00.0 [random] is ignored *)
   val create : ?random:bool -> int -> ('a, 'b) t
@@ -112,6 +111,16 @@ module Hashtbl :
   val fold : ('a -> 'b -> 'c -> 'c) -> ('a, 'b) t -> 'c -> 'c
   val hash : 'a -> int
   val hash_param : int -> int -> 'a -> int
+
+#ifdef OCAML4_07
+  (** [*_seq] functions were introduced in OCaml 4.07.0, and are _not_ implemented in extlib for older OCaml versions *)
+  val to_seq : ('a,'b) t -> ('a * 'b) Seq.t
+  val to_seq_keys : ('a,_) t -> 'a Seq.t
+  val to_seq_values : (_,'b) t -> 'b Seq.t
+  val add_seq : ('a,'b) t -> ('a * 'b) Seq.t -> unit
+  val replace_seq : ('a,'b) t -> ('a * 'b) Seq.t -> unit
+  val of_seq : ('a * 'b) Seq.t -> ('a, 'b) t
+#endif
 
 (** Functor interface forwards directly to stdlib implementation (i.e. no enum functions) *)
 
@@ -150,6 +159,16 @@ module type S =
 #ifdef OCAML4
     val stats: 'a t -> statistics
 #endif
+
+#ifdef OCAML4_07
+    (** [*_seq] functions were introduced in OCaml 4.07.0, and are _not_ implemented in extlib for older OCaml versions *)
+    val to_seq : 'a t -> (key * 'a) Seq.t
+    val to_seq_keys : _ t -> key Seq.t
+    val to_seq_values : 'a t -> 'a Seq.t
+    val add_seq : 'a t -> (key * 'a) Seq.t -> unit
+    val replace_seq : 'a t -> (key * 'a) Seq.t -> unit
+    val of_seq : (key * 'a) Seq.t -> 'a t
+#endif
   end
 
 module Make (H : HashedType) : S with type key = H.t
@@ -186,6 +205,16 @@ module type SeededS =
     val fold : (key -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
     val length : 'a t -> int
     val stats: 'a t -> statistics
+
+#ifdef OCAML4_07
+    (** [*_seq] functions were introduced in OCaml 4.07.0, and are _not_ implemented in extlib for older OCaml versions *)
+    val to_seq : 'a t -> (key * 'a) Seq.t
+    val to_seq_keys : _ t -> key Seq.t
+    val to_seq_values : 'a t -> 'a Seq.t
+    val add_seq : 'a t -> (key * 'a) Seq.t -> unit
+    val replace_seq : 'a t -> (key * 'a) Seq.t -> unit
+    val of_seq : (key * 'a) Seq.t -> 'a t
+#endif
   end
 
 module MakeSeeded (H : SeededHashedType) : SeededS with type key = H.t
