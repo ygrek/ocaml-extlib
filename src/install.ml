@@ -196,9 +196,8 @@ let install() =
   if doc && not (Sys.file_exists doc_dir) then run (sprintf "mkdir %s" doc_dir);
   (* generate *)
   let defines =
-    (if Sys.ocaml_version >= "4.00.0" then "-D OCAML4" else "")
-    ^ " " ^
-    (if Sys.ocaml_version >= "4.02.0" then "-D OCAML4_02" else "")
+    let version = Scanf.sscanf Sys.ocaml_version "%d.%d." (fun major minor -> major * 100 + minor) in
+    sprintf "-D 'OCAML %d' %s" version (if Sys.word_size = 32 then "-D WORD_SIZE_32 " else "");
   in
   let pp = sprintf "-pp \"cppo %s\"" defines in
   let ocamlc fmt = ksprintf (fun s -> run (sprintf "ocamlc %s %s" pp s)) fmt in
@@ -254,6 +253,7 @@ let install() =
       end;
 ;;
 try
+  print_endline "\nATTENTION! install.ml is deprecated and will be removed in next release. Please use Makefile instead.\n";
   install();
   print_endline "Done.";
 with
