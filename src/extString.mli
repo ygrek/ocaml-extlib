@@ -206,6 +206,13 @@ module String :
   val compare : t -> t -> int
   val equal : t -> t -> bool
 
+#ifdef OCAML4_07
+  (** [*_seq] functions were introduced in OCaml 4.07.0, and are _not_ implemented in extlib for older OCaml versions *)
+  val to_seq : t -> char Seq.t
+  val to_seqi : t -> (int * char) Seq.t
+  val of_seq : char Seq.t -> t
+#endif
+
   (**/**)
 
   external unsafe_get : string -> int -> char = "%string_unsafe_get"

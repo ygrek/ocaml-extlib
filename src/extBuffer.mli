@@ -81,4 +81,12 @@ val add_utf_16be_uchar : t -> Uchar.t -> unit
 
 #endif
 
+#ifdef OCAML4_07
+(** [*_seq] functions were introduced in OCaml 4.07.0, and are _not_ implemented in extlib for older OCaml versions *)
+val to_seq : t -> char Seq.t
+val to_seqi : t -> (int * char) Seq.t
+val add_seq : t -> char Seq.t -> unit
+val of_seq : char Seq.t -> t
+#endif
+
 end

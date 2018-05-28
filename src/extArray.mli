@@ -164,4 +164,11 @@ sig
   external unsafe_get : 'a array -> int -> 'a = "%array_unsafe_get"
   external unsafe_set : 'a array -> int -> 'a -> unit = "%array_unsafe_set"
 
+#ifdef OCAML4_07
+  (** [*_seq] functions were introduced in OCaml 4.07.0, and are _not_ implemented in extlib for older OCaml versions *)
+  val to_seq : 'a array -> 'a Seq.t
+  val to_seqi : 'a array -> (int * 'a) Seq.t
+  val of_seq : 'a Seq.t -> 'a array
+#endif
+
 end
