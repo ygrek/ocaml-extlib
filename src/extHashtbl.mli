@@ -124,6 +124,18 @@ module Hashtbl :
 
 (** Functor interface forwards directly to stdlib implementation (i.e. no enum functions) *)
 
+#ifdef OCAML4_07
+
+module type HashedType = Hashtbl.HashedType
+module type S = Hashtbl.S
+module Make = Hashtbl.Make
+
+module type SeededHashedType = Hashtbl.SeededHashedType
+module type SeededS = Hashtbl.SeededS
+module MakeSeeded = Hashtbl.MakeSeeded
+
+#else
+
 module type HashedType =
   sig
     type t
@@ -158,16 +170,6 @@ module type S =
     val length : 'a t -> int
 #ifdef OCAML4
     val stats: 'a t -> statistics
-#endif
-
-#ifdef OCAML4_07
-    (** [*_seq] functions were introduced in OCaml 4.07.0, and are _not_ implemented in extlib for older OCaml versions *)
-    val to_seq : 'a t -> (key * 'a) Seq.t
-    val to_seq_keys : _ t -> key Seq.t
-    val to_seq_values : 'a t -> 'a Seq.t
-    val add_seq : 'a t -> (key * 'a) Seq.t -> unit
-    val replace_seq : 'a t -> (key * 'a) Seq.t -> unit
-    val of_seq : (key * 'a) Seq.t -> 'a t
 #endif
   end
 
@@ -205,19 +207,11 @@ module type SeededS =
     val fold : (key -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
     val length : 'a t -> int
     val stats: 'a t -> statistics
-
-#ifdef OCAML4_07
-    (** [*_seq] functions were introduced in OCaml 4.07.0, and are _not_ implemented in extlib for older OCaml versions *)
-    val to_seq : 'a t -> (key * 'a) Seq.t
-    val to_seq_keys : _ t -> key Seq.t
-    val to_seq_values : 'a t -> 'a Seq.t
-    val add_seq : 'a t -> (key * 'a) Seq.t -> unit
-    val replace_seq : 'a t -> (key * 'a) Seq.t -> unit
-    val of_seq : (key * 'a) Seq.t -> 'a t
-#endif
   end
 
 module MakeSeeded (H : SeededHashedType) : SeededS with type key = H.t
+#endif
+
 #endif
 
   end
