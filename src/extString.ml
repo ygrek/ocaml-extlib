@@ -26,7 +26,7 @@ module String = struct
 
 include String
 
-#ifndef OCAML4_02
+#if OCAML < 402
 let init len f =
   let s = Bytes.create len in
   for i = 0 to len - 1 do
@@ -99,7 +99,7 @@ let strip ?(chars=" \t\r\n") s =
   done;
   sub s p (!l - p + 1)
 
-#ifndef OCAML4
+#if OCAML < 400
 let trim s = strip ~chars:" \t\r\n\012" s
 #endif
 
@@ -184,7 +184,7 @@ let of_enum e =
         (* 's' doesn't escape and will never be mutated again *)
   Bytes.unsafe_to_string s
 
-#ifndef OCAML4
+#if OCAML < 400
 let map f s =
   let len = length s in
   let sc = Bytes.create len in
@@ -195,7 +195,7 @@ let map f s =
   Bytes.unsafe_to_string sc
 #endif
 
-#ifndef OCAML4_02
+#if OCAML < 402
 let mapi f s =
   let len = length s in
   let sc = Bytes.create len in
@@ -206,7 +206,7 @@ let mapi f s =
   Bytes.unsafe_to_string sc
 #endif
 
-#ifndef OCAML4
+#if OCAML < 400
 let iteri f s =
   for i = 0 to length s - 1 do
     let () = f i (unsafe_get s i) in ()
@@ -281,7 +281,7 @@ let replace ~str ~sub ~by =
         with
     Invalid_string -> (false, String.sub str 0 (String.length str))
 
-#ifndef OCAML4_03
+#if OCAML < 403
 let uppercase_ascii = uppercase
 let lowercase_ascii = lowercase
 let capitalize_ascii = capitalize
@@ -290,7 +290,7 @@ let uncapitalize_ascii = uncapitalize
 let equal = (=)
 #endif
 
-#ifndef OCAML4_04
+#if OCAML < 404
 let split_on_char sep s =
   let r = ref [] in
   let j = ref (length s) in
@@ -303,7 +303,7 @@ let split_on_char sep s =
   sub s 0 !j :: !r
 #endif
 
-#ifndef OCAML4_05
+#if OCAML < 405
 
 let rec index_rec_opt s lim i c =
   if i >= lim then None else

@@ -206,7 +206,7 @@ module String :
   val compare : t -> t -> int
   val equal : t -> t -> bool
 
-#ifdef OCAML4_07
+#if OCAML >= 407
   (** [*_seq] functions were introduced in OCaml 4.07.0, and are _not_ implemented in extlib for older OCaml versions *)
   val to_seq : t -> char Seq.t
   val to_seqi : t -> (int * char) Seq.t

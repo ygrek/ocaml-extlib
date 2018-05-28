@@ -110,7 +110,7 @@ sig
 
   (** These functions are reimplemented in extlib when they are missing from the stdlib *)
 
-#ifdef OCAML4_03
+#if OCAML >= 403
   external create_float : int -> float array = "caml_make_float_vect"
 #else
   val create_float : int -> float array
@@ -118,7 +118,7 @@ sig
 
   val make_float : int -> float array
 
-#ifdef OCAML4_06
+#if OCAML >= 406
   module Floatarray :
   sig
     external create : int -> floatarray = "caml_floatarray_create"
@@ -164,7 +164,7 @@ sig
   external unsafe_get : 'a array -> int -> 'a = "%array_unsafe_get"
   external unsafe_set : 'a array -> int -> 'a -> unit = "%array_unsafe_set"
 
-#ifdef OCAML4_07
+#if OCAML >= 407
   (** [*_seq] functions were introduced in OCaml 4.07.0, and are _not_ implemented in extlib for older OCaml versions *)
   val to_seq : 'a array -> 'a Seq.t
   val to_seqi : 'a array -> (int * 'a) Seq.t

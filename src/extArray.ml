@@ -37,7 +37,7 @@ let rev xs =
   rev_in_place ys;
   ys
 
-#ifndef OCAML4_03
+#if OCAML < 403
 let for_all p xs =
   let n = length xs in
   let rec loop i =
@@ -164,7 +164,7 @@ let of_enum e =
        | Some x -> x
        | None -> assert false)
 
-#ifndef OCAML4_03
+#if OCAML < 403
 let iter2 f a1 a2 =
      if Array.length a1 <> Array.length a2
      then raise (Invalid_argument "Array.iter2");
@@ -178,9 +178,9 @@ let map2 f a1 a2 =
      Array.init (Array.length a1) (fun i -> f a1.(i) a2.(i))
 #endif
 
-#ifdef OCAML4_03
+#if OCAML >= 403
 #else
-#ifdef OCAML4_02
+#if OCAML >= 402
 let create_float = make_float
 #else
 let make_float n = make n 0.

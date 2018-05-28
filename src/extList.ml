@@ -369,9 +369,9 @@ let combine l1 l2 =
 
 let sort ?(cmp=compare) = List.sort cmp
 
-#ifndef OCAML4_06
+#if OCAML < 406
 let rec init size f =
-  if size = 0 then [] 
+  if size = 0 then []
   else if size < 0 then invalid_arg "ExtList.init"
   else
     let rec loop dst n =
@@ -407,7 +407,7 @@ let mapi f = function
     loop r 1 t;
     inj r
 
-#ifndef OCAML4
+#if OCAML < 400
 let iteri f l =
   let rec loop n = function
     | [] -> ()
@@ -523,11 +523,11 @@ let of_enum e =
     r) h e in
   h.tl
 
-#ifndef OCAML4_03
+#if OCAML < 403
 let cons x l = x :: l
 #endif
 
-#ifndef OCAML4_05
+#if OCAML < 405
 
 let assoc_opt k l = try Some (assoc k l) with Not_found -> None
 let assq_opt k l = try Some (assq k l) with Not_found -> None

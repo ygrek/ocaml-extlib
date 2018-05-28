@@ -67,13 +67,13 @@ val add_channel : t -> in_channel -> int -> unit
 
 val output_buffer : out_channel -> t -> unit
 
-#ifdef OCAML4_05
+#if OCAML >= 405
 
 val truncate : t -> int -> unit
 
 #endif
 
-#ifdef OCAML4_06
+#if OCAML >= 406
 
 val add_utf_8_uchar : t -> Uchar.t -> unit
 val add_utf_16le_uchar : t -> Uchar.t -> unit
@@ -81,7 +81,7 @@ val add_utf_16be_uchar : t -> Uchar.t -> unit
 
 #endif
 
-#ifdef OCAML4_07
+#if OCAML >= 407
 (** [*_seq] functions were introduced in OCaml 4.07.0, and are _not_ implemented in extlib for older OCaml versions *)
 val to_seq : t -> char Seq.t
 val to_seqi : t -> (int * char) Seq.t

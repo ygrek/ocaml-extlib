@@ -4,7 +4,7 @@ module Buffer = struct
 
   include Buffer
 
-#ifndef OCAML4_02
+#if OCAML < 402
   (* The uses of unsafe_{of,to}_string above are not semantically
      justified, as the Buffer implementation may very well capture and
      share parts of its internal buffer, or of input string given as

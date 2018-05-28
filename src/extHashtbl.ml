@@ -22,7 +22,7 @@
 module Hashtbl =
   struct
 
-#ifdef OCAML4
+#if OCAML >= 400
   external old_hash_param :
     int -> int -> 'a -> int = "caml_hash_univ_param" "noalloc"
 #endif
@@ -31,7 +31,7 @@ module Hashtbl =
     | Empty
     | Cons of 'a * 'b * ('a, 'b) h_bucketlist
 
-#ifdef OCAML4
+#if OCAML >= 400
   type ('a, 'b) h_t = {
     mutable size: int;
     mutable data: ('a, 'b) h_bucketlist array;
@@ -47,7 +47,7 @@ module Hashtbl =
 
   include Hashtbl
 
-#ifndef OCAML4
+#if OCAML < 400
   let create ?random:_ n = Hashtbl.create (* no seed *) n
 #endif
 
@@ -108,7 +108,7 @@ module Hashtbl =
       data = Array.map loop (h_conv h).data; 
     }
 
-#ifdef OCAML4
+#if OCAML >= 400
   (* copied from stdlib :( *)
   let key_index h key =
     (* compatibility with old hash tables *)
@@ -142,7 +142,7 @@ module Hashtbl =
     let pos = key_index h key in
     loop (Array.unsafe_get (h_conv h).data pos)
 
-#ifndef OCAML4_05
+#if OCAML < 405
   let find_opt h key =
     let rec loop = function
       | Empty -> None
