@@ -116,12 +116,12 @@ module Index = struct
 
   let index pred rl =
     let index = ref (-1) in
-    List.find (fun it -> incr index; pred it; ) !rl;
+    let _ = List.find (fun it -> incr index; pred it; ) !rl in
     !index
 
   let index_of rl item =
     let index = ref (-1) in
-    List.find (fun it -> incr index; it = item; ) !rl;
+    let _ = List.find (fun it -> incr index; it = item; ) !rl in
     !index
 
   let at_index rl pos =

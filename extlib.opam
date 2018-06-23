@@ -1,7 +1,7 @@
 opam-version: "2.0"
 maintainer: "ygrek@autistici.org"
 homepage: "https://github.com/ygrek/ocaml-extlib"
-dev-repo: "git://github.com/ygrek/ocaml-extlib.git"
+dev-repo: "git+https://github.com/ygrek/ocaml-extlib.git"
 bug-reports: "https://github.com/ygrek/ocaml-extlib/issues"
 doc: ["https://ygrek.org/p/extlib/doc/"]
 license: "LGPL-2.1-only with OCaml-LGPL-linking-exception"
@@ -19,17 +19,11 @@ authors: [
   "Gabriel Scherer"
   "Pietro Abate"
 ]
-build: [
-  [make "minimal=1" "build"]
-  [make "minimal=1" "test"] {with-test}
-  [make "minimal=1" "doc"] {with-doc}
-]
-install: [ [make "minimal=1" "install"] ]
 depends: [
+  "dune"
   "ocaml"
-  "ocamlfind" {build}
   "cppo" {build}
-  "base-bytes" {build}
+  "base-bytes"
 ]
 synopsis:
   "A complete yet small extension for OCaml standard library"
@@ -43,3 +37,4 @@ Current goal is to maintain compatibility, new software is encouraged to not use
 is now seeing many additions and improvements which make many parts of extlib obsolete.
 For tail-recursion safety consider using other libraries e.g. containers.
 """
+build: [[ "dune" "build" "-p" name ]]

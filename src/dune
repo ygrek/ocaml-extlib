@@ -1,0 +1,18 @@
+(library
+ (name extlib)
+ (public_name extlib)
+ (modules :standard \ configure install uChar uTF8)
+ (flags :standard -w -3-6-9-27-32-33-35-39-50)
+ (preprocess
+  (action
+   (run %{bin:cppo} %{read-lines:compat-level} %{input-file})))
+ (wrapped false))
+
+(rule
+ (targets compat-level)
+ (deps
+  (:< configure.ml))
+ (action
+  (with-stdout-to
+   %{targets}
+   (run ocaml %{<} -cppo-args))))
