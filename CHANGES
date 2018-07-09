@@ -1,5 +1,8 @@
-1.7.5 ?
+1.7.5 (2018-07-08)
  * IO: restore compilation on 32-bit (broken in 1.7.3)
+ * sync with OCaml 4.07
+ * install.ml is now deprecated, install with Makefile
+ + IO: read_i32_as_int
 
 1.7.4 (2018-03-12)
  * fix tests with OCaml 4.06

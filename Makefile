@@ -1,6 +1,6 @@
 
 VERSION:=$(shell git --git-dir=.git describe --always --long)
-RELEASE:=1.7.4
+RELEASE:=1.7.5
 
 ifndef VERSION
 VERSION:=$(RELEASE)
