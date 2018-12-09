@@ -47,9 +47,17 @@ let test_regression_2 () =
   ignore (Dllist.promote lst);
   assert (Dllist.length lst = 2)  (* returned 1, but should return 2 *)
 
+let skip_both_ways () =
+  let lst = Dllist.create "left" in
+  ignore (Dllist.add lst "right");
+  let lm = Dllist.append lst "middle" in
+  assert (Dllist.get (Dllist.skip lm 1) = "right");
+  assert (Dllist.get (Dllist.skip lm (-1)) = "left") (* returned right *)
+
 let () = 
   Util.register "Dllist" [
     "simple", test_simple;
     "regression_1", test_regression_1;
     "regression_2", test_regression_2;
+    "skip_both_ways", skip_both_ways;
   ]
