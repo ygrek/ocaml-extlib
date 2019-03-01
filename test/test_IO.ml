@@ -97,6 +97,13 @@ let test_real_i32 () =
   test IO.BigEndian.write_real_i32 IO.BigEndian.read_real_i32;
   ()
 
+let test_bits () =
+  let input = Bytes.make 4 (Char.chr 0xFF) in
+  let ch = IO.input_bits (IO.input_bytes input) in
+  let value = IO.read_bits ch 31 in
+  assert (value = 2147483647);
+  ()
+
 let () =
   Util.register1 "IO" "i32" test_i32;
   Util.register1 "IO" "real_i32" test_real_i32;
@@ -105,4 +112,5 @@ let () =
   Util.register1 "IO" "i16" test_i16;
   Util.register1 "IO" "u8" test_u8;
   Util.register1 "IO" "i8" test_i8;
+  Util.register1 "IO" "bits" test_bits;
   ()
