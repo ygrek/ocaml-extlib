@@ -1,3 +1,7 @@
+1.7.6 (2019-03-03)
+* fix Dllist.skip with negative argument (Virgile Robles)
+* fix IO.read_bits 31 (Dan Korostelev)
+
 1.7.5 (2018-07-08)
  * IO: restore compilation on 32-bit (broken in 1.7.3)
  * sync with OCaml 4.07
