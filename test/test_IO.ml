@@ -101,7 +101,7 @@ let test_bits () =
   let input = Bytes.make 4 (Char.chr 0xFF) in
   let ch = IO.input_bits (IO.input_bytes input) in
   let value = IO.read_bits ch 31 in
-  assert (value = 2147483647);
+  assert (value = (0b111_1111_1111_1111_1111_1111_1111_1111));
   ()
 
 let () =
