@@ -22,8 +22,8 @@ authors: [
 ]
 build: [
   [make "minimal=1" "build"]
-  [make "test"] {with-test}
-  [make "doc"] {with-doc}
+  [make "minimal=1" "test"] {with-test}
+  [make "minimal=1" "doc"] {with-doc}
 ]
 install: [ [make "minimal=1" "install"] ]
 remove: [
