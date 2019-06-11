@@ -20,7 +20,7 @@
 
 (library
  (name extlib)
- (public_name extlib)
+ (public_name extlib_wrapped)
  (modules extBytes enum bitSet dynArray extArray extHashtbl extList extString
    extBuffer global IO option pMap base64 refList optParse dllist extLib std)
  (preprocess
