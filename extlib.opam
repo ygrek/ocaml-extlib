@@ -1,0 +1,28 @@
+opam-version: "2.0"
+maintainer: "ygrek@autistici.org"
+homepage: "https://github.com/ygrek/ocaml-extlib"
+dev-repo: "git://github.com/ygrek/ocaml-extlib.git"
+bug-reports: "https://github.com/ygrek/ocaml-extlib/issues"
+doc: ["http://ygrek.org.ua/p/extlib/doc/"]
+license: "LGPL-2.1 with OCaml linking exception"
+synopsis: "A complete yet small extension for OCaml standard library"
+authors: [
+  "Nicolas Cannasse"
+  "Brian Hurt"
+  "Yamagata Yoriyuki"
+  "Markus Mottl"
+  "Jesse Guardiani"
+  "John Skaller"
+  "Bardur Arantsson"
+  "Janne Hellsten"
+  "Richard W.M. Jones"
+  "ygrek"
+  "Gabriel Scherer"
+  "Pietro Abate"
+]
+build: ["dune" "build" "-p" name]
+depends: [
+  "ocaml"
+  "cppo" {build}
+  "base-bytes" {build}
+]

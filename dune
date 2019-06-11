@@ -1,0 +1,30 @@
+(env
+ (dev
+  (flags
+   (:standard -g (:include flags.sexp))))
+ (release
+  (flags
+   (:standard -g (:include flags.sexp)))))
+
+(executable
+ (name genconfig)
+ (modules genconfig)
+ (libraries dune.configurator))
+
+(rule
+ (targets cppo_flags)
+ (action
+  (run ./genconfig.exe)))
+
+(copy_files src/*.ml*)
+
+(library
+ (name extlib)
+ (public_name extlib)
+ (modules extBytes enum bitSet dynArray extArray extHashtbl extList extString
+   extBuffer global IO option pMap base64 refList optParse dllist extLib std)
+ (preprocess
+  (action
+   (run %{bin:cppo} -D WITH_BYTES %{read-lines:cppo_flags} -V
+     OCAML:%{ocaml_version} %{input-file})))
+ (libraries bytes))
