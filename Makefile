@@ -33,3 +33,17 @@ release:
 	git tag -a -m $(RELEASE) $(RELEASE)
 	git archive --prefix=$(NAME)/ $(RELEASE) | gzip > $(NAME).tar.gz
 	gpg -a -b $(NAME).tar.gz
+
+.PHONY: test_all
+
+define gen_test =
+test_all:: test_$(1)
+
+.PHONY: test_$(1)
+test_$(1):
+	opam exec --switch=$(1) -- make clean build test > /dev/null
+# expected to fail < 4.03.0
+#	opam exec --switch=$(1) -- ocaml test/std.ml
+endef
+
+$(foreach version,3.12.1 4.00.1 4.01.0 4.02.3 4.03.0 4.04.2 4.05.0 4.06.0 4.06.1 4.07.1 4.08.0 4.09.0 4.10.0,$(eval $(call gen_test,$(version))))
