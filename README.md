@@ -25,12 +25,15 @@ What is ExtLib ?
 ----------------
 
 ExtLib is a set of additional useful functions and modules for OCaml.
+Current goal is to maintain compatibility, new software is encouraged to not use extlib since stdlib
+is now seeing many additions and improvements which make many parts of extlib obsolete.
+For tail-recursion safety consider using other libraries e.g. containers.
 
 Project page :
   https://github.com/ygrek/ocaml-extlib
 
 Online API documentation :
-  http://ygrek.org.ua/p/extlib/doc/
+  https://ygrek.org/p/extlib/doc/
 
 Dependencies
 ------------
