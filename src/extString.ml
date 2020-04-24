@@ -213,24 +213,22 @@ let iteri f s =
   done
 #endif
 
-(* fold_left and fold_right by Eric C. Cooper *)
-let fold_left f init str =
-  let n = String.length str in
-  let rec loop i result =
+let fold_left =
+  let rec loop str f i n result =
     if i = n then result
-    else loop (i + 1) (f result str.[i])
+    else
+      loop str f (i + 1) n (f result (String.unsafe_get str i))
   in
-  loop 0 init
+  fun f init str -> loop str f 0 (String.length str) init
 
-let fold_right f str init =
-  let n = String.length str in
-  let rec loop i result =
+let fold_right =
+  let rec loop str f i result =
     if i = 0 then result
     else
       let i' = i - 1 in
-      loop i' (f str.[i'] result)
+      loop str f i' (f (String.unsafe_get str i') result)
   in
-  loop n init
+  fun f str init -> loop str f (String.length str) init
 
 (* explode and implode from the OCaml Expert FAQ. *)
 let explode s =
