@@ -1,3 +1,8 @@
+1.7.7 (2020-04-24)
+* sync with OCaml 4.10
+* mark ExtList.find_map deprecated in anticipation of type breakage in next release to match OCaml 4.10 function with same name
+* String: fold_left and fold_right without allocations
+
 1.7.6 (2019-03-03)
 * fix Dllist.skip with negative argument (Virgile Robles)
 * fix IO.read_bits 31 (Dan Korostelev)
