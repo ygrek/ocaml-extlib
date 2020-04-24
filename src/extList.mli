@@ -90,11 +90,21 @@ module List :
    [f ai = Some bi] (when [f] returns [None], the corresponding element of
    [l] is discarded). *)
 
-  val find_map : ('a -> 'b option) -> 'a list -> 'b
-  (** [find_map pred list] finds the first element of [list] for which
+  val find_map_exn : ('a -> 'b option) -> 'a list -> 'b
+  (** [find_map_exn pred list] finds the first element of [list] for which
       [pred element] returns [Some r].  It returns [r] immediately
       once found or raises [Not_found] if no element matches the
-      predicate.  See also {!filter_map}. *)
+      predicate.  See also {!filter_map}.
+      This function was called [find_map] prior to extlib 1.7.7, but had to
+      be renamed to stay compatible with OCaml 4.10.
+  *)
+
+  val find_map : ('a -> 'b option) -> 'a list -> 'b
+#if OCAML >= 402
+  [@@ocaml.deprecated "this function will change type to stay compatible with OCaml 4.10 in next extlib release, use ExtList.find_map_exn instead"]
+#endif
+
+  val find_map_opt : ('a -> 'b option) -> 'a list -> 'b option
 
   val split_nth : int -> 'a list -> 'a list * 'a list
   (** [split_nth n l] returns two lists [l1] and [l2], [l1] containing the
@@ -255,6 +265,8 @@ module List :
   val to_seq : 'a list -> 'a Seq.t
   val of_seq : 'a Seq.t -> 'a list
 #endif
+
+  val concat_map : ('a -> 'b list) -> 'a list -> 'b list
 
   (** {6 Exceptions} *)
 

@@ -166,12 +166,21 @@ let filter_map f l =
   loop dummy l;
   dummy.tl
 
-let rec find_map f = function
+let rec find_map_exn f = function
   | [] -> raise Not_found
   | x :: xs ->
       match f x with
       | Some y -> y
-      | None -> find_map f xs
+      | None -> find_map_exn f xs
+
+let find_map = find_map_exn
+
+let rec find_map_opt f = function
+  | [] -> None
+  | x :: xs ->
+      match f x with
+      | Some _ as y -> y
+      | None -> find_map_opt f xs
 
 let fold_right_max = 1000
 
@@ -559,6 +568,16 @@ let rec compare_length_with l n =
   | _, 0 -> 1
   | _ :: l, n -> compare_length_with l (n-1)
 
+#endif
+
+#if OCAML < 410
+let concat_map f l =
+  let rec aux f acc = function
+    | [] -> rev acc
+    | x :: l ->
+       let xs = f x in
+       aux f (rev_append xs acc) l
+  in aux f [] l
 #endif
 
 end

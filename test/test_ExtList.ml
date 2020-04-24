@@ -123,36 +123,36 @@ let test_map () =
     assert (a = b)
   done
 
-let test_find_map () =
+let test_find_map_exn () =
   let f = function "this", v -> Some v | _ -> None in
   (try
-     let r = List.find_map f [ "a", 1; "b", 2; "this", 3; "d", 4 ] in
+     let r = List.find_map_exn f [ "a", 1; "b", 2; "this", 3; "d", 4 ] in
      assert (3 = r);
-     let r = List.find_map f [ "this", 1; "b", 2; "c", 3; "d", 4 ] in
+     let r = List.find_map_exn f [ "this", 1; "b", 2; "c", 3; "d", 4 ] in
      assert (1 = r);
-     let r = List.find_map f [ "a", 1; "b", 2; "c", 3; "this", 4 ] in
+     let r = List.find_map_exn f [ "a", 1; "b", 2; "c", 3; "this", 4 ] in
      assert (4 = r);
-     let r = List.find_map f [ "this", 1; "b", 2; "c", 3; "this", 4 ] in
+     let r = List.find_map_exn f [ "this", 1; "b", 2; "c", 3; "this", 4 ] in
      assert (1 = r);
-     let r = List.find_map f [ "a", 1; "b", 2; "this", 3; "this", 4 ] in
+     let r = List.find_map_exn f [ "a", 1; "b", 2; "this", 3; "this", 4 ] in
      assert (3 = r);
-     let r = List.find_map f [ "this", 5 ] in
+     let r = List.find_map_exn f [ "this", 5 ] in
      assert (5 = r)
    with
      Not_found -> assert false
   );
   (try
-     ignore (List.find_map f []); assert false
+     ignore (List.find_map_exn f []); assert false
    with
      Not_found -> ()
   );
   (try
-     ignore (List.find_map f [ "a", 1 ]); assert false
+     ignore (List.find_map_exn f [ "a", 1 ]); assert false
    with
      Not_found -> ()
   );
   (try
-     ignore (List.find_map f [ "a", 1; "b", 2 ]); assert false
+     ignore (List.find_map_exn f [ "a", 1; "b", 2 ]); assert false
    with
      Not_found -> ()
   )
@@ -172,6 +172,6 @@ let () =
     "fold_right", test_fold_right;
     "fold_right2", test_fold_right2;
     "map", test_map;
-    "find_map", test_find_map;
+    "find_map_exn", test_find_map_exn;
     "make", test_make;
   ]
