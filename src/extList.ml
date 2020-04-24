@@ -22,6 +22,10 @@
 
 module List = struct
 
+#if OCAML < 408
+type 'a t = 'a list
+#endif
+
 exception Empty_list
 exception Invalid_index of int
 exception Different_list_size of string
@@ -30,7 +34,7 @@ include List
 
 (* Thanks to Jacques Garrigue for suggesting the following structure *)
 type 'a mut_list =  {
-  hd: 'a; 
+  hd: 'a;
   mutable tl: 'a list
 }
 external inj : 'a mut_list -> 'a list = "%identity"

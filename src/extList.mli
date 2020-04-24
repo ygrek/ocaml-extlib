@@ -31,6 +31,11 @@
 module List :
     sig
 
+    type 'a t = 'a list
+#if OCAML >= 408
+    = [] | (::) of 'a * 'a list
+#endif
+
   (** {6 New functions} *)
 
   val init : int -> (int -> 'a) -> 'a list

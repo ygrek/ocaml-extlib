@@ -20,6 +20,10 @@
 
 module Array = struct
 
+#if OCAML < 408
+type 'a t = 'a array
+#endif
+
 include Array
 
 let rev_in_place xs =

@@ -89,4 +89,22 @@ val add_seq : t -> char Seq.t -> unit
 val of_seq : char Seq.t -> t
 #endif
 
+#if OCAML >= 408
+(** [add_*int*] functions were introduced in OCaml 4.08.0, and are _not_ implemented in extlib for older OCaml versions *)
+val add_uint8 : t -> int -> unit
+val add_int8 : t -> int -> unit
+val add_uint16_ne : t -> int -> unit
+val add_uint16_be : t -> int -> unit
+val add_uint16_le : t -> int -> unit
+val add_int16_ne : t -> int -> unit
+val add_int16_be : t -> int -> unit
+val add_int16_le : t -> int -> unit
+val add_int32_ne : t -> int32 -> unit
+val add_int32_be : t -> int32 -> unit
+val add_int32_le : t -> int32 -> unit
+val add_int64_ne : t -> int64 -> unit
+val add_int64_be : t -> int64 -> unit
+val add_int64_le : t -> int64 -> unit
+#endif
+
 end

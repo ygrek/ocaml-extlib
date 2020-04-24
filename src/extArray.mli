@@ -28,6 +28,8 @@
 module Array :
 sig
 
+  type 'a t = 'a array
+
   (** {6 New functions} *)
   val rev : 'a array -> 'a array
     (** Array reversal. *)
