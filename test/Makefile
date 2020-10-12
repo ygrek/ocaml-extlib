@@ -6,7 +6,7 @@
 TESTS := $(wildcard test_*.ml)
 
 ifdef minimal
-TESTS := $(filter-out test_Unzip.ml test_UChar.ml test_UTF8.ml, $(TESTS))
+TESTS := $(filter-out test_Base64.ml test_Unzip.ml test_UChar.ml test_UTF8.ml, $(TESTS))
 endif
 
 all:

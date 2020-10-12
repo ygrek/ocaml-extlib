@@ -6,7 +6,7 @@ MODULES := \
  global IO option pMap std uChar uTF8 base64 unzip refList optParse dllist extLib
 
 ifdef minimal
-MODULES := $(filter-out unzip uChar uTF8, $(MODULES))
+MODULES := $(filter-out base64 unzip uChar uTF8, $(MODULES))
 endif
 
 CPPO_ARGS := $(shell ocaml configure.ml -cppo-args)
