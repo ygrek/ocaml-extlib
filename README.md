@@ -53,7 +53,7 @@ On bytecode-only architecture run
 
   `make minimal=1 all install`
 
-`minimal=1` will exclude from build several modules (namely `Unzip` `UChar` `UTF8`) potentially
+`minimal=1` will exclude from build several modules (namely `Base64` `Unzip` `UChar` `UTF8`) potentially
 conflicting with other well established OCaml libraries. If your code is expecting to find
 these modules in extlib - omit this parameter during build to produce the full library.
 
