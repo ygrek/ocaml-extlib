@@ -380,7 +380,7 @@ let combine l1 l2 =
   loop dummy l1 l2;
   dummy.tl
 
-let sort ?(cmp=compare) = List.sort cmp
+let sort ?(cmp=Pervasives.compare) = List.sort cmp
 
 #if OCAML < 406
 let rec init size f =
