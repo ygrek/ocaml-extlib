@@ -22,7 +22,7 @@
 module Hashtbl =
   struct
 
-#if OCAML >= 400
+#if OCAML >= 400 && OCAML < 412
   external old_hash_param :
     int -> int -> 'a -> int = "caml_hash_univ_param" "noalloc"
 #endif
@@ -114,7 +114,11 @@ module Hashtbl =
     (* compatibility with old hash tables *)
     if Obj.size (Obj.repr h) >= 3
     then (seeded_hash_param 10 100 (h_conv h).seed key) land (Array.length (h_conv h).data - 1)
+  #if OCAML >= 412
+    else failwith "Old hash function not supported anymore"
+  #else
     else (old_hash_param 10 100 key) mod (Array.length (h_conv h).data)
+  #endif
 #else
   let key_index h key = (hash key) mod (Array.length (h_conv h).data)
 #endif
