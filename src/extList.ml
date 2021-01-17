@@ -182,6 +182,33 @@ let rec find_map_opt f = function
 
 let find_map = find_map_opt
 
+let filteri f l =
+  let rec findnext i dst = function
+    | [] -> ()
+    | h :: t ->
+      if f i h then
+        let r = { hd = h; tl = [] } in
+        dst.tl <- inj r;
+        findnext (i+1) r t
+      else
+        findnext (i+1) dst t
+  in
+  let dummy = dummy_node () in
+  findnext 0 dummy l;
+  dummy.tl
+
+let fold_left_map f accu l =
+  let dummy = dummy_node () in
+  let rec aux accu l_accu = function
+    | [] -> accu, dummy.tl
+    | x :: l ->
+        let accu, x = f accu x in
+        let r = { hd = x; tl = [] } in
+        l_accu.tl <- inj r;
+        aux accu r l
+  in
+  aux accu dummy l
+
 let fold_right_max = 1000
 
 let fold_right f l init =

@@ -132,6 +132,14 @@ sig
   end
 #endif
 
+  val for_all2 : ('a -> 'b -> bool) -> 'a array -> 'b array -> bool
+  (** Same as {!Array.for_all}, but for a two-argument predicate.
+     @raise Invalid_argument if the two arrays have different lengths. *)
+
+  val exists2 : ('a -> 'b -> bool) -> 'a array -> 'b array -> bool
+  (** Same as {!Array.exists}, but for a two-argument predicate.
+     @raise Invalid_argument if the two arrays have different lengths. *)
+
   (** {6 Old functions} *)
 
   (** These functions are already part of the Ocaml standard library

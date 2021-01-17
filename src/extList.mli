@@ -110,6 +110,16 @@ module List :
    first [n] elements of [l] and [l2] the others. Raise [Invalid_index] if
    [n] is outside of [l] size bounds. *)
 
+  val filteri : (int -> 'a -> bool) -> 'a list -> 'a list
+  (** Same as {!List.filter}, but the predicate is applied to the index of
+     the element as first argument (counting from 0), and the element
+     itself as second argument.
+  *)
+
+  val fold_left_map : ('a -> 'b -> 'a * 'c) -> 'a -> 'b list -> 'a * 'c list
+  (** [fold_left_map] is  a combination of [fold_left] and [map] that threads an
+    accumulator through calls to [f] *)
+
   val remove : 'a list -> 'a -> 'a list
   (** [remove l x] returns the list [l] without the first element [x] found
    or returns  [l] if no element is equal to [x]. Elements are compared
