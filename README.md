@@ -1,7 +1,7 @@
 OCaml Extended standard Library - ExtLib.
 =========================================
 
-[![Build Status](https://travis-ci.org/ygrek/ocaml-extlib.svg?branch=master)](https://travis-ci.org/ygrek/ocaml-extlib)
+[![Build Status](https://travis-ci.com/ygrek/ocaml-extlib.svg?branch=master)](https://travis-ci.com/ygrek/ocaml-extlib)
 [![Build status](https://ci.appveyor.com/api/projects/status/6a3t5iq7ljbd25iq?svg=true)](https://ci.appveyor.com/project/ygrek/ocaml-extlib/branch/master)
 
 ```
