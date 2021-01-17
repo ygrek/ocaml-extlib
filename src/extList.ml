@@ -607,6 +607,24 @@ let concat_map f l =
   in aux f [] l
 #endif
 
+#if OCAML < 412
+let rec equal eq l1 l2 =
+  match l1, l2 with
+  | [], [] -> true
+  | [], _::_ | _::_, [] -> false
+  | a1::l1, a2::l2 -> eq a1 a2 && equal eq l1 l2
+
+let rec compare cmp l1 l2 =
+  match l1, l2 with
+  | [], [] -> 0
+  | [], _::_ -> -1
+  | _::_, [] -> 1
+  | a1::l1, a2::l2 ->
+    let c = cmp a1 a2 in
+    if c <> 0 then c
+    else compare cmp l1 l2
+#endif
+
 end
 
 let ( @ ) = List.append

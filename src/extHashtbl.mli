@@ -122,6 +122,10 @@ module Hashtbl :
   val of_seq : ('a * 'b) Seq.t -> ('a, 'b) t
 #endif
 
+#if OCAML >= 412
+val rebuild : ?random:bool -> ('a, 'b) t -> ('a, 'b) t
+#endif
+
 (** Functor interface forwards directly to stdlib implementation (i.e. no enum functions) *)
 
 #if OCAML >= 407
