@@ -99,12 +99,11 @@ module List :
       be renamed to stay compatible with OCaml 4.10.
   *)
 
-  val find_map : ('a -> 'b option) -> 'a list -> 'b
-#if OCAML >= 402
-  [@@ocaml.deprecated "this function will change type to stay compatible with OCaml 4.10 in next extlib release, use ExtList.find_map_exn instead"]
-#endif
-
   val find_map_opt : ('a -> 'b option) -> 'a list -> 'b option
+  (** same as find_map_exn but returning option *)
+
+  val find_map : ('a -> 'b option) -> 'a list -> 'b option
+  (** same as find_map_opt *)
 
   val split_nth : int -> 'a list -> 'a list * 'a list
   (** [split_nth n l] returns two lists [l1] and [l2], [l1] containing the

@@ -173,14 +173,14 @@ let rec find_map_exn f = function
       | Some y -> y
       | None -> find_map_exn f xs
 
-let find_map = find_map_exn
-
 let rec find_map_opt f = function
   | [] -> None
   | x :: xs ->
       match f x with
       | Some _ as y -> y
       | None -> find_map_opt f xs
+
+let find_map = find_map_opt
 
 let fold_right_max = 1000
 
