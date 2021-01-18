@@ -65,6 +65,9 @@ Generate and read the documentation.
 Release
 -------
 
+* Check for changes in stdlib (e.g. with ocaml test/std.ml)
+* Update sw_test_all target for new OCaml release
+* `make sw_test_all`
 * Review `git log` and update CHANGES
 * Update version in Makefile
 * Commit

@@ -34,16 +34,44 @@ release:
 	git archive --prefix=$(NAME)/ $(RELEASE) | gzip > $(NAME).tar.gz
 	gpg -a -b $(NAME).tar.gz
 
-.PHONY: test_all
+.PHONY: sw_test_all sw_deps_all
 
-define gen_test =
-test_all:: test_$(1)
+define gen_sw =
+sw_test_all:: sw_test_$(1)
+sw_deps_all:: sw_deps_$(1)
 
-.PHONY: test_$(1)
-test_$(1):
-	opam exec --switch=$(1) -- make clean build test > /dev/null
+.PHONY: sw_deps_$(1)
+sw_deps_$(1):
+	opam install --switch=$(1) -y --deps-only .
+
+.PHONY: sw_test_$(1)
+sw_test_$(1):
+	-opam exec --switch=$(1) -- make clean build test >/dev/null 2>/dev/null
 # expected to fail < 4.03.0
-#	opam exec --switch=$(1) -- ocaml test/std.ml
+ifneq "$(1)" "3.12.1"
+ifneq "$(1)" "4.00.1"
+ifneq "$(1)" "4.01.0"
+ifneq "$(1)" "4.02.3"
+	-opam exec --switch=$(1) -- ocaml test/std.ml
+endif
+endif
+endif
+endif
 endef
 
-$(foreach version,3.12.1 4.00.1 4.01.0 4.02.3 4.03.0 4.04.2 4.05.0 4.06.0 4.06.1 4.07.1 4.08.0 4.09.0 4.10.0,$(eval $(call gen_test,$(version))))
+$(foreach version,\
+	3.12.1\
+	4.00.1\
+	4.01.0\
+	4.02.3\
+	4.03.0\
+	4.04.2\
+	4.05.0\
+	4.06.1\
+	4.07.1\
+	4.08.0\
+	4.09.1\
+	4.10.2\
+	4.11.1\
+	4.12.0~beta1\
+,$(eval $(call gen_sw,$(version))))
