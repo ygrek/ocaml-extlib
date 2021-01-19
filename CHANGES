@@ -1,3 +1,8 @@
+1.7.8 (2021-01-19)
+* sync with OCaml 4.12
+* breaking change: ExtList.find_map type updated to match stdlib (following deprecation in previous release)
+* breaking change: minimal (recommended) build of extlib now excludes Base64 module
+
 1.7.7 (2020-04-24)
 * sync with OCaml 4.10
 * mark ExtList.find_map deprecated in anticipation of type breakage in next release to match OCaml 4.10 function with same name

@@ -1,6 +1,6 @@
 
 VERSION:=$(shell git --git-dir=.git describe --always --long)
-RELEASE:=1.7.7
+RELEASE:=1.7.8
 
 ifndef VERSION
 VERSION:=$(RELEASE)
@@ -32,7 +32,7 @@ NAME=extlib-$(RELEASE)
 release:
 	git tag -a -m $(RELEASE) $(RELEASE)
 	git archive --prefix=$(NAME)/ $(RELEASE) | gzip > $(NAME).tar.gz
-	gpg -a -b $(NAME).tar.gz
+	gpg -a -b $(NAME).tar.gz -o $(NAME).tar.gz.asc
 
 .PHONY: sw_test_all sw_deps_all
 
