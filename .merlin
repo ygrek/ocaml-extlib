@@ -1,4 +1,22 @@
+EXCLUDE_QUERY_DIR
+B /home/joris/.opam/ahrefs/lib/bytes
+B /home/joris/.opam/ahrefs/lib/dune/_caml
+B /home/joris/.opam/ahrefs/lib/dune/_dune_lang
+B /home/joris/.opam/ahrefs/lib/dune/_ocaml_config
+B /home/joris/.opam/ahrefs/lib/dune/_result
+B /home/joris/.opam/ahrefs/lib/dune/_stdune
+B /home/joris/.opam/ahrefs/lib/dune/configurator
+B /home/joris/.opam/ahrefs/lib/ocaml
+B _build/default/.extlib.objs/byte
+B _build/default/.genconfig.eobjs/byte
+S /home/joris/.opam/ahrefs/lib/bytes
+S /home/joris/.opam/ahrefs/lib/dune/_caml
+S /home/joris/.opam/ahrefs/lib/dune/_dune_lang
+S /home/joris/.opam/ahrefs/lib/dune/_ocaml_config
+S /home/joris/.opam/ahrefs/lib/dune/_result
+S /home/joris/.opam/ahrefs/lib/dune/_stdune
+S /home/joris/.opam/ahrefs/lib/dune/configurator
+S /home/joris/.opam/ahrefs/lib/ocaml
+S .
 S src
-S test
-B src
-B test
+FLG -w @a-4-29-40-41-42-44-45-48-58-59-60-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -w -3-6-9-27-32-33-39-50 -no-strict-sequence -open Extlib -w @a-4-29-40-41-42-44-45-48-58-59-60-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -w -3-6-9-27-32-33-39-50 -no-strict-sequence
