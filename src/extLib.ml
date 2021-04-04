@@ -38,9 +38,19 @@ module String = ExtString.String
 module Hashtbl = ExtHashtbl.Hashtbl
 module Array = ExtArray.Array
 module Buffer = ExtBuffer.Buffer
+module Enum = ExtEnum
+module DynArray = ExtDynArray
+module Global = ExtGlobal
+module IO = ExtIO
+module Option = ExtOption
+module PMap = ExtPMap
+module Std = ExtStd
+module RefList = ExtRefList
+module OptParse = ExtOptParse
+module Dllist = ExtDllist
 
 exception Invalid_string = ExtString.Invalid_string
 
 let (@) = ExtList.(@)
 
-include Std
+include ExtStd

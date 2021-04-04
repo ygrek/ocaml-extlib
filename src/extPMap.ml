@@ -169,7 +169,7 @@ let rec enum m =
     let l = ref l in
     let rec next() =
       match !l with
-      | [] -> raise Enum.No_more_elements
+      | [] -> raise ExtEnum.No_more_elements
       | Empty :: tl -> l := tl; next()
       | Node (m1, key, data, m2, h) :: tl ->
         l := m1 :: m2 :: tl;
@@ -185,13 +185,13 @@ let rec enum m =
         done;
         assert false
       with
-    Enum.No_more_elements -> l := r; !n
+    ExtEnum.No_more_elements -> l := r; !n
     in
     let clone() = make !l in
-  Enum.make ~next ~count ~clone
+  ExtEnum.make ~next ~count ~clone
   in
   make [m.map]
 
 
 let uncurry_add (k, v) m = add k v m
-let of_enum ?(cmp = compare) e = Enum.fold uncurry_add (create cmp) e
+let of_enum ?(cmp = compare) e = ExtEnum.fold uncurry_add (create cmp) e

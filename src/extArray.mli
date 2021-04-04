@@ -102,10 +102,10 @@ sig
 
   (** {6 Enumerations} *)
 
-  val enum : 'a array -> 'a Enum.t
+  val enum : 'a array -> 'a ExtEnum.t
     (** Returns an enumeration of the elements of an array. *)
 
-  val of_enum : 'a Enum.t -> 'a array
+  val of_enum : 'a ExtEnum.t -> 'a array
     (** Build an array from an enumeration. *)
 
   (** {6 Compatibility functions} *)

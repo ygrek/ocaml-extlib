@@ -216,7 +216,7 @@ let of_list lst =
 let enum node =
   let next e () =
     if e.valid == false then
-      raise Enum.No_more_elements
+      raise ExtEnum.No_more_elements
     else
       begin
       let rval = e.curr.data in
@@ -240,15 +240,15 @@ let enum node =
   in
   let rec clone e () =
     let e' = { curr = e.curr; valid = e.valid } in
-    Enum.make ~next:(next e') ~count:(count e') ~clone:(clone e')
+    ExtEnum.make ~next:(next e') ~count:(count e') ~clone:(clone e')
   in
   let e = { curr = node; valid = true } in
-  Enum.make ~next:(next e) ~count:(count e) ~clone:(clone e)
+  ExtEnum.make ~next:(next e) ~count:(count e) ~clone:(clone e)
 
 let rev_enum node =
   let prev e () =
     if e.valid == false then
-      raise Enum.No_more_elements
+      raise ExtEnum.No_more_elements
     else
       begin
       let rval = e.curr.data in
@@ -272,16 +272,16 @@ let rev_enum node =
   in
   let rec clone e () =
     let e' = { curr = e.curr; valid = e.valid } in
-    Enum.make ~next:(prev e') ~count:(count e') ~clone:(clone e')
+    ExtEnum.make ~next:(prev e') ~count:(count e') ~clone:(clone e')
   in
   let e = { curr = node; valid = true } in
-  Enum.make ~next:(prev e) ~count:(count e) ~clone:(clone e)
+  ExtEnum.make ~next:(prev e) ~count:(count e) ~clone:(clone e)
 
 let of_enum enm =
-  match Enum.get enm with
+  match ExtEnum.get enm with
     | None -> raise Empty
     | Some(d) ->
       let first = create d in
       let f d n = append n d in
-      ignore(Enum.fold f first enm);
+      ignore(ExtEnum.fold f first enm);
       first

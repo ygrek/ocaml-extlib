@@ -2,8 +2,9 @@
 
 # the list is topologically sorted
 MODULES := \
- extBytes enum bitSet dynArray extArray extHashtbl extList extString extBuffer \
- global IO option pMap std uChar uTF8 base64 unzip refList optParse dllist extLib
+ extBytes extEnum extBitSet extDynArray extArray extHashtbl extList extString extBuffer \
+ extGlobal extIO extOption extPMap extStd extRefList extOptParse extDllist extLib \
+ uChar uTF8 base64 unzip
 
 ifdef minimal
 MODULES := $(filter-out base64 unzip uChar uTF8, $(MODULES))
@@ -64,4 +65,4 @@ uninstall:
 	ocamlfind remove extlib
 
 clean:
-	rm -f *.cmo *.cmx *.o *.obj *.cmi *.cma *.cmxa *.cmxs *.a *.lib doc/*.html extBytes.mli
+	rm -f *.cmo *.cmx *.o *.obj *.cmt *.cmti *.cmi *.cma *.cmxa *.cmxs *.a *.lib doc/*.html extBytes.mli

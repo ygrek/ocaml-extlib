@@ -167,14 +167,14 @@ let partition p xs =
 let enum xs =
   let rec make start xs =
     let n = length xs in
-    Enum.make
+    ExtEnum.make
       ~next:(fun () ->
          if !start < n then (
      let r = xs.(!start) in
      incr start;
      r
          ) else
-     raise Enum.No_more_elements)
+     raise ExtEnum.No_more_elements)
       ~count:(fun () ->
     n - !start)
       ~clone:(fun () ->
@@ -184,11 +184,11 @@ let enum xs =
   make (ref 0) xs
 
 let of_enum e =
-  let n = Enum.count e in
+  let n = ExtEnum.count e in
   (* This assumes, reasonably, that init traverses the array in order. *)
   Array.init n
     (fun i ->
-       match Enum.get e with
+       match ExtEnum.get e with
        | Some x -> x
        | None -> assert false)
 

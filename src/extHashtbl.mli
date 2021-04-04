@@ -33,18 +33,18 @@ module Hashtbl :
   (** [exists h k] returns true is at least one item with key [k] is
     found in the hashtable. *)
 
-  val keys : ('a,'b) t -> 'a Enum.t
+  val keys : ('a,'b) t -> 'a ExtEnum.t
   (** Return an enumeration of all the keys of a hashtable.
       If the key is in the Hashtable multiple times, all occurrences
       will be returned.  *)
 
-  val values : ('a,'b) t -> 'b Enum.t
+  val values : ('a,'b) t -> 'b ExtEnum.t
   (** Return an enumeration of all the values of a hashtable. *)
 
-  val enum : ('a, 'b) t -> ('a * 'b) Enum.t
+  val enum : ('a, 'b) t -> ('a * 'b) ExtEnum.t
   (** Return an enumeration of (key,value) pairs of a hashtable. *)
 
-  val of_enum : ('a * 'b) Enum.t -> ('a, 'b) t
+  val of_enum : ('a * 'b) ExtEnum.t -> ('a, 'b) t
   (** Create a hashtable from a (key,value) enumeration. *)
 
   val find_default : ('a,'b) t -> 'a -> 'b -> 'b
