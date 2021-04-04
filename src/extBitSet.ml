@@ -240,8 +240,8 @@ let enum t =
           cur := (elem+1);
           elem
       | None ->
-          raise Enum.No_more_elements in
-    Enum.make
+          raise ExtEnum.No_more_elements in
+    ExtEnum.make
       ~next
       ~count:(fun () -> partial_count t !cur)
       ~clone:(fun () -> make !cur)

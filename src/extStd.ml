@@ -31,12 +31,12 @@ let finally handler f x =
   r
 
 let input_lines ch =
-  Enum.from (fun () ->
-    try input_line ch with End_of_file -> raise Enum.No_more_elements)
+  ExtEnum.from (fun () ->
+    try input_line ch with End_of_file -> raise ExtEnum.No_more_elements)
 
 let input_chars ch =
-  Enum.from (fun () ->
-    try input_char ch with End_of_file -> raise Enum.No_more_elements)
+  ExtEnum.from (fun () ->
+    try input_char ch with End_of_file -> raise ExtEnum.No_more_elements)
 
 type 'a _mut_list = {
   hd : 'a;

@@ -37,11 +37,11 @@ type error_msg =
 
 exception Error of error_msg
 
-val inflate : ?header:bool -> IO.input -> IO.input
+val inflate : ?header:bool -> ExtIO.input -> ExtIO.input
 (** wrap an input using "inflate" decompression algorithm. raises [Error] if
   an error occurs (this can only be caused by malformed input data). *)
 
 type t
 
-val inflate_init : ?header:bool -> IO.input -> t
+val inflate_init : ?header:bool -> ExtIO.input -> t
 val inflate_data : t -> Bytes.t -> int -> int -> int

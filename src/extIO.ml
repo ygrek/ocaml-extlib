@@ -329,7 +329,7 @@ let input_enum e =
   let pos = ref 0 in
   {
     in_read = (fun () ->
-      match Enum.get e with
+      match ExtEnum.get e with
       | None -> raise No_more_input
       | Some c ->
         incr pos;
@@ -340,7 +340,7 @@ let input_enum e =
         if l = 0 then
           0
         else
-          match Enum.get e with
+          match ExtEnum.get e with
           | None -> l
           | Some c ->
             Bytes.unsafe_set s p c;

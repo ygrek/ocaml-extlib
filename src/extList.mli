@@ -155,10 +155,10 @@ module List :
    abstract enumeration of elements, regardless if they are located in a list,
    an array, or a file. *)
 
-  val enum : 'a list -> 'a Enum.t
+  val enum : 'a list -> 'a ExtEnum.t
   (** Returns an enumeration of the elements of a list. *)
 
-  val of_enum : 'a Enum.t -> 'a list
+  val of_enum : 'a ExtEnum.t -> 'a list
   (** Build a list from an enumeration. *)
 
   (** {6 Compatibility functions} *)

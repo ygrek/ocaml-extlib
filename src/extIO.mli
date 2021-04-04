@@ -139,10 +139,10 @@ val input_channel : in_channel -> input
 val output_channel : out_channel -> unit output
 (** Create an output that will write into a channel. *)
 
-val input_enum : char Enum.t -> input
+val input_enum : char ExtEnum.t -> input
 (** Create an input that will read from an [enum]. *)
 
-val output_enum : unit -> char Enum.t output
+val output_enum : unit -> char ExtEnum.t output
 (** Create an output that will write into an [enum]. The
   final enum is returned when the output is closed. *)
 

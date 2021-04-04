@@ -73,7 +73,7 @@ module Hashtbl =
         force();
         match !buck with
         | Empty ->
-          if !hcount = 0 then raise Enum.No_more_elements;
+          if !hcount = 0 then raise ExtEnum.No_more_elements;
           incr pos;
           buck := Array.unsafe_get !hdata !pos;
           next()
@@ -89,15 +89,15 @@ module Hashtbl =
         force();
         make !pos !buck !hdata !hcount
       in
-      Enum.make ~next ~count ~clone
+      ExtEnum.make ~next ~count ~clone
     in
     make (-1) Empty (Obj.magic()) (-1)
 
   let keys h =
-    Enum.map (fun (k,_) -> k) (enum h)
+    ExtEnum.map (fun (k,_) -> k) (enum h)
 
   let values h =
-    Enum.map (fun (_,v) -> v) (enum h)
+    ExtEnum.map (fun (_,v) -> v) (enum h)
 
   let map f h =
     let rec loop = function
@@ -160,8 +160,8 @@ module Hashtbl =
   let find_option = find_opt
 
   let of_enum e =
-    let h = create (if Enum.fast_count e then Enum.count e else 0) in
-    Enum.iter (fun (k,v) -> add h k v) e;
+    let h = create (if ExtEnum.fast_count e then ExtEnum.count e else 0) in
+    ExtEnum.iter (fun (k,v) -> add h k v) e;
     h
 
   let length h =

@@ -536,10 +536,10 @@ let rec remove_all l x =
 
 let enum l =
   let rec make lr count =
-    Enum.make
+    ExtEnum.make
       ~next:(fun () ->
         match !lr with
-        | [] -> raise Enum.No_more_elements
+        | [] -> raise ExtEnum.No_more_elements
         | h :: t ->
           decr count;
           lr := t;
@@ -557,7 +557,7 @@ let enum l =
 
 let of_enum e =
   let h = dummy_node() in
-  let _ = Enum.fold (fun x acc ->
+  let _ = ExtEnum.fold (fun x acc ->
     let r = { hd = x; tl = [] }  in
     acc.tl <- inj r;
     r) h e in

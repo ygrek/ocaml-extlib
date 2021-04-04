@@ -60,7 +60,7 @@ type t = {
   mutable zneeded : int;
   mutable zoutput : Bytes.t;
   mutable zoutpos : int;
-  zinput : IO.input;
+  zinput : ExtIO.input;
   zlengths : int array;
   zwindow : window;
 }
@@ -155,10 +155,10 @@ let adler32_update a s p l =
   done
 
 let adler32_read ch =
-  let a2a = IO.read_byte ch in
-  let a2b = IO.read_byte ch in
-  let a1a = IO.read_byte ch in
-  let a1b = IO.read_byte ch in
+  let a2a = ExtIO.read_byte ch in
+  let a2b = ExtIO.read_byte ch in
+  let a1a = ExtIO.read_byte ch in
+  let a1b = ExtIO.read_byte ch in
   {
     a1 = (a1a lsl 8) lor a1b;
     a2 = (a2a lsl 8) lor a2b;
@@ -220,7 +220,7 @@ let fixed_huffman = make_huffman (Array.init 288 (fun n ->
 
 let get_bits z n =
   while z.znbits < n do
-    z.zbits <- z.zbits lor ((IO.read_byte z.zinput) lsl z.znbits);
+    z.zbits <- z.zbits lor ((ExtIO.read_byte z.zinput) lsl z.znbits);
     z.znbits <- z.znbits + 8;
   done;
   let b = z.zbits land (1 lsl n - 1) in
@@ -231,7 +231,7 @@ let get_bits z n =
 let get_bit z =
   if z.znbits = 0 then begin
     z.znbits <- 8;
-    z.zbits <- IO.read_byte z.zinput;
+    z.zbits <- ExtIO.read_byte z.zinput;
   end;
   let b = z.zbits land 1 = 1 in
   z.znbits <- z.znbits - 1;
@@ -306,11 +306,11 @@ let inflate_lengths z a max =
 let rec inflate_loop z =
   match z.zstate with
   | Head ->
-    let cmf = IO.read_byte z.zinput in
+    let cmf = ExtIO.read_byte z.zinput in
     let cm = cmf land 15 in
     let cinfo = cmf lsr 4 in
     if cm <> 8 || cinfo <> 7 then error Invalid_data;
-    let flg = IO.read_byte z.zinput in
+    let flg = ExtIO.read_byte z.zinput in
     (*let fcheck = flg land 31 in*)
     let fdict = flg land 32 <> 0 in
     (*let flevel = flg lsr 6 in*)
@@ -331,8 +331,8 @@ let rec inflate_loop z =
     let btype = get_bits z 2 in
     (match btype with
     | 0 -> (* no compression *)
-      z.zlen <- IO.read_ui16 z.zinput;
-      let nlen = IO.read_ui16 z.zinput in
+      z.zlen <- ExtIO.read_ui16 z.zinput;
+      let nlen = ExtIO.read_ui16 z.zinput in
       if nlen <> 0xffff - z.zlen then error Invalid_data;
       z.zstate <- Flat;
       inflate_loop z;
@@ -363,7 +363,7 @@ let rec inflate_loop z =
       error Invalid_data)
   | Flat ->
     let rlen = min z.zlen z.zneeded in
-    let str = IO.nread z.zinput rlen in
+    let str = ExtIO.nread z.zinput rlen in
     let len = Bytes.length str in
     z.zlen <- z.zlen - len;
     add_bytes z str 0 len;
@@ -413,7 +413,7 @@ let inflate_data z s pos len =
     if len > 0 then inflate_loop z;
     len - z.zneeded
   with
-    IO.No_more_input -> error Truncated_data
+    ExtIO.No_more_input -> error Truncated_data
 
 let inflate_init ?(header=true) ch = 
   {
@@ -436,16 +436,16 @@ let inflate_init ?(header=true) ch =
 let inflate ?(header=true) ch =
   let z = inflate_init ~header ch in
   let s = Bytes.create 1 in
-  IO.create_in
+  ExtIO.create_in
     ~read:(fun() ->
       let l = inflate_data z s 0 1 in
-      if l = 1 then Bytes.unsafe_get s 0 else raise IO.No_more_input
+      if l = 1 then Bytes.unsafe_get s 0 else raise ExtIO.No_more_input
     )
     ~input:(fun s p l ->
       let n = inflate_data z s p l in
-      if n = 0 then raise IO.No_more_input;
+      if n = 0 then raise ExtIO.No_more_input;
       n
     )
     ~close:(fun () ->
-      IO.close_in ch
+      ExtIO.close_in ch
     )

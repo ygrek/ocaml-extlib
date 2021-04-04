@@ -107,10 +107,10 @@ module String :
   val starts_with : string -> string -> bool
   (** [starts_with s x] return true if [s] is starting with [x]. *)
 
-  val enum : string -> char Enum.t
+  val enum : string -> char ExtEnum.t
   (** Returns an enumeration of the characters of a string.*)
 
-  val of_enum : char Enum.t -> string
+  val of_enum : char ExtEnum.t -> string
   (** Creates a string from a character enumeration. *)
 
   val map : (char -> char) -> string -> string

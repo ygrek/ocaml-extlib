@@ -162,10 +162,10 @@ let to_float s =
 let enum s =
   let l = length s in
   let rec make i =
-    Enum.make 
+    ExtEnum.make 
     ~next:(fun () ->
       if !i = l then
-        raise Enum.No_more_elements
+        raise ExtEnum.No_more_elements
       else
         let p = !i in
         incr i;
@@ -177,10 +177,10 @@ let enum s =
   make (ref 0)
 
 let of_enum e =
-  let l = Enum.count e in
+  let l = ExtEnum.count e in
   let s = Bytes.create l in
   let i = ref 0 in
-  Enum.iter (fun c -> Bytes.unsafe_set s !i c; incr i) e;
+  ExtEnum.iter (fun c -> Bytes.unsafe_set s !i c; incr i) e;
         (* 's' doesn't escape and will never be mutated again *)
   Bytes.unsafe_to_string s
 

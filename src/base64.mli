@@ -56,10 +56,10 @@ val encode_string : ?tbl:encoding_table -> string -> string
 val decode_string : ?tbl:decoding_table -> string -> string
 
 (** Generic base64 encoding over an output. *)
-val encode : ?tbl:encoding_table -> 'a IO.output -> 'a IO.output
+val encode : ?tbl:encoding_table -> 'a ExtIO.output -> 'a ExtIO.output
 
 (** Generic base64 decoding over an input. *)
-val decode : ?tbl:decoding_table -> IO.input -> IO.input
+val decode : ?tbl:decoding_table -> ExtIO.input -> ExtIO.input
 
 (** Create a valid decoding table from an encoding one. *)
 val make_decoding_table : encoding_table -> decoding_table
