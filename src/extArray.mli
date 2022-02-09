@@ -118,9 +118,7 @@ sig
   val create_float : int -> float array
 #endif
 
-#if OCAML < 500
   val make_float : int -> float array
-#endif
 
 #if OCAML >= 406
   module Floatarray :
@@ -152,14 +150,10 @@ sig
   external get : 'a array -> int -> 'a = "%array_safe_get"
   external set : 'a array -> int -> 'a -> unit = "%array_safe_set"
   external make : int -> 'a -> 'a array = "caml_make_vect"
-#if OCAML < 500
   external create : int -> 'a -> 'a array = "caml_make_vect"
-#endif
   val init : int -> (int -> 'a) -> 'a array
   val make_matrix : int -> int -> 'a -> 'a array array
-#if OCAML < 500
   val create_matrix : int -> int -> 'a -> 'a array array
-#endif
   val append : 'a array -> 'a array -> 'a array
   val concat : 'a array list -> 'a array
   val sub : 'a array -> int -> int -> 'a array

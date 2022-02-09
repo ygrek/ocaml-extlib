@@ -1,7 +1,7 @@
 (*
  * ExtString - Additional functions for string manipulations.
  * Copyright (C) 2003 Nicolas Cannasse
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -37,7 +37,7 @@ let init len f =
 #endif
 
 let starts_with str p =
-  if length str < length p then 
+  if length str < length p then
     false
   else
     let rec loop str p i =
@@ -326,6 +326,20 @@ let rindex_from_opt s i c =
   else
     rindex_rec_opt s i c
 
+#endif
+
+#if OCAML >= 500
+let set = Bytes.set
+let create = Bytes.create
+let unsafe_set = Bytes.unsafe_set
+let unsafe_fill = Bytes.unsafe_fill
+let fill = Bytes.fill
+let copy s =
+  Bytes.copy (Bytes.unsafe_of_string s) |> Bytes.unsafe_to_string
+let uppercase = uppercase_ascii
+let lowercase = lowercase_ascii
+let capitalize = capitalize_ascii
+let uncapitalize = uncapitalize_ascii
 #endif
 
 end

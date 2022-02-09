@@ -206,6 +206,11 @@ let map2 f a1 a2 =
      Array.init (Array.length a1) (fun i -> f a1.(i) a2.(i))
 #endif
 
+#if OCAML >= 500
+let make_float = create_float
+let create_matrix = make_matrix
+external create : int -> 'a -> 'a array = "caml_make_vect"
+#else
 #if OCAML >= 403
 #else
 #if OCAML >= 402
@@ -213,6 +218,7 @@ let create_float = make_float
 #else
 let make_float n = make n 0.
 let create_float = make_float
+#endif
 #endif
 #endif
 
