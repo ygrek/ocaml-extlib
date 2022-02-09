@@ -176,21 +176,29 @@ module String :
 
   val length : string -> int
   val get : string -> int -> char
+#if OCAML < 500
   val set : Bytes.t -> int -> char -> unit
+#endif
 #if OCAML >= 402
   [@@ocaml.deprecated "Use Bytes.set instead."]
 #endif
+#if OCAML < 500
   val create : int -> Bytes.t
+#endif
 #if OCAML >= 402
   [@@ocaml.deprecated "Use Bytes.create instead."]
 #endif
   val make : int -> char -> string
+#if OCAML < 500
   val copy : string -> string
+#endif
 #if OCAML >= 402
   [@@ocaml.deprecated]
 #endif
   val sub : string -> int -> int -> string
+#if OCAML < 500
   val fill : Bytes.t -> int -> int -> char -> unit
+#endif
 #if OCAML >= 402
   [@@ocaml.deprecated "Use Bytes.fill instead."]
 #endif
@@ -210,22 +218,30 @@ module String :
   val contains_from : string -> int -> char -> bool
   val rcontains_from : string -> int -> char -> bool
 
+#if OCAML < 500
   val uppercase : string -> string
+#endif
 #if OCAML >= 402
   [@@ocaml.deprecated "Use String.uppercase_ascii instead."]
 #endif
 
+#if OCAML < 500
   val lowercase : string -> string
+#endif
 #if OCAML >= 402
   [@@ocaml.deprecated "Use String.lowercase_ascii instead."]
 #endif
 
+#if OCAML < 500
   val capitalize : string -> string
+#endif
 #if OCAML >= 402
   [@@ocaml.deprecated "Use String.capitalize_ascii instead."]
 #endif
 
+#if OCAML < 500
   val uncapitalize : string -> string
+#endif
 #if OCAML >= 402
   [@@ocaml.deprecated "Use String.uncapitalize_ascii instead."]
 #endif
@@ -244,12 +260,16 @@ module String :
   (**/**)
 
   external unsafe_get : string -> int -> char = "%string_unsafe_get"
+#if OCAML < 500
   val unsafe_set : Bytes.t -> int -> char -> unit
+#endif
 #if OCAML >= 402
   [@@ocaml.deprecated]
 #endif
   val unsafe_blit : string -> int -> Bytes.t -> int -> int -> unit
+#if OCAML < 500
   val unsafe_fill : Bytes.t -> int -> int -> char -> unit
+#endif
 #if OCAML >= 402
   [@@ocaml.deprecated]
 #endif
