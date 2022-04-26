@@ -216,4 +216,10 @@ let create_float = make_float
 #endif
 #endif
 
+#if OCAML >= 500
+external create : int -> 'a -> 'a array = "caml_make_vect"
+let create_matrix = make_matrix
+let make_float = create_float
+#endif
+
 end

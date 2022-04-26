@@ -328,4 +328,17 @@ let rindex_from_opt s i c =
 
 #endif
 
+#if OCAML >= 500
+let create = Bytes.create
+let set = Bytes.set
+let unsafe_set = Bytes.unsafe_set
+let copy x = Bytes.unsafe_to_string (Bytes.copy (Bytes.unsafe_of_string x))
+let fill = Bytes.fill
+let unsafe_fill = Bytes.unsafe_fill
+let uppercase = uppercase_ascii
+let lowercase = lowercase_ascii
+let capitalize = capitalize_ascii
+let uncapitalize = uncapitalize_ascii
+#endif
+
 end
