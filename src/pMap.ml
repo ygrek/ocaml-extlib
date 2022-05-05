@@ -126,7 +126,7 @@ let mem x { cmp = cmp; map = map } =
 
 let exists = mem
 
-let iter f { map = map } =
+let iter f { map = map; cmp = _ } =
   let rec loop = function
     | Empty -> ()
     | Node (l, k, v, r, _) -> loop l; f k v; loop r in
