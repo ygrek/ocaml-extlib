@@ -90,7 +90,7 @@ let run_all filter =
   let allowed name =
     match filter with
     | None -> true
-    | Some l -> List.mem (String.lowercase_ascii name) l
+    | Some l -> List.mem (ExtString.String.lowercase name) l
   in
   g_test_run_count := 0;
   g_test_success_count := 0;
