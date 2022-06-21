@@ -29,20 +29,20 @@ let random_char () =
 
 let random_string () = 
   let len = Random.int 256 in
-  let str = String.create len in
+  let str = Bytes.create len in
   if len > 0 then
     for i = 0 to (len-1) do
-      str.[i] <- random_char ()
+      Bytes.set str i (random_char ())
     done;
   Bytes.unsafe_to_string str
 
 
 let random_string_len len = 
   let len = len in
-  let str = String.create len in
+  let str = Bytes.create len in
   if len > 0 then
     for i = 0 to (len-1) do
-      str.[i] <- random_char ()
+      Bytes.set str i (random_char ())
     done;
   Bytes.unsafe_to_string str
 
@@ -90,7 +90,7 @@ let run_all filter =
   let allowed name =
     match filter with
     | None -> true
-    | Some l -> List.mem (String.lowercase name) l
+    | Some l -> List.mem (String.lowercase_ascii name) l
   in
   g_test_run_count := 0;
   g_test_success_count := 0;

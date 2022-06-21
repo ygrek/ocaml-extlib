@@ -48,7 +48,7 @@ let test_insert () =
     assert (i = DynArray.length !d);
     (* This is needed in order to expose the memory corruption. *)
     Printf.ifprintf stdout "%d %d\n" i (DynArray.length !d); flush stdout;
-    DynArray.insert !d 0 (Array.create 42 "")
+    DynArray.insert !d 0 (Array.make 42 "")
   done
 
 (* Issue 2: Error in DynArray exponential resizer *)
