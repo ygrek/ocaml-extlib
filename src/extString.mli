@@ -233,6 +233,15 @@ module String :
 #if OCAML >= 413
   (* [empty] was introduced in OCaml 4.13, expose it  *)
   val empty : string
+
+  val of_bytes : bytes -> string
+  val to_bytes : string -> bytes
+
+  val cat : string -> string -> string
+
+  val for_all : (char -> bool) -> string -> bool
+  val exists : (char -> bool) -> string -> bool
+
 #endif
 
   (**/**)
