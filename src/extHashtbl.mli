@@ -70,7 +70,6 @@ module Hashtbl :
   (** Return the number of elements inserted into the Hashtbl 
     (including duplicates) *)
 
-#if OCAML >= 400
   val reset : ('a,'b) t -> unit
   val randomize : unit -> unit
 
@@ -85,7 +84,6 @@ module Hashtbl :
 
   val seeded_hash_param : int -> int -> int -> 'a -> int
   val seeded_hash : int -> 'a -> int
-#endif
 
 #if OCAML >= 403
   val is_randomized : unit -> bool
@@ -153,9 +151,7 @@ module type S =
     type 'a t
     val create : int -> 'a t
     val clear : 'a t -> unit
-#if OCAML >= 400
     val reset : 'a t -> unit
-#endif
     val copy : 'a t -> 'a t
     val add : 'a t -> key -> 'a -> unit
     val remove : 'a t -> key -> unit
@@ -172,14 +168,11 @@ module type S =
 #endif
     val fold : (key -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
     val length : 'a t -> int
-#if OCAML >= 400
     val stats: 'a t -> statistics
-#endif
   end
 
 module Make (H : HashedType) : S with type key = H.t
 
-#if OCAML >= 400
 module type SeededHashedType =
   sig
     type t
@@ -214,7 +207,6 @@ module type SeededS =
   end
 
 module MakeSeeded (H : SeededHashedType) : SeededS with type key = H.t
-#endif
 
 #endif
 

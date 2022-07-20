@@ -26,16 +26,6 @@ module String = struct
 
 include String
 
-#if OCAML < 402
-let init len f =
-  let s = Bytes.create len in
-  for i = 0 to len - 1 do
-    Bytes.unsafe_set s i (f i)
-  done;
-        (* 's' doesn't escape and will never be mutated again *)
-  Bytes.unsafe_to_string s
-#endif
-
 let starts_with str p =
   if length str < length p then 
     false
@@ -98,10 +88,6 @@ let strip ?(chars=" \t\r\n") s =
     decr l;
   done;
   sub s p (!l - p + 1)
-
-#if OCAML < 400
-let trim s = strip ~chars:" \t\r\n\012" s
-#endif
 
 let split str sep =
   let p = find str sep in
@@ -183,35 +169,6 @@ let of_enum e =
   Enum.iter (fun c -> Bytes.unsafe_set s !i c; incr i) e;
         (* 's' doesn't escape and will never be mutated again *)
   Bytes.unsafe_to_string s
-
-#if OCAML < 400
-let map f s =
-  let len = length s in
-  let sc = Bytes.create len in
-  for i = 0 to len - 1 do
-    Bytes.unsafe_set sc i (f (unsafe_get s i))
-  done;
-        (* 'sc' doesn't escape and will never be mutated again *)
-  Bytes.unsafe_to_string sc
-#endif
-
-#if OCAML < 402
-let mapi f s =
-  let len = length s in
-  let sc = Bytes.create len in
-  for i = 0 to len - 1 do
-    Bytes.unsafe_set sc i (f i (unsafe_get s i))
-  done;
-        (* 'sc' doesn't escape and will never be mutated again *)
-  Bytes.unsafe_to_string sc
-#endif
-
-#if OCAML < 400
-let iteri f s =
-  for i = 0 to length s - 1 do
-    let () = f i (unsafe_get s i) in ()
-  done
-#endif
 
 let fold_left =
   let rec loop str f i n result =

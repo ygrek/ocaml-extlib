@@ -208,12 +208,7 @@ let map2 f a1 a2 =
 
 #if OCAML >= 403
 #else
-#if OCAML >= 402
 let create_float = make_float
-#else
-let make_float n = make n 0.
-let create_float = make_float
-#endif
 #endif
 
 #if OCAML >= 500
