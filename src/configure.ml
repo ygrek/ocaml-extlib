@@ -6,7 +6,7 @@ let () =
     let version = Scanf.sscanf Sys.ocaml_version "%d.%d." (fun major minor -> major * 100 + minor) in
     printf "-D\n";
     printf "OCAML %d\n" version;
-    if Sys.word_size = 32 then (print_endline "-D"; print_endline "WORD_SIZE_32 ");
+    if Sys.word_size = 32 then (print_endline "-D"; print_endline "WORD_SIZE_32");
     print_endline "-D";
     print_endline "WITH_BYTES";
     exit 0

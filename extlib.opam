@@ -20,10 +20,9 @@ authors: [
   "Pietro Abate"
 ]
 depends: [
-  "dune"
-  "ocaml"
+  "dune" {>= "1.0"}
+  "ocaml" {>= "4.02"}
   "cppo" {build}
-  "base-bytes"
 ]
 synopsis:
   "A complete yet small extension for OCaml standard library"
@@ -37,4 +36,4 @@ Current goal is to maintain compatibility, new software is encouraged to not use
 is now seeing many additions and improvements which make many parts of extlib obsolete.
 For tail-recursion safety consider using other libraries e.g. containers.
 """
-build: [[ "dune" "build" "-p" name ]]
+build: [[ "dune" "build" "-p" name "-j" jobs ]]
