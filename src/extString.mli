@@ -230,6 +230,11 @@ module String :
   val of_seq : char Seq.t -> t
 #endif
 
+#if OCAML >= 413
+  (* [empty] was introduced in OCaml 4.13, expose it  *)
+  val empty : string
+#endif
+
   (**/**)
 
   external unsafe_get : string -> int -> char = "%string_unsafe_get"
