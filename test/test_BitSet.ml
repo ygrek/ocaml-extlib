@@ -75,7 +75,7 @@ let int_of_bitset_scale s scl =
   !n
 
 let test_rnd_creation () =
-  for i = 0 to 255 do
+  for _ = 0 to 255 do
     let r1 = biased_rnd_28 () in
     let s = bitset_of_int r1 in
     let c = B.copy s in
@@ -89,14 +89,14 @@ let test_rnd_creation () =
   done
 
 let test_intersect () = 
-  for i = 0 to 255 do
+  for _ = 0 to 255 do
     let s = bitset_of_int (biased_rnd_28 ()) in
     B.intersect s (B.empty ());
     assert (B.count s = 0)
   done
 
 let test_diff () = 
-  for i = 0 to 255 do
+  for _ = 0 to 255 do
     let r = biased_rnd_28 () in
     let s = bitset_of_int r in
     if r <> 0 then
@@ -105,7 +105,7 @@ let test_diff () =
   done
 
 let test_sym_diff () =
-  for i = 0 to 255 do
+  for _ = 0 to 255 do
     let s = (Random.int 3)+1 in
     let r1 = biased_rnd_28 () in
     let r2 = biased_rnd_28 () in
@@ -120,7 +120,7 @@ let test_sym_diff () =
 
 let test_compare () =
   assert (B.compare (B.empty ()) (B.empty ()) = 0);
-  for i = 0 to 255 do
+  for _ = 0 to 255 do
     let r1 = biased_rnd_28 () in
     let r2 = biased_rnd_28 () in
     let s1 = bitset_of_int r1 
@@ -131,7 +131,7 @@ let test_compare () =
     assert (B.compare s1 s1 = 0);
     assert (B.compare s2 s2 = 0)
   done;
-  for i = 0 to 255 do
+  for _ = 0 to 255 do
     let scl = (Random.int 15)+1 in
     let r1 = biased_rnd_28 () in
     let r2 = biased_rnd_28 () in
@@ -224,7 +224,7 @@ let test_set_opers () =
     | 1 -> (IS.diff, B.diff)
     | 2 -> (IS.union, B.union)
     | _ -> assert false in
-  for i = 0 to 255 do
+  for _ = 0 to 255 do
     let r1 = biased_rnd_28 () in
     let r2 = biased_rnd_28 () in
     let s1 = set_of_int r1
@@ -244,7 +244,7 @@ let test_set_opers () =
   done
 
 let test_unite () =
-  for i = 0 to 255 do
+  for _ = 0 to 255 do
     let r1 = biased_rnd_28 () in
     let s = bitset_of_int r1 in
     let c = B.copy s in
@@ -255,7 +255,7 @@ let test_unite () =
   done
 
 let test_intersect_2 () =
-  for i = 0 to 255 do
+  for _ = 0 to 255 do
     let r1 = biased_rnd_28 () in
     let s = bitset_of_int r1 in
     let c = B.copy s in
@@ -265,13 +265,13 @@ let test_intersect_2 () =
   done
 
 let test_differentiate () = 
-  for i = 0 to 255 do
+  for _ = 0 to 255 do
     let r1 = biased_rnd_28 () in
     let s = bitset_of_int r1 in
     let d = B.copy s in
     B.differentiate d s;
     assert (B.count d = 0);
-    for j = 0 to 32 do
+    for _ = 0 to 32 do
       B.set s (Random.int 256)
     done;
     let d = B.copy s in
@@ -284,14 +284,14 @@ let test_differentiate () =
 
 (* TODO *)
 let test_differentiate_sym () = 
-  for i = 0 to 255 do
+  for _ = 0 to 255 do
     let r1 = biased_rnd_28 () in
     let r2 = biased_rnd_28 () in
     let s = bitset_of_int r1 in
     let d = B.copy s in
     B.differentiate_sym d s;
     assert (B.count d = 0);
-    for j = 0 to 32 do
+    for _ = 0 to 32 do
       B.set s (Random.int 256)
     done;
     let d = B.copy s in

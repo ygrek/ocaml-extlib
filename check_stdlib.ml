@@ -1,8 +1,5 @@
 (* check compatibility of interfaces *)
 
-#directory "src";;
-#load "extLib.cma";;
-
 module XS = (struct
   include ExtLib.String
   external length : string -> int = "%string_length"
@@ -22,3 +19,6 @@ end : module type of List)
 module XA = (ExtLib.Array : module type of Array)
 module XB = (ExtLib.Buffer : module type of Buffer)
 module XH = (ExtLib.Hashtbl : module type of Hashtbl)
+
+(* NOTE: needed because dune does not build modules not mentioned in the main module for executables *)
+let register () = ()

@@ -69,7 +69,7 @@ let t_rchop () =
   done
 
 let t_split () = 
-  for i = 0 to 64 do
+  for _ = 0 to 64 do
     let s = Util.random_string () in
     let s' = String.replace_chars 
                (fun c -> if c = '|' then "_" else String.of_char c) s in
@@ -99,12 +99,12 @@ let t_split () =
   done
 
 let t_replace1 () =
-  let s = "karhupullo" in
-  assert (String.replace s "karhu" "kalja" = (true, "kaljapullo"));
-  assert (String.replace s "kalja" "karhu" = (false, s));
+  let str = "karhupullo" in
+  assert (String.replace ~str ~sub:"karhu" ~by:"kalja" = (true, "kaljapullo"));
+  assert (String.replace ~str ~sub:"kalja" ~by:"karhu" = (false, str));
   (* TODO is this correct?  Is "" supposed to always match? *)
-  assert (String.replace s "" "karhu" = (true, "karhu"^s));
-  assert (String.replace "" "" "karhu" = (true, "karhu"))
+  assert (String.replace ~str ~sub:"" ~by:"karhu" = (true, "karhu"^str));
+  assert (String.replace ~str:"" ~sub:"" ~by:"karhu" = (true, "karhu"))
 
 let t_strip () = 
   let s = "1234abcd5678" in
