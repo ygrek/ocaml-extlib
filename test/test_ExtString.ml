@@ -80,7 +80,7 @@ let t_split () =
         (* Insert separator and split based on that *)
         let modified =
           let b = Bytes.of_string s' in
-          b.[rpos] <- '|';
+          Bytes.set b rpos '|';
           Bytes.to_string b
         in
         let (half1, half2) = String.split modified "|" in
