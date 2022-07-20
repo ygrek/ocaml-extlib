@@ -123,7 +123,7 @@ let t_nsplit () =
   assert (S.nsplit s "te" = ["";"stsui";""]);
   assert (try let _ = S.nsplit s "" in false with Invalid_string -> true)
 
-let () = 
+let register () =
   Util.register "ExtString" [
     "starts_with", t_starts_with;
     "ends_with", t_ends_with;

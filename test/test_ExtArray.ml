@@ -137,7 +137,7 @@ let test_map2 () =
   assert (try let _ = Array.map2 (+) [||] [|1|] in false with Invalid_argument _ -> true);
   assert (Array.map2 (-) a b = Array.of_list (List.map2 (-) (Array.to_list a) (Array.to_list b)))
 
-let () =
+let register () =
   Util.register "ExtArray" [
     "rev", test_rev;
     "rev_in_place", test_rev_in_place;

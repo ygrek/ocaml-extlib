@@ -54,7 +54,7 @@ let skip_both_ways () =
   assert (Dllist.get (Dllist.skip lm 1) = "right");
   assert (Dllist.get (Dllist.skip lm (-1)) = "left") (* returned right *)
 
-let () = 
+let register () =
   Util.register "Dllist" [
     "simple", test_simple;
     "regression_1", test_regression_1;

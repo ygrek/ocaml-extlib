@@ -67,10 +67,10 @@ let test_find_exc () =
             let rnd_elem = Random.int (List.length lst) in
             assert (check_exn 
                       (fun () -> 
-                         List.find_exc (fun e -> e = List.length lst) Test_Exception lst));
+                         ignore (List.find_exc (fun e -> e = List.length lst) Test_Exception lst)));
             assert (not (check_exn 
                            (fun () -> 
-                              List.find_exc (fun e -> e = rnd_elem) Test_Exception lst)))
+                              ignore (List.find_exc (fun e -> e = rnd_elem) Test_Exception lst))))
       end
     done
   with _ -> assert false
@@ -162,7 +162,7 @@ let test_make () =
   let l = List.make 10_000_000 1 in
   assert (List.length l = 10_000_000)
 
-let () =
+let register () =
   Util.register "ExtList" [
     "iteri", test_iteri;
     "mapi", test_mapi;

@@ -200,7 +200,7 @@ let test_exceptions () =
   assert (expect_exn 
             (fun () ->
                let s = B.create 8 in
-               B.is_set s (-19)))
+               ignore (B.is_set s (-19))))
 
 module IS = Set.Make (struct type t = int let compare = compare end)
 
@@ -383,7 +383,7 @@ let test_enum_regr_pz () =
   ()
 
 
-let () =
+let register () =
   Util.register "BitSet" [
     "basic", test_bs_1;
     "enum_1", test_enum_1;

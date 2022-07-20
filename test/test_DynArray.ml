@@ -64,7 +64,7 @@ let test_dynarray2 () =
     DynArray.add a i
   done
  
-let () = 
+let register () =
   Util.register "DynArray" [
     "triv", test_triv;
     "regr_1", test_regr_1;

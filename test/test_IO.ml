@@ -104,7 +104,7 @@ let test_bits () =
   assert (value = (0b111_1111_1111_1111_1111_1111_1111_1111));
   ()
 
-let () =
+let register () =
   Util.register1 "IO" "i32" test_i32;
   Util.register1 "IO" "real_i32" test_real_i32;
   Util.register1 "IO" "i31" test_i31;

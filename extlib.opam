@@ -36,4 +36,7 @@ Current goal is to maintain compatibility, new software is encouraged to not use
 is now seeing many additions and improvements which make many parts of extlib obsolete.
 For tail-recursion safety consider using other libraries e.g. containers.
 """
-build: [[ "dune" "build" "-p" name "-j" jobs ]]
+build: [
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]

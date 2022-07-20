@@ -29,5 +29,5 @@ let test_map () =
   assert (find h "test" = Some 1);
   assert (find h1 "test" = Some 2)
 
-let () = 
+let register () =
   Util.register1 "ExtHashtbl" "map" test_map
