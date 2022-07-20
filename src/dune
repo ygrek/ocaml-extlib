@@ -15,4 +15,4 @@
  (action
   (with-stdout-to
    %{targets}
-   (run ocaml %{<} -cppo-args))))
+   (run ocaml %{<} -cppo-args-lines))))
