@@ -240,8 +240,35 @@ module String :
   val cat : string -> string -> string
 
   val for_all : (char -> bool) -> string -> bool
-  val exists : (char -> bool) -> string -> bool
 
+  val get_uint8 : string -> int -> int
+  val get_int8 : string -> int -> int
+  val get_uint16_ne : string -> int -> int
+  val get_uint16_be : string -> int -> int
+  val get_uint16_le : string -> int -> int
+  val get_int16_ne : string -> int -> int
+  val get_int16_be : string -> int -> int
+  val get_int16_le : string -> int -> int
+  val get_int32_ne : string -> int -> int32
+  val get_int32_be : string -> int -> int32
+  val get_int32_le : string -> int -> int32
+  val get_int64_ne : string -> int -> int64
+  val get_int64_be : string -> int -> int64
+  val get_int64_le : string -> int -> int64
+#endif
+
+#if OCAML >= 414
+  val get_utf_8_uchar : t -> int -> Uchar.utf_decode
+  val is_valid_utf_8 : t -> bool
+  val get_utf_16be_uchar : t -> int -> Uchar.utf_decode
+  val is_valid_utf_16be : t -> bool
+  val get_utf_16le_uchar : t -> int -> Uchar.utf_decode
+  val is_valid_utf_16le : t -> bool
+#endif
+
+#if OCAML >= 500
+  val hash : t -> int
+  val seeded_hash : int -> t -> int
 #endif
 
   (**/**)

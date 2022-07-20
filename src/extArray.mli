@@ -181,4 +181,12 @@ sig
   val of_seq : 'a Seq.t -> 'a array
 #endif
 
+#if OCAML >= 413
+  val fold_left_map : ('a -> 'b -> 'a * 'c) -> 'a -> 'b array -> 'a * 'c array
+  val find_opt : ('a -> bool) -> 'a array -> 'a option
+  val find_map : ('a -> 'b option) -> 'a array -> 'b option
+  val split : ('a * 'b) array -> 'a array * 'b array
+  val combine : 'a array -> 'b array -> ('a * 'b) array
+#endif
+
 end
