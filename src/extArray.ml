@@ -187,7 +187,7 @@ let of_enum e =
   let n = Enum.count e in
   (* This assumes, reasonably, that init traverses the array in order. *)
   Array.init n
-    (fun i ->
+    (fun _ ->
        match Enum.get e with
        | Some x -> x
        | None -> assert false)

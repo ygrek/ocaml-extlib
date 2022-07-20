@@ -145,9 +145,9 @@ let rec dump r =
     opaque "closure"
   | x when x = Obj.object_tag ->
     let fields = get_fields [] s in
-    let clasz, id, slots =
+    let id, slots =
       match fields with
-      | h::h'::t -> h, h', t 
+      | _h::h'::t -> h', t
       | _ -> assert false
     in
     (* No information on decoding the class (first field).  So just print

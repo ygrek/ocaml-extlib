@@ -48,11 +48,11 @@ let dummy_node () = { hd = Obj.magic (); tl = [] }
 
 let hd = function
   | [] -> raise Empty_list
-  | h :: t -> h
+  | h :: _ -> h
 
 let tl = function
   | [] -> raise Empty_list
-  | h :: t -> t
+  | _ :: t -> t
 
 let nth l index =
   if index < 0 then raise (Invalid_index index);
