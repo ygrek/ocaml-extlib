@@ -236,7 +236,7 @@ let replace ~str ~sub ~by =
         with
     Invalid_string -> (false, String.sub str 0 (String.length str))
 
-#if OCAML < 403
+#if OCAML_VERSION < (4, 3, 0)
 let uppercase_ascii = uppercase
 let lowercase_ascii = lowercase
 let capitalize_ascii = capitalize
@@ -245,7 +245,7 @@ let uncapitalize_ascii = uncapitalize
 let equal = (=)
 #endif
 
-#if OCAML < 404
+#if OCAML_VERSION < (4, 4, 0)
 let split_on_char sep s =
   let r = ref [] in
   let j = ref (length s) in
@@ -258,7 +258,7 @@ let split_on_char sep s =
   sub s 0 !j :: !r
 #endif
 
-#if OCAML < 405
+#if OCAML_VERSION < (4, 5, 0)
 
 let rec index_rec_opt s lim i c =
   if i >= lim then None else
@@ -285,7 +285,7 @@ let rindex_from_opt s i c =
 
 #endif
 
-#if OCAML >= 500
+#if OCAML_VERSION >= (5, 0, 0)
 let create = Bytes.create
 let set = Bytes.set
 let unsafe_set = Bytes.unsafe_set

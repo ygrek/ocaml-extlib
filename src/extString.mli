@@ -223,14 +223,14 @@ module String :
   val compare : t -> t -> int
   val equal : t -> t -> bool
 
-#if OCAML >= 407
+#if OCAML_VERSION >= (4, 7, 0)
   (** [*_seq] functions were introduced in OCaml 4.07.0, and are _not_ implemented in extlib for older OCaml versions *)
   val to_seq : t -> char Seq.t
   val to_seqi : t -> (int * char) Seq.t
   val of_seq : char Seq.t -> t
 #endif
 
-#if OCAML >= 413
+#if OCAML_VERSION >= (4, 13, 0)
   (* [empty] was introduced in OCaml 4.13, expose it  *)
   val empty : string
 
@@ -257,7 +257,7 @@ module String :
   val get_int64_le : string -> int -> int64
 #endif
 
-#if OCAML >= 414
+#if OCAML_VERSION >= (4, 14, 0)
   val get_utf_8_uchar : t -> int -> Uchar.utf_decode
   val is_valid_utf_8 : t -> bool
   val get_utf_16be_uchar : t -> int -> Uchar.utf_decode
@@ -266,7 +266,7 @@ module String :
   val is_valid_utf_16le : t -> bool
 #endif
 
-#if OCAML >= 500
+#if OCAML_VERSION >= (5, 0, 0)
   val hash : t -> int
   val seeded_hash : int -> t -> int
 #endif

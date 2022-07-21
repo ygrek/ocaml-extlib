@@ -38,24 +38,15 @@ Online API documentation :
 Dependencies
 ------------
 
-* `cppo` - enables conditional compilation to ensure compatibility with various OCaml versions
-* `ocamlfind >= 1.5.1` - provides bytes package
+* `dune` - build system
+* `cppo >= 1.1.0` - enables conditional compilation to ensure compatibility with various OCaml versions
 
 Installation
 ------------
 
 Unzip or untar in any directory and run
 
-  `make minimal=1 build install`
-
-This will build and install bytecode and native libraries.
-On bytecode-only architecture run
-
-  `make minimal=1 all install`
-
-`minimal=1` will exclude from build several modules (namely `Base64` `Unzip` `UChar` `UTF8`) potentially
-conflicting with other well established OCaml libraries. If your code is expecting to find
-these modules in extlib - omit this parameter during build to produce the full library.
+  `make install`
 
 Usage
 -----

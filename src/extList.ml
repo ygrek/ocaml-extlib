@@ -20,13 +20,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
-#if OCAML < 407
+#if OCAML_VERSION < (4, 7, 0)
 module Stdlib = Pervasives
 #endif
 
 module List = struct
 
-#if OCAML < 408
+#if OCAML_VERSION < (4, 8, 0)
 type 'a t = 'a list
 #endif
 
@@ -413,7 +413,7 @@ let combine l1 l2 =
 
 let sort ?(cmp=Stdlib.compare) = List.sort cmp
 
-#if OCAML < 406
+#if OCAML_VERSION < (4, 6, 0)
 let rec init size f =
   if size = 0 then []
   else if size < 0 then invalid_arg "ExtList.init"
@@ -556,11 +556,11 @@ let of_enum e =
     r) h e in
   h.tl
 
-#if OCAML < 403
+#if OCAML_VERSION < (4, 3, 0)
 let cons x l = x :: l
 #endif
 
-#if OCAML < 405
+#if OCAML_VERSION < (4, 5, 0)
 
 let assoc_opt k l = try Some (assoc k l) with Not_found -> None
 let assq_opt k l = try Some (assq k l) with Not_found -> None
@@ -590,7 +590,7 @@ let rec compare_length_with l n =
 
 #endif
 
-#if OCAML < 410
+#if OCAML_VERSION < (4, 10, 0)
 let concat_map f l =
   let rec aux f acc = function
     | [] -> rev acc
@@ -600,7 +600,7 @@ let concat_map f l =
   in aux f [] l
 #endif
 
-#if OCAML < 412
+#if OCAML_VERSION < (4, 12, 0)
 let rec equal eq l1 l2 =
   match l1, l2 with
   | [], [] -> true

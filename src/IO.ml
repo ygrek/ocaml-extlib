@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
-#if OCAML < 407
+#if OCAML_VERSION < (4, 7, 0)
 module Stdlib = Pervasives
 #endif
 
@@ -577,13 +577,13 @@ let write_32 ch n =
   write_byte ch (n asr 24)
 
 let write_i31 ch n =
-#ifndef WORD_SIZE_32
+#ifdef WORD_SIZE_64_true
   if n < -0x4000_0000 || n > 0x3FFF_FFFF then raise (Overflow "write_i31");
 #endif
   write_32 ch n
 
 let write_i32 ch n =
-#ifndef WORD_SIZE_32
+#ifdef WORD_SIZE_64_true
   if n < -0x8000_0000 || n > 0x7FFF_FFFF then raise (Overflow "write_i32");
 #endif
   write_32 ch n
@@ -688,13 +688,13 @@ let write_32 ch n =
   write_byte ch n
 
 let write_i31 ch n =
-#ifndef WORD_SIZE_32
+#ifdef WORD_SIZE_64_true
   if n < -0x4000_0000 || n > 0x3FFF_FFFF then raise (Overflow "write_i31");
 #endif
   write_32 ch n
 
 let write_i32 ch n =
-#ifndef WORD_SIZE_32
+#ifdef WORD_SIZE_64_true
   if n < -0x8000_0000 || n > 0x7FFF_FFFF then raise (Overflow "write_i32");
 #endif
   write_32 ch n
