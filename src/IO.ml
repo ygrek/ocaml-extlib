@@ -44,8 +44,6 @@ exception Output_closed
 (* -------------------------------------------------------------- *)
 (* API *)
 
-let default_close = (fun () -> ())
-
 let create_in ~read ~input ~close =
   {
     in_read = read;
