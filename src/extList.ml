@@ -79,7 +79,7 @@ let append l1 l2 =
     loop r t;
     inj r
 
-let rec flatten l =
+let flatten l =
   let rec inner dst = function
     | [] -> dst
     | h :: t ->
@@ -140,7 +140,7 @@ let rec dropwhile f = function
   | xs -> xs
 
 
-let rec unique ?(cmp = ( = )) l =
+let unique ?(cmp = ( = )) l =
   let rec loop dst = function
     | [] -> ()
     | h :: t ->
@@ -349,7 +349,7 @@ let find_all p l =
   findnext dummy l;
   dummy.tl
 
-let rec findi p l =
+let findi p l =
   let rec loop n = function
     | [] -> raise Not_found
     | h :: t ->
@@ -414,7 +414,7 @@ let combine l1 l2 =
 let sort ?(cmp=Stdlib.compare) = List.sort cmp
 
 #if OCAML_VERSION < (4, 6, 0)
-let rec init size f =
+let init size f =
   if size = 0 then []
   else if size < 0 then invalid_arg "ExtList.init"
   else
@@ -497,7 +497,7 @@ let remove l x =
   loop dummy l;
   dummy.tl
 
-let rec remove_if f lst =
+let remove_if f lst =
   let rec loop dst = function
     | [] -> ()
     | x :: l ->
@@ -512,7 +512,7 @@ let rec remove_if f lst =
   loop dummy lst;
   dummy.tl
 
-let rec remove_all l x =
+let remove_all l x =
   let rec loop dst = function
     | [] -> ()
     | h :: t ->

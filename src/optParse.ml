@@ -62,7 +62,7 @@ module GetOpt =
 
     let parse other find_short_opt find_long_opt args =
       let rec loop args =
-        let rec gather_args name n args =
+        let gather_args name n args =
           try 
             List.split_nth n args 
           with

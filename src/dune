@@ -2,7 +2,7 @@
  (name extlib)
  (public_name extlib)
  (modules :standard \ base64 unzip uChar uTF8)
- (flags :standard -w -3-39-50)
+ (flags :standard -w -3-50)
  (preprocess
   (action
    (run %{bin:cppo} -V OCAML:%{ocaml_version} -D "WORD_SIZE_64_%{arch_sixtyfour}" %{input-file})))

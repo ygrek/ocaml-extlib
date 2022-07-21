@@ -164,7 +164,7 @@ let foldi f { cmp = _; map = map } acc =
        loop (f k v (loop acc l)) r in
   loop acc map
 
-let rec enum m =
+let enum m =
   let rec make l =
     let l = ref l in
     let rec next() =
