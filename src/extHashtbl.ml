@@ -52,7 +52,7 @@ module Hashtbl =
       let hdata = ref idata in
       let hcount = ref icount in
       let force() =
-        (** this is a hack in order to keep an O(1) enum constructor **)
+        (* this is a hack in order to keep an O(1) enum constructor *)
         if !hcount = -1 then begin
           hcount := (h_conv h).size;
           hdata := Array.copy (h_conv h).data;

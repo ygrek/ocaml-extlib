@@ -20,8 +20,8 @@
  
 (** Extra functions over hashtables. *)
 
+(** The wrapper module *)
 module Hashtbl :
-  (** The wrapper module *)
   sig
 
   type ('a,'b) t = ('a,'b) Hashtbl.t
