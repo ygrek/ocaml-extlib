@@ -48,21 +48,12 @@ sw_deps_$(1):
 sw_test_$(1):
 	-opam exec --switch=$(1) -- make clean build test >/dev/null 2>/dev/null
 # expected to fail < 4.03.0
-ifneq "$(1)" "3.12.1"
-ifneq "$(1)" "4.00.1"
-ifneq "$(1)" "4.01.0"
 ifneq "$(1)" "4.02.3"
-	-opam exec --switch=$(1) -- ocaml test/std.ml
-endif
-endif
-endif
+	-opam exec --switch=$(1) -- ocaml check_stdlib.ml
 endif
 endef
 
 $(foreach version,\
-	3.12.1\
-	4.00.1\
-	4.01.0\
 	4.02.3\
 	4.03.0\
 	4.04.2\
@@ -73,5 +64,8 @@ $(foreach version,\
 	4.09.1\
 	4.10.2\
 	4.11.1\
-	4.12.0~beta1\
+	4.12.0\
+	4.13.1\
+	4.14.0\
+	5.0.0~alpha1\
 ,$(eval $(call gen_sw,$(version))))
