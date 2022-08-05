@@ -1,3 +1,9 @@
+1.7.9 (2022-08-05)
+* build with OCaml 5 (Kate)
+* minimum supported version is OCaml 4.02 now
+* build with dune (Makefile is now deprecated) (Marek Kubica, Kate)
+* sync String deprecation attributes with upstream
+
 1.7.8 (2021-01-19)
 * sync with OCaml 4.12
 * breaking change: ExtList.find_map type updated to match stdlib (following deprecation in previous release)
