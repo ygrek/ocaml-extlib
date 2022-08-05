@@ -1,7 +1,7 @@
 (library
  (name extlib)
  (public_name extlib)
- (modules :standard \ base64 unzip uChar uTF8)
+ (modules :standard \ configure base64 unzip uChar uTF8)
  (flags :standard -w -3)
  (preprocess
   (action
