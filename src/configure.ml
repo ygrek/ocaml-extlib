@@ -10,6 +10,4 @@ let () =
   | [|_;"-cppo-args"|] ->
     cppo_args (printf "-D %s ") (printf "-V '%s:%s' ");
     exit 0
-  | [|_;"-compile-args"|] ->
-    exit 0
   | _ -> failwith "not gonna happen"
