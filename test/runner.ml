@@ -15,7 +15,6 @@ let () =
     Test_ExtList.register;
     Test_ExtString.register;
     Test_IO.register;
-    Test_std.register;
   ]
   in
   List.iter (fun register -> register ()) tests;
