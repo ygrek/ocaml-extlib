@@ -234,7 +234,7 @@ let find_first_set b n =
 let enum t =
   let rec make n =
     let cur = ref n in
-    let rec next () =
+    let next () =
       match find_first_set t !cur with
         Some elem ->
           cur := (elem+1);

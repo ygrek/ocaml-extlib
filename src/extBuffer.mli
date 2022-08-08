@@ -67,13 +67,13 @@ val add_channel : t -> in_channel -> int -> unit
 
 val output_buffer : out_channel -> t -> unit
 
-#if OCAML >= 405
+#if OCAML_VERSION >= (4, 5, 0)
 
 val truncate : t -> int -> unit
 
 #endif
 
-#if OCAML >= 406
+#if OCAML_VERSION >= (4, 6, 0)
 
 val add_utf_8_uchar : t -> Uchar.t -> unit
 val add_utf_16le_uchar : t -> Uchar.t -> unit
@@ -81,7 +81,7 @@ val add_utf_16be_uchar : t -> Uchar.t -> unit
 
 #endif
 
-#if OCAML >= 407
+#if OCAML_VERSION >= (4, 7, 0)
 (** [*_seq] functions were introduced in OCaml 4.07.0, and are _not_ implemented in extlib for older OCaml versions *)
 val to_seq : t -> char Seq.t
 val to_seqi : t -> (int * char) Seq.t
@@ -89,7 +89,7 @@ val add_seq : t -> char Seq.t -> unit
 val of_seq : char Seq.t -> t
 #endif
 
-#if OCAML >= 408
+#if OCAML_VERSION >= (4, 8, 0)
 (** [add_*int*] functions were introduced in OCaml 4.08.0, and are _not_ implemented in extlib for older OCaml versions *)
 val add_uint8 : t -> int -> unit
 val add_int8 : t -> int -> unit

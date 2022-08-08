@@ -36,14 +36,14 @@ let rnd_list () =
   List.init len Std.identity
 
 let test_iteri () = 
-  for i = 0 to 15 do
+  for _ = 0 to 15 do
     List.iteri (fun i e -> assert (i = e)) (rnd_list ());
   done
 
 let test_mapi () =
-  for i = 0 to 15 do
+  for _ = 0 to 15 do
     let rnd_list = rnd_list () in
-    let lst = List.mapi (fun n e -> (e,"foo")) rnd_list in
+    let lst = List.mapi (fun _ e -> (e,"foo")) rnd_list in
     let lst' = 
       List.mapi (fun n (e,s) -> assert (s = "foo"); assert (n = e); n) lst in
     List.iteri (fun i e -> assert (i = e)) lst'
@@ -58,7 +58,7 @@ let test_find_exc () =
   let check_exn f = try f (); false with Test_Exception -> true | _ -> false in
   assert (check_exn (fun () -> (List.find_exc (fun _ -> true) Test_Exception [])));
   try 
-    for i = 0 to 15 do
+    for _ = 0 to 15 do
       let rnd_lst = rnd_list () in
       begin 
         match rnd_lst with
@@ -78,7 +78,7 @@ let test_find_exc () =
 let test_findi () =
   let check_fn f = try (let e,i = f () in e<>i) with Not_found -> true in
   try 
-    for i = 0 to 15 do
+    for _ = 0 to 15 do
       let rnd_lst = rnd_list () in
       begin 
         match rnd_lst with
@@ -87,10 +87,10 @@ let test_findi () =
             let rnd_elem = Random.int (List.length lst) in
             assert (check_fn 
                       (fun () -> 
-                         List.findi (fun i e -> e = List.length lst) lst));
+                         List.findi (fun _ e -> e = List.length lst) lst));
             assert (not (check_fn 
                            (fun () -> 
-                              List.findi (fun i e -> e = rnd_elem) lst)))
+                              List.findi (fun _ e -> e = rnd_elem) lst)))
       end
     done
   with _ -> assert false
@@ -115,7 +115,7 @@ let test_fold_right2 () =
   assert (!cnt = cnt_std)
 
 let test_map () = 
-  for i = 0 to 10 do
+  for _ = 0 to 10 do
     let f = ( * ) 2 in
     let lst = rnd_list () in
     let a = StdList.map f lst in

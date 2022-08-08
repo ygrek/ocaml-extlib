@@ -41,7 +41,7 @@ let invalid_arg n f p = raise (Invalid_arg (n,f,p))
 
 let length d = d.len
 
-let exponential_resizer ~currslots ~oldlength ~newlength =
+let exponential_resizer ~currslots ~oldlength:_ ~newlength =
   let rec doubler x = if x >= newlength then x else doubler (x * 2) in
   let rec halfer x = if x / 2 < newlength then x else halfer (x / 2) in
   if newlength = 1 then
@@ -55,7 +55,7 @@ let exponential_resizer ~currslots ~oldlength ~newlength =
 
 let step_resizer step =
   if step <= 0 then invalid_arg step "step_resizer" "step";
-  (fun ~currslots ~oldlength ~newlength ->
+  (fun ~currslots ~oldlength:_ ~newlength ->
     if currslots < newlength || newlength < (currslots - step)
     then
        (newlength + step - (newlength mod step))
@@ -242,7 +242,7 @@ let delete_last d =
   iset d.arr (d.len - 1) (Obj.magic 0);
   changelen d (d.len - 1)
 
-let rec blit src srcidx dst dstidx len =
+let blit src srcidx dst dstidx len =
   if len < 0 then invalid_arg len "blit" "len";
   if srcidx < 0 || srcidx + len > src.len then invalid_arg srcidx "blit" "source index";
   if dstidx < 0 || dstidx > dst.len then invalid_arg dstidx "blit" "dest index";
@@ -410,7 +410,7 @@ let fold_right f a x =
   loop (a.len - 1) x
 
 let enum d =
-  let rec make start =
+  let rec make () =
     let idxref = ref 0 in
     let next () =
       if !idxref >= d.len then
@@ -423,11 +423,11 @@ let enum d =
       if !idxref >= d.len then 0
       else d.len - !idxref
     and clone () =
-      make !idxref
+      make ()
     in
     Enum.make ~next:next ~count:count ~clone:clone
   in
-  make 0
+  make ()
 
 let of_enum e =
   if Enum.fast_count e then begin

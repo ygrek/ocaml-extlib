@@ -1,22 +1,13 @@
 open Printf
 
 let cppo_args define var =
-  let version = Scanf.sscanf Sys.ocaml_version "%d.%d." (fun major minor -> major * 100 + minor) in
-  var "OCAML" (string_of_int version);
-  if Sys.word_size = 32 then define "WORD_SIZE_32";
-  define "WITH_BYTES"
+  let version = Scanf.sscanf Sys.ocaml_version "%d.%d.%d" (fun major minor patch -> sprintf "%d.%d.%d" major minor patch) in
+  var "OCAML" version;
+  if Sys.word_size = 64 then define "WORD_SIZE_64_true"
 
 let () =
   match Sys.argv with
   | [|_;"-cppo-args"|] ->
-    cppo_args (printf "-D %s ") (printf "-D '%s %s' ");
-    exit 0
-  | [|_;"-cppo-args-lines"|] ->
-    let pr fmt = ksprintf print_endline fmt in
-    cppo_args (fun x -> pr "-D"; pr "%s" x) (fun k v -> pr "-D"; pr "%s %s" k v);
-    exit 0
-  | [|_;"-compile-args"|] ->
-    if Sys.ocaml_version >= "4.00.0" then print_endline "-bin-annot";
-    print_endline "-package bytes";
+    cppo_args (printf "-D %s ") (printf "-V '%s:%s' ");
     exit 0
   | _ -> failwith "not gonna happen"

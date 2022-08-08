@@ -13,7 +13,7 @@ CPPO_ARGS := $(shell ocaml configure.ml -cppo-args)
 CPPO := cppo $(CPPO_ARGS)
 
 OCAML_ARGS := -pp "$(CPPO)" -g
-OCAML_ARGS += $(shell ocaml configure.ml -compile-args)
+OCAML_ARGS += -bin-annot
 
 OCAMLC = ocamlfind ocamlc $(OCAML_ARGS)
 OCAMLOPT = ocamlfind ocamlopt $(OCAML_ARGS)

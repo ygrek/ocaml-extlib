@@ -20,7 +20,7 @@
 
 module Array = struct
 
-#if OCAML < 408
+#if OCAML_VERSION < (4, 8, 0)
 type 'a t = 'a array
 #endif
 
@@ -41,7 +41,7 @@ let rev xs =
   rev_in_place ys;
   ys
 
-#if OCAML < 403
+#if OCAML_VERSION < (4, 3, 0)
 let for_all p xs =
   let n = length xs in
   let rec loop i =
@@ -112,7 +112,7 @@ let filter p xs =
 
 let find_all = filter
 
-#if OCAML < 411
+#if OCAML_VERSION < (4, 11, 0)
 
 let for_all2 p l1 l2 =
   let n1 = length l1
@@ -187,12 +187,12 @@ let of_enum e =
   let n = Enum.count e in
   (* This assumes, reasonably, that init traverses the array in order. *)
   Array.init n
-    (fun i ->
+    (fun _ ->
        match Enum.get e with
        | Some x -> x
        | None -> assert false)
 
-#if OCAML < 403
+#if OCAML_VERSION < (4, 3, 0)
 let iter2 f a1 a2 =
      if Array.length a1 <> Array.length a2
      then raise (Invalid_argument "Array.iter2");
@@ -206,17 +206,12 @@ let map2 f a1 a2 =
      Array.init (Array.length a1) (fun i -> f a1.(i) a2.(i))
 #endif
 
-#if OCAML >= 403
+#if OCAML_VERSION >= (4, 3, 0)
 #else
-#if OCAML >= 402
 let create_float = make_float
-#else
-let make_float n = make n 0.
-let create_float = make_float
-#endif
 #endif
 
-#if OCAML >= 500
+#if OCAML_VERSION >= (5, 0, 0)
 external create : int -> 'a -> 'a array = "caml_make_vect"
 let create_matrix = make_matrix
 let make_float = create_float

@@ -26,16 +26,6 @@ module String = struct
 
 include String
 
-#if OCAML < 402
-let init len f =
-  let s = Bytes.create len in
-  for i = 0 to len - 1 do
-    Bytes.unsafe_set s i (f i)
-  done;
-        (* 's' doesn't escape and will never be mutated again *)
-  Bytes.unsafe_to_string s
-#endif
-
 let starts_with str p =
   if length str < length p then 
     false
@@ -98,10 +88,6 @@ let strip ?(chars=" \t\r\n") s =
     decr l;
   done;
   sub s p (!l - p + 1)
-
-#if OCAML < 400
-let trim s = strip ~chars:" \t\r\n\012" s
-#endif
 
 let split str sep =
   let p = find str sep in
@@ -184,35 +170,6 @@ let of_enum e =
         (* 's' doesn't escape and will never be mutated again *)
   Bytes.unsafe_to_string s
 
-#if OCAML < 400
-let map f s =
-  let len = length s in
-  let sc = Bytes.create len in
-  for i = 0 to len - 1 do
-    Bytes.unsafe_set sc i (f (unsafe_get s i))
-  done;
-        (* 'sc' doesn't escape and will never be mutated again *)
-  Bytes.unsafe_to_string sc
-#endif
-
-#if OCAML < 402
-let mapi f s =
-  let len = length s in
-  let sc = Bytes.create len in
-  for i = 0 to len - 1 do
-    Bytes.unsafe_set sc i (f i (unsafe_get s i))
-  done;
-        (* 'sc' doesn't escape and will never be mutated again *)
-  Bytes.unsafe_to_string sc
-#endif
-
-#if OCAML < 400
-let iteri f s =
-  for i = 0 to length s - 1 do
-    let () = f i (unsafe_get s i) in ()
-  done
-#endif
-
 let fold_left =
   let rec loop str f i n result =
     if i = n then result
@@ -279,7 +236,7 @@ let replace ~str ~sub ~by =
         with
     Invalid_string -> (false, String.sub str 0 (String.length str))
 
-#if OCAML < 403
+#if OCAML_VERSION < (4, 3, 0)
 let uppercase_ascii = uppercase
 let lowercase_ascii = lowercase
 let capitalize_ascii = capitalize
@@ -288,7 +245,7 @@ let uncapitalize_ascii = uncapitalize
 let equal = (=)
 #endif
 
-#if OCAML < 404
+#if OCAML_VERSION < (4, 4, 0)
 let split_on_char sep s =
   let r = ref [] in
   let j = ref (length s) in
@@ -301,7 +258,7 @@ let split_on_char sep s =
   sub s 0 !j :: !r
 #endif
 
-#if OCAML < 405
+#if OCAML_VERSION < (4, 5, 0)
 
 let rec index_rec_opt s lim i c =
   if i >= lim then None else
@@ -328,7 +285,7 @@ let rindex_from_opt s i c =
 
 #endif
 
-#if OCAML >= 500
+#if OCAML_VERSION >= (5, 0, 0)
 let create = Bytes.create
 let set = Bytes.set
 let unsafe_set = Bytes.unsafe_set

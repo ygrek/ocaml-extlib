@@ -37,7 +37,7 @@ let test_triv () =
 (* Failure reported by Jeff Henrikson.  Should be fixed in CVS
    already? JH 2005/Mar/01 *)
 let test_regr_1 () = 
-  for i = 0 to 30 do
+  for _ = 0 to 30 do
     ignore (DynArray.of_array [||])
   done
 

@@ -32,7 +32,7 @@ module List :
     sig
 
     type 'a t = 'a list
-#if OCAML >= 408
+#if OCAML_VERSION >= (4, 8, 0)
     = [] | (::) of 'a * 'a list
 #endif
 
@@ -263,19 +263,17 @@ module List :
   val fast_sort : ('a -> 'a -> int) -> 'a list -> 'a list
   val merge : ('a -> 'a -> int) -> 'a list -> 'a list -> 'a list
 
-#if OCAML >= 402
   val sort_uniq : ('a -> 'a -> int) -> 'a list -> 'a list
   (** Same as {!List.sort}, but also remove duplicates.
       @since 4.02.0 *)
-#endif
 
-#if OCAML >= 407
+#if OCAML_VERSION >= (4, 7, 0)
   (** [*_seq] functions were introduced in OCaml 4.07.0, and are _not_ implemented in extlib for older OCaml versions *)
   val to_seq : 'a list -> 'a Seq.t
   val of_seq : 'a Seq.t -> 'a list
 #endif
 
-#if OCAML >= 412
+#if OCAML_VERSION >= (4, 12, 0)
   val partition_map : ('a -> ('b, 'c) Either.t) -> 'a list -> 'b list * 'c list
   (** [partition_map f l] returns a pair of lists [(l1, l2)] such that,
       for each element [x] of the input list [l]:

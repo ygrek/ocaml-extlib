@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
-#if OCAML < 407
+#if OCAML_VERSION < (4, 7, 0)
 module Stdlib = Pervasives
 #endif
 
@@ -43,8 +43,6 @@ exception Output_closed
 
 (* -------------------------------------------------------------- *)
 (* API *)
-
-let default_close = (fun () -> ())
 
 let create_in ~read ~input ~close =
   {
@@ -577,13 +575,13 @@ let write_32 ch n =
   write_byte ch (n asr 24)
 
 let write_i31 ch n =
-#ifndef WORD_SIZE_32
+#ifdef WORD_SIZE_64_true
   if n < -0x4000_0000 || n > 0x3FFF_FFFF then raise (Overflow "write_i31");
 #endif
   write_32 ch n
 
 let write_i32 ch n =
-#ifndef WORD_SIZE_32
+#ifdef WORD_SIZE_64_true
   if n < -0x8000_0000 || n > 0x7FFF_FFFF then raise (Overflow "write_i32");
 #endif
   write_32 ch n
@@ -688,13 +686,13 @@ let write_32 ch n =
   write_byte ch n
 
 let write_i31 ch n =
-#ifndef WORD_SIZE_32
+#ifdef WORD_SIZE_64_true
   if n < -0x4000_0000 || n > 0x3FFF_FFFF then raise (Overflow "write_i31");
 #endif
   write_32 ch n
 
 let write_i32 ch n =
-#ifndef WORD_SIZE_32
+#ifdef WORD_SIZE_64_true
   if n < -0x8000_0000 || n > 0x7FFF_FFFF then raise (Overflow "write_i32");
 #endif
   write_32 ch n
@@ -793,7 +791,7 @@ let rec write_bits b ~nbits x =
   end
 
 let flush_bits b =
-  if b.nbits > 0 then write_bits b (8 - b.nbits) 0
+  if b.nbits > 0 then write_bits b ~nbits:(8 - b.nbits) 0
 
 (* -------------------------------------------------------------- *)
 (* Generic IO *)

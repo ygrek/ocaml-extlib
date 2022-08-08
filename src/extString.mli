@@ -182,23 +182,15 @@ module String :
   val length : string -> int
   val get : string -> int -> char
   val set : Bytes.t -> int -> char -> unit
-#if OCAML >= 402
   [@@ocaml.deprecated "Use Bytes.set instead."]
-#endif
   val create : int -> Bytes.t
-#if OCAML >= 402
   [@@ocaml.deprecated "Use Bytes.create instead."]
-#endif
   val make : int -> char -> string
   val copy : string -> string
-#if OCAML >= 402
   [@@ocaml.deprecated]
-#endif
   val sub : string -> int -> int -> string
   val fill : Bytes.t -> int -> int -> char -> unit
-#if OCAML >= 402
   [@@ocaml.deprecated "Use Bytes.fill instead."]
-#endif
   val blit : string -> int -> Bytes.t -> int -> int -> unit
   val concat : string -> string list -> string
   val iter : (char -> unit) -> string -> unit
@@ -216,47 +208,76 @@ module String :
   val rcontains_from : string -> int -> char -> bool
 
   val uppercase : string -> string
-#if OCAML >= 402
   [@@ocaml.deprecated "Use String.uppercase_ascii instead."]
-#endif
 
   val lowercase : string -> string
-#if OCAML >= 402
   [@@ocaml.deprecated "Use String.lowercase_ascii instead."]
-#endif
 
   val capitalize : string -> string
-#if OCAML >= 402
   [@@ocaml.deprecated "Use String.capitalize_ascii instead."]
-#endif
 
   val uncapitalize : string -> string
-#if OCAML >= 402
   [@@ocaml.deprecated "Use String.uncapitalize_ascii instead."]
-#endif
 
   type t = string
   val compare : t -> t -> int
   val equal : t -> t -> bool
 
-#if OCAML >= 407
+#if OCAML_VERSION >= (4, 7, 0)
   (** [*_seq] functions were introduced in OCaml 4.07.0, and are _not_ implemented in extlib for older OCaml versions *)
   val to_seq : t -> char Seq.t
   val to_seqi : t -> (int * char) Seq.t
   val of_seq : char Seq.t -> t
 #endif
 
+#if OCAML_VERSION >= (4, 13, 0)
+  (* [empty] was introduced in OCaml 4.13, expose it  *)
+  val empty : string
+
+  val of_bytes : bytes -> string
+  val to_bytes : string -> bytes
+
+  val cat : string -> string -> string
+
+  val for_all : (char -> bool) -> string -> bool
+
+  val get_uint8 : string -> int -> int
+  val get_int8 : string -> int -> int
+  val get_uint16_ne : string -> int -> int
+  val get_uint16_be : string -> int -> int
+  val get_uint16_le : string -> int -> int
+  val get_int16_ne : string -> int -> int
+  val get_int16_be : string -> int -> int
+  val get_int16_le : string -> int -> int
+  val get_int32_ne : string -> int -> int32
+  val get_int32_be : string -> int -> int32
+  val get_int32_le : string -> int -> int32
+  val get_int64_ne : string -> int -> int64
+  val get_int64_be : string -> int -> int64
+  val get_int64_le : string -> int -> int64
+#endif
+
+#if OCAML_VERSION >= (4, 14, 0)
+  val get_utf_8_uchar : t -> int -> Uchar.utf_decode
+  val is_valid_utf_8 : t -> bool
+  val get_utf_16be_uchar : t -> int -> Uchar.utf_decode
+  val is_valid_utf_16be : t -> bool
+  val get_utf_16le_uchar : t -> int -> Uchar.utf_decode
+  val is_valid_utf_16le : t -> bool
+#endif
+
+#if OCAML_VERSION >= (5, 0, 0)
+  val hash : t -> int
+  val seeded_hash : int -> t -> int
+#endif
+
   (**/**)
 
   external unsafe_get : string -> int -> char = "%string_unsafe_get"
   val unsafe_set : Bytes.t -> int -> char -> unit
-#if OCAML >= 402
   [@@ocaml.deprecated]
-#endif
   val unsafe_blit : string -> int -> Bytes.t -> int -> int -> unit
   val unsafe_fill : Bytes.t -> int -> int -> char -> unit
-#if OCAML >= 402
   [@@ocaml.deprecated]
-#endif
 
   end

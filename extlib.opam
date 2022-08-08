@@ -22,7 +22,7 @@ authors: [
 depends: [
   "dune" {>= "1.0"}
   "ocaml" {>= "4.02"}
-  "cppo" {build}
+  "cppo" {build & >= "1.1.0"}
 ]
 synopsis:
   "A complete yet small extension for OCaml standard library"

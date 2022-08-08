@@ -8,27 +8,30 @@ endif
 
 .NOTPARALLEL:
 .SUFFIXES:
-.PHONY: build clean test doc release install
 
+.PHONY: build
 build:
-	$(MAKE) -C src build
+	dune build
 
+.PHONY: install
 install:
-	$(MAKE) -C src VERSION=$(VERSION) install
+	dune install
 
+.PHONY: doc
 doc:
-	$(MAKE) -C src doc
+	dune build @doc
 
+.PHONY: test
 test:
-	$(MAKE) -C test all run
-	$(MAKE) -C test opt run
+	dune runtest
 
+.PHONY: clean
 clean:
-	$(MAKE) -C src clean
-	$(MAKE) -C test clean
+	dune clean
 
 NAME=extlib-$(RELEASE)
 
+.PHONY: release
 release:
 	git tag -a -m $(RELEASE) $(RELEASE)
 	git archive --prefix=$(NAME)/ $(RELEASE) | gzip > $(NAME).tar.gz

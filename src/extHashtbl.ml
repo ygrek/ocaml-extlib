@@ -22,7 +22,7 @@
 module Hashtbl =
   struct
 
-#if OCAML >= 400 && OCAML < 412
+#if OCAML_VERSION < (4, 12, 0)
   external old_hash_param :
     int -> int -> 'a -> int = "caml_hash_univ_param" "noalloc"
 #endif
@@ -31,25 +31,14 @@ module Hashtbl =
     | Empty
     | Cons of 'a * 'b * ('a, 'b) h_bucketlist
 
-#if OCAML >= 400
   type ('a, 'b) h_t = {
     mutable size: int;
     mutable data: ('a, 'b) h_bucketlist array;
     mutable seed: int;
     initial_size: int;
   }
-#else
-  type ('a, 'b) h_t = {
-    mutable size: int;
-    mutable data: ('a, 'b) h_bucketlist array
-  }
-#endif
 
   include Hashtbl
-
-#if OCAML < 400
-  let create ?random:_ n = Hashtbl.create (* no seed *) n
-#endif
 
   external h_conv : ('a, 'b) t -> ('a, 'b) h_t = "%identity"
   external h_make : ('a, 'b) h_t -> ('a, 'b) t = "%identity"
@@ -63,7 +52,7 @@ module Hashtbl =
       let hdata = ref idata in
       let hcount = ref icount in
       let force() =
-        (** this is a hack in order to keep an O(1) enum constructor **)
+        (* this is a hack in order to keep an O(1) enum constructor *)
         if !hcount = -1 then begin
           hcount := (h_conv h).size;
           hdata := Array.copy (h_conv h).data;
@@ -108,20 +97,16 @@ module Hashtbl =
       data = Array.map loop (h_conv h).data; 
     }
 
-#if OCAML >= 400
   (* copied from stdlib :( *)
   let key_index h key =
     (* compatibility with old hash tables *)
     if Obj.size (Obj.repr h) >= 3
     then (seeded_hash_param 10 100 (h_conv h).seed key) land (Array.length (h_conv h).data - 1)
-  #if OCAML >= 412
+  #if OCAML_VERSION >= (4, 12, 0)
     else failwith "Old hash function not supported anymore"
   #else
     else (old_hash_param 10 100 key) mod (Array.length (h_conv h).data)
   #endif
-#else
-  let key_index h key = (hash key) mod (Array.length (h_conv h).data)
-#endif
 
   let remove_all h key =
     let hc = h_conv h in
@@ -146,7 +131,7 @@ module Hashtbl =
     let pos = key_index h key in
     loop (Array.unsafe_get (h_conv h).data pos)
 
-#if OCAML < 405
+#if OCAML_VERSION < (4, 5, 0)
   let find_opt h key =
     let rec loop = function
       | Empty -> None

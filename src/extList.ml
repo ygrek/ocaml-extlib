@@ -20,13 +20,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
-#if OCAML < 407
+#if OCAML_VERSION < (4, 7, 0)
 module Stdlib = Pervasives
 #endif
 
 module List = struct
 
-#if OCAML < 408
+#if OCAML_VERSION < (4, 8, 0)
 type 'a t = 'a list
 #endif
 
@@ -48,11 +48,11 @@ let dummy_node () = { hd = Obj.magic (); tl = [] }
 
 let hd = function
   | [] -> raise Empty_list
-  | h :: t -> h
+  | h :: _ -> h
 
 let tl = function
   | [] -> raise Empty_list
-  | h :: t -> t
+  | _ :: t -> t
 
 let nth l index =
   if index < 0 then raise (Invalid_index index);
@@ -79,7 +79,7 @@ let append l1 l2 =
     loop r t;
     inj r
 
-let rec flatten l =
+let flatten l =
   let rec inner dst = function
     | [] -> dst
     | h :: t ->
@@ -140,7 +140,7 @@ let rec dropwhile f = function
   | xs -> xs
 
 
-let rec unique ?(cmp = ( = )) l =
+let unique ?(cmp = ( = )) l =
   let rec loop dst = function
     | [] -> ()
     | h :: t ->
@@ -349,7 +349,7 @@ let find_all p l =
   findnext dummy l;
   dummy.tl
 
-let rec findi p l =
+let findi p l =
   let rec loop n = function
     | [] -> raise Not_found
     | h :: t ->
@@ -413,8 +413,8 @@ let combine l1 l2 =
 
 let sort ?(cmp=Stdlib.compare) = List.sort cmp
 
-#if OCAML < 406
-let rec init size f =
+#if OCAML_VERSION < (4, 6, 0)
+let init size f =
   if size = 0 then []
   else if size < 0 then invalid_arg "ExtList.init"
   else
@@ -450,17 +450,6 @@ let mapi f = function
     let r = { hd = f 0 h; tl = [] } in
     loop r 1 t;
     inj r
-
-#if OCAML < 400
-let iteri f l =
-  let rec loop n = function
-    | [] -> ()
-    | h :: t ->
-      f n h;
-      loop (n+1) t
-  in
-  loop 0 l
-#endif
 
 let first = hd
 
@@ -508,7 +497,7 @@ let remove l x =
   loop dummy l;
   dummy.tl
 
-let rec remove_if f lst =
+let remove_if f lst =
   let rec loop dst = function
     | [] -> ()
     | x :: l ->
@@ -523,7 +512,7 @@ let rec remove_if f lst =
   loop dummy lst;
   dummy.tl
 
-let rec remove_all l x =
+let remove_all l x =
   let rec loop dst = function
     | [] -> ()
     | h :: t ->
@@ -567,11 +556,11 @@ let of_enum e =
     r) h e in
   h.tl
 
-#if OCAML < 403
+#if OCAML_VERSION < (4, 3, 0)
 let cons x l = x :: l
 #endif
 
-#if OCAML < 405
+#if OCAML_VERSION < (4, 5, 0)
 
 let assoc_opt k l = try Some (assoc k l) with Not_found -> None
 let assq_opt k l = try Some (assq k l) with Not_found -> None
@@ -601,7 +590,7 @@ let rec compare_length_with l n =
 
 #endif
 
-#if OCAML < 410
+#if OCAML_VERSION < (4, 10, 0)
 let concat_map f l =
   let rec aux f acc = function
     | [] -> rev acc
@@ -611,7 +600,7 @@ let concat_map f l =
   in aux f [] l
 #endif
 
-#if OCAML < 412
+#if OCAML_VERSION < (4, 12, 0)
 let rec equal eq l1 l2 =
   match l1, l2 with
   | [], [] -> true

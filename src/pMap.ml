@@ -118,7 +118,7 @@ let remove x { cmp = cmp; map = map } =
 
 let mem x { cmp = cmp; map = map } =
   let rec loop = function
-    | Node (l, k, v, r, _) ->
+    | Node (l, k, _, r, _) ->
         let c = cmp x k in
         c = 0 || loop (if c < 0 then l else r)
     | Empty -> false in
@@ -126,7 +126,7 @@ let mem x { cmp = cmp; map = map } =
 
 let exists = mem
 
-let iter f { map = map } =
+let iter f { map = map; cmp = _ } =
   let rec loop = function
     | Empty -> ()
     | Node (l, k, v, r, _) -> loop l; f k v; loop r in
@@ -150,28 +150,28 @@ let mapi f { cmp = cmp; map = map } =
     Node (l, k, f k v, r, h) in
   { cmp = cmp; map = loop map }
 
-let fold f { cmp = cmp; map = map } acc =
+let fold f { cmp = _; map = map } acc =
   let rec loop acc = function
     | Empty -> acc
-    | Node (l, k, v, r, _) ->
+    | Node (l, _, v, r, _) ->
     loop (f v (loop acc l)) r in
   loop acc map
 
-let foldi f { cmp = cmp; map = map } acc =
+let foldi f { cmp = _; map = map } acc =
   let rec loop acc = function
     | Empty -> acc
   | Node (l, k, v, r, _) ->
        loop (f k v (loop acc l)) r in
   loop acc map
 
-let rec enum m =
+let enum m =
   let rec make l =
     let l = ref l in
     let rec next() =
       match !l with
       | [] -> raise Enum.No_more_elements
       | Empty :: tl -> l := tl; next()
-      | Node (m1, key, data, m2, h) :: tl ->
+      | Node (m1, key, data, m2, _) :: tl ->
         l := m1 :: m2 :: tl;
         (key, data)
     in

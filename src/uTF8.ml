@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
-#if OCAML < 407
+#if OCAML_VERSION < (4, 7, 0)
 module Stdlib = Pervasives
 #endif
 
