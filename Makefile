@@ -13,6 +13,10 @@ endif
 build:
 	$(MAKE) -C src build
 
+# bytecode-only target:
+all:
+	$(MAKE) -C src all
+
 install:
 	$(MAKE) -C src VERSION=$(VERSION) install
 
