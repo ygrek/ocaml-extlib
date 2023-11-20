@@ -79,7 +79,7 @@ let find_from str pos sub =
 
 let find str sub = find_from str 0 sub
 
-let exists str sub =
+let exists str ~sub =
   try
     ignore(find str sub);
     true

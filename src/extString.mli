@@ -143,8 +143,8 @@ module String :
   (** Returns the string without the chars if they are at the beginning or
       at the end of the string. By default chars are " \t\r\n". *)
 
-  val exists : string -> string -> bool
-  (** [exists str sub] returns true if [sub] is a substring of [str] or
+  val exists : string -> sub:string -> bool
+  (** [exists str ~sub] returns true if [sub] is a substring of [str] or
       false otherwise. *)
 
   val replace_chars : (char -> string) -> string -> string
