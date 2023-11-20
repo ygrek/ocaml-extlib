@@ -101,8 +101,8 @@ module String :
   (** Returns the float represented by the given string or
       raises Invalid_string if the string does not represent a float. *)
 
-  val ends_with : string -> string -> bool
-  (** [ends_with s x] returns true if the string [s] is ending with [x]. *)
+  val ends_with : string -> suffix:string -> bool
+  (** [ends_with s ~suffix] returns true if the string [s] is ending with [suffix]. *)
 
   val starts_with : string -> prefix:string -> bool
   (** [starts_with s ~prefix] return true if [s] is starting with [prefix]. *)

@@ -34,13 +34,13 @@ let t_starts_with () =
 
 let t_ends_with () = 
   let s0 = "foo" in
-  assert (S.ends_with s0 "foo");
-  assert (S.ends_with s0 "oo");
-  assert (S.ends_with s0 "o");
-  assert (S.ends_with s0 "");
-  assert (S.ends_with "" "");
-  assert (not (S.ends_with "" "b"));
-  assert (not (S.ends_with s0 "f"))
+  assert (S.ends_with s0 ~suffix:"foo");
+  assert (S.ends_with s0 ~suffix:"oo");
+  assert (S.ends_with s0 ~suffix:"o");
+  assert (S.ends_with s0 ~suffix:"");
+  assert (S.ends_with "" ~suffix:"");
+  assert (not (S.ends_with "" ~suffix:"b"));
+  assert (not (S.ends_with s0 ~suffix:"f"))
 
 let t_map () =
   let s0 = "foobar" in
@@ -112,10 +112,10 @@ let t_strip () =
   assert (S.strip ~chars:"1" s = String.sub s 1 (String.length s-1));
   assert (S.strip ~chars:"12" s = String.sub s 2 (String.length s-2));
   assert (S.strip ~chars:"1234" s = "abcd5678");
-  assert (S.ends_with (S.strip ~chars:"8" s) "567");
-  assert (S.ends_with (S.strip ~chars:"87" s) "56");
-  assert (S.ends_with (S.strip ~chars:"86" s) "567");
-  assert (S.ends_with (S.strip ~chars:"" s) "5678")
+  assert (S.ends_with (S.strip ~chars:"8" s) ~suffix:"567");
+  assert (S.ends_with (S.strip ~chars:"87" s) ~suffix:"56");
+  assert (S.ends_with (S.strip ~chars:"86" s) ~suffix:"567");
+  assert (S.ends_with (S.strip ~chars:"" s) ~suffix:"5678")
 
 let t_nsplit () =
   let s = "testsuite" in
