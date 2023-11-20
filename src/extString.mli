@@ -27,6 +27,9 @@ exception Invalid_string
 module String :
   sig
 
+  val empty: string
+  (** The empty string. *)
+
   (** {6 New Functions} *)
 
   val init : int -> (int -> char) -> string
