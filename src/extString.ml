@@ -36,6 +36,10 @@ let init len f =
   Bytes.unsafe_to_string s
 #endif
 
+#if OCAML < 413
+let empty = ""
+#endif
+
 let starts_with str ~prefix:p =
   if length str < length p then 
     false
