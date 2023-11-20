@@ -456,7 +456,7 @@ module Formatter =
               fill ~initial_indent:(!indent) ~subsequent_indent:(!indent)
                 description (width - !indent)
             in
-              if not (String.ends_with x "\n") then x ^ "\n\n" else x ^ "\n");
+              if not (String.ends_with x ~suffix:"\n") then x ^ "\n\n" else x ^ "\n");
         
         format_option =
          fun names metavars help ->
@@ -489,7 +489,7 @@ module Formatter =
            let contents =
              Buffer.contents buf
            in
-             if String.length contents > 0 && not (String.ends_with contents "\n") then
+             if String.length contents > 0 && not (String.ends_with contents ~suffix:"\n") then
                contents ^ "\n"
              else
                contents

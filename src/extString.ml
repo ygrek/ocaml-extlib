@@ -47,7 +47,7 @@ let starts_with str p =
     in
     loop str p 0
 
-let ends_with s e =
+let ends_with s ~suffix:e =
   if length s < length e then
     false
   else
