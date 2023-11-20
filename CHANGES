@@ -1,3 +1,6 @@
+unreleased
+* breaking change: ExtString.exists use labelled ~sub argument
+
 1.7.9 (2022-08-05)
 * build with OCaml 5 (Kate)
 * minimum supported version is OCaml 4.02 now
