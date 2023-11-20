@@ -36,7 +36,7 @@ let init len f =
   Bytes.unsafe_to_string s
 #endif
 
-let starts_with str p =
+let starts_with str ~prefix:p =
   if length str < length p then 
     false
   else

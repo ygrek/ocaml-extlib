@@ -113,10 +113,10 @@ module GetOpt =
           [] -> []
         | arg :: args' ->
             if arg = "--" then args'
-            else if String.starts_with arg "--" then
+            else if String.starts_with arg ~prefix:"--" then
               loop (gather_long_opt arg args')
             else if arg = "-" then begin other arg; loop args' end
-            else if String.starts_with arg "-" then
+            else if String.starts_with arg ~prefix:"-" then
               loop (gather_short_opt arg 1 args')
             else begin other arg; loop args' end
       in
