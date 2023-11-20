@@ -25,12 +25,12 @@ module S = String
 
 let t_starts_with () = 
   let s0 = "foo" in
-  assert (S.starts_with s0 s0);
-  assert (S.starts_with s0 "f");
-  assert (not (S.starts_with s0 "bo"));
-  assert (not (S.starts_with "" "foo"));
-  assert (S.starts_with s0 "");
-  assert (S.starts_with "" "")
+  assert (S.starts_with s0 ~prefix:s0);
+  assert (S.starts_with s0 ~prefix:"f");
+  assert (not (S.starts_with s0 ~prefix:"bo"));
+  assert (not (S.starts_with "" ~prefix:"foo"));
+  assert (S.starts_with s0 ~prefix:"");
+  assert (S.starts_with "" ~prefix:"")
 
 let t_ends_with () = 
   let s0 = "foo" in

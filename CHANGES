@@ -1,3 +1,6 @@
+unreleased
+* breaking change: ExtString.starts_with type updated to match stdlib (use labelled ~prefix)
+
 1.7.9 (2022-08-05)
 * build with OCaml 5 (Kate)
 * minimum supported version is OCaml 4.02 now
