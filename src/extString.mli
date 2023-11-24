@@ -27,6 +27,9 @@ exception Invalid_string
 module String :
   sig
 
+  val empty: string
+  (** The empty string. *)
+
   (** {6 New Functions} *)
 
   val init : int -> (int -> char) -> string
@@ -101,11 +104,11 @@ module String :
   (** Returns the float represented by the given string or
       raises Invalid_string if the string does not represent a float. *)
 
-  val ends_with : string -> string -> bool
-  (** [ends_with s x] returns true if the string [s] is ending with [x]. *)
+  val ends_with : string -> suffix:string -> bool
+  (** [ends_with s ~suffix] returns true if the string [s] is ending with [suffix]. *)
 
-  val starts_with : string -> string -> bool
-  (** [starts_with s x] return true if [s] is starting with [x]. *)
+  val starts_with : string -> prefix:string -> bool
+  (** [starts_with s ~prefix] return true if [s] is starting with [prefix]. *)
 
   val enum : string -> char Enum.t
   (** Returns an enumeration of the characters of a string.*)
@@ -143,8 +146,8 @@ module String :
   (** Returns the string without the chars if they are at the beginning or
       at the end of the string. By default chars are " \t\r\n". *)
 
-  val exists : string -> string -> bool
-  (** [exists str sub] returns true if [sub] is a substring of [str] or
+  val exists : string -> sub:string -> bool
+  (** [exists str ~sub] returns true if [sub] is a substring of [str] or
       false otherwise. *)
 
   val replace_chars : (char -> string) -> string -> string

@@ -36,7 +36,11 @@ let init len f =
   Bytes.unsafe_to_string s
 #endif
 
-let starts_with str p =
+#if OCAML < 413
+let empty = ""
+#endif
+
+let starts_with str ~prefix:p =
   if length str < length p then 
     false
   else
@@ -47,7 +51,7 @@ let starts_with str p =
     in
     loop str p 0
 
-let ends_with s e =
+let ends_with s ~suffix:e =
   if length s < length e then
     false
   else
@@ -79,7 +83,7 @@ let find_from str pos sub =
 
 let find str sub = find_from str 0 sub
 
-let exists str sub =
+let exists str ~sub =
   try
     ignore(find str sub);
     true

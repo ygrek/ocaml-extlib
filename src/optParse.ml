@@ -113,10 +113,10 @@ module GetOpt =
           [] -> []
         | arg :: args' ->
             if arg = "--" then args'
-            else if String.starts_with arg "--" then
+            else if String.starts_with arg ~prefix:"--" then
               loop (gather_long_opt arg args')
             else if arg = "-" then begin other arg; loop args' end
-            else if String.starts_with arg "-" then
+            else if String.starts_with arg ~prefix:"-" then
               loop (gather_short_opt arg 1 args')
             else begin other arg; loop args' end
       in
@@ -456,7 +456,7 @@ module Formatter =
               fill ~initial_indent:(!indent) ~subsequent_indent:(!indent)
                 description (width - !indent)
             in
-              if not (String.ends_with x "\n") then x ^ "\n\n" else x ^ "\n");
+              if not (String.ends_with x ~suffix:"\n") then x ^ "\n\n" else x ^ "\n");
         
         format_option =
          fun names metavars help ->
@@ -489,7 +489,7 @@ module Formatter =
            let contents =
              Buffer.contents buf
            in
-             if String.length contents > 0 && not (String.ends_with contents "\n") then
+             if String.length contents > 0 && not (String.ends_with contents ~suffix:"\n") then
                contents ^ "\n"
              else
                contents
