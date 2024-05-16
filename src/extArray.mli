@@ -112,7 +112,9 @@ sig
 
   (** These functions are reimplemented in extlib when they are missing from the stdlib *)
 
-#if OCAML >= 403
+#if OCAML >= 503
+  external create_float : int -> float array = "caml_array_create_float"
+#elif OCAML >= 403
   external create_float : int -> float array = "caml_make_float_vect"
 #else
   val create_float : int -> float array
@@ -149,7 +151,11 @@ sig
   external length : 'a array -> int = "%array_length"
   external get : 'a array -> int -> 'a = "%array_safe_get"
   external set : 'a array -> int -> 'a -> unit = "%array_safe_set"
+#if OCAML >= 503
+  external make : int -> 'a -> 'a array = "caml_array_make"
+#else
   external make : int -> 'a -> 'a array = "caml_make_vect"
+#endif
   external create : int -> 'a -> 'a array = "caml_make_vect"
   val init : int -> (int -> 'a) -> 'a array
   val make_matrix : int -> int -> 'a -> 'a array array
