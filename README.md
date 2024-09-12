@@ -38,8 +38,9 @@ Online API documentation :
 Dependencies
 ------------
 
+* `ocaml` >= 4.02
 * `cppo` - enables conditional compilation to ensure compatibility with various OCaml versions
-* `ocamlfind >= 1.5.1` - provides bytes package
+* `ocamlfind` >= 1.5.1 - provides bytes package
 
 Installation
 ------------

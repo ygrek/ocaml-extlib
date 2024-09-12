@@ -1,0 +1,50 @@
+name: Build
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        ocaml-version:
+          - 4.02.3
+          - 4.05.0
+          - 4.11.1
+          - 4.14.1
+          - 5.1.0
+          - 5.2.0
+          - 5.3.0+trunk
+        os:
+          - ubuntu-latest
+        include:
+          - ocaml-version: 4.14.1
+            os: macos-latest
+          - ocaml-version: 4.14.1
+            os: windows-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use OCaml ${{ matrix.ocaml-version }}
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-version }}
+
+      - run: opam pin add extlib.dev . --no-action
+
+      - run: opam install . --deps-only --with-doc --with-test
+
+      - run: opam exec -- make
+
+      - run: opam exec -- make clean
+
+      - run: opam exec -- dune build @all
+
+      - run: opam exec -- ocaml check_stdlib.ml
+        continue-on-error: true
