@@ -12,7 +12,7 @@ endif
 all:
 ifndef INSTALLED
 	$(MAKE) -C ../src all minimal=$(minimal)
-	ocamlfind ocamlc -linkall -linkpkg -package bytes -I ../src extLib.cma util.ml $(TESTS) runner.ml -o extlib_test
+	ocamlc -I ../src extLib.cma util.ml $(TESTS) runner.ml -o extlib_test
 else
 	ocamlfind ocamlc -linkall -linkpkg -package extlib util.ml $(TESTS) runner.ml -o extlib_test
 endif
@@ -20,7 +20,7 @@ endif
 opt:
 ifndef INSTALLED
 	$(MAKE) -C ../src opt minimal=$(minimal)
-	ocamlfind ocamlopt -linkall -linkpkg -package bytes -I ../src extLib.cmxa util.ml $(TESTS) runner.ml -o extlib_test
+	ocamlopt -I ../src extLib.cmxa util.ml $(TESTS) runner.ml -o extlib_test
 else
 	ocamlfind ocamlopt -linkall -linkpkg -package extlib util.ml $(TESTS) runner.ml -o extlib_test
 endif

@@ -40,22 +40,37 @@ Dependencies
 
 * `ocaml` >= 4.02
 * `cppo` - enables conditional compilation to ensure compatibility with various OCaml versions
-* `ocamlfind` >= 1.5.1 - provides bytes package
+
+optional:
+* `ocamlfind` >= 1.5.1 - for `make install`
+* `dune` - for dune build
 
 Installation
 ------------
 
-Unzip or untar in any directory and run
+`opam install extlib` or follow manual instructions below.
 
-  `make minimal=1 build install`
+Build with dune:
+
+  `dune build`
+
+or with Makefile:
+
+```
+make minimal=1 build`
+make install
+```
 
 This will build and install bytecode and native libraries.
 On bytecode-only architecture run
 
-  `make minimal=1 all install`
+```
+make minimal=1 all
+make install
+```
 
 `minimal=1` will exclude from build several modules (namely `Base64` `Unzip` `UChar` `UTF8`) potentially
-conflicting with other well established OCaml libraries. If your code is expecting to find
+conflicting with other well-established OCaml libraries. If your code is expecting to find
 these modules in extlib - omit this parameter during build to produce the full library.
 
 Usage
