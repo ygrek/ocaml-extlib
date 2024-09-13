@@ -26,8 +26,6 @@
   or enum.
 *)
 
-open ExtBytes
-
 type input
 (** The abstract input type. *)
 

@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
-open ExtBytes
-
 exception Invalid_char
 exception Invalid_table
 

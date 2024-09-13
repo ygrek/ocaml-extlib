@@ -1,5 +1,5 @@
-OCaml Extended standard Library - ExtLib.
-=========================================
+OCaml Extended standard Library - ExtLib
+========================================
 
 [![Build Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fci.ocamllabs.io%2Fbadge%2Fygrek%2Focaml-extlib%2Fmaster&logo=ocaml)](https://ci.ocamllabs.io/github/ygrek/ocaml-extlib)
 [![Build](https://github.com/ygrek/ocaml-extlib/actions/workflows/workflow.yml/badge.svg)](https://github.com/ygrek/ocaml-extlib/actions/workflows/workflow.yml)
@@ -48,7 +48,7 @@ optional:
 Installation
 ------------
 
-`opam install extlib` or follow manual instructions below.
+`opam install extlib` or follow the manual instructions below.
 
 Build with dune:
 
@@ -57,11 +57,12 @@ Build with dune:
 or with Makefile:
 
 ```
-make minimal=1 build`
+make minimal=1 build
 make install
 ```
 
 This will build and install bytecode and native libraries.
+
 On bytecode-only architecture run
 
 ```

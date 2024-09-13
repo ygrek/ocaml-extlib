@@ -22,8 +22,6 @@
 module Stdlib = Pervasives
 #endif
 
-open ExtBytes
-
 type input = {
   mutable in_read : unit -> char;
   mutable in_input : Bytes.t -> int -> int -> int;
