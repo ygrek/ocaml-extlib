@@ -45,9 +45,9 @@ jobs:
 
       - run: opam exec -- make
 
+      - run: opam exec -- ocaml check_stdlib.ml
+        continue-on-error: true
+
       - run: opam exec -- make clean
 
       - run: opam exec -- dune build @all
-
-      - run: opam exec -- ocaml check_stdlib.ml
-        continue-on-error: true
