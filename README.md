@@ -2,6 +2,7 @@ OCaml Extended standard Library - ExtLib.
 =========================================
 
 [![Build Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fci.ocamllabs.io%2Fbadge%2Fygrek%2Focaml-extlib%2Fmaster&logo=ocaml)](https://ci.ocamllabs.io/github/ygrek/ocaml-extlib)
+[![Build](https://github.com/ygrek/ocaml-extlib/actions/workflows/workflow.yml/badge.svg)](https://github.com/ygrek/ocaml-extlib/actions/workflows/workflow.yml)
 [![Build status](https://ci.appveyor.com/api/projects/status/6a3t5iq7ljbd25iq?svg=true)](https://ci.appveyor.com/project/ygrek/ocaml-extlib/branch/master)
 
 ```
@@ -40,7 +41,10 @@ Dependencies
 
 * `ocaml` >= 4.02
 * `cppo` - enables conditional compilation to ensure compatibility with various OCaml versions
-* `ocamlfind` >= 1.5.1 - provides bytes package
+
+optional:
+* `ocamlfind` >= 1.5.1 - for `make install`
+* `dune` - for dune build
 
 Installation
 ------------

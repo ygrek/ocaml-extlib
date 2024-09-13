@@ -15,8 +15,4 @@ let () =
     let pr fmt = ksprintf print_endline fmt in
     cppo_args (fun x -> pr "-D"; pr "%s" x) (fun k v -> pr "-D"; pr "%s %s" k v);
     exit 0
-  | [|_;"-compile-args"|] ->
-    if Sys.ocaml_version >= "4.00.0" then print_endline "-bin-annot";
-    print_endline "-package bytes";
-    exit 0
   | _ -> failwith "not gonna happen"

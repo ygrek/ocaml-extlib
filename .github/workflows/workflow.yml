@@ -40,8 +40,6 @@ jobs:
 
       - run: opam install . --deps-only --with-doc --with-test
 
-      - run: opam install ocamlfind # for make build
-
       - run: opam exec -- make minimal=1
 
       - run: opam exec -- make clean
