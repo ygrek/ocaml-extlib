@@ -16,7 +16,6 @@ jobs:
           - 4.14.1
           - 5.1.0
           - 5.2.0
-          - 5.3.0+trunk
         os:
           - ubuntu-latest
         include:
@@ -40,11 +39,20 @@ jobs:
 
       - run: opam install . --deps-only --with-doc --with-test
 
-      - run: opam exec -- make
+      - run: opam exec -- make minimal=1 test
+        if: matrix.os != 'windows-latest'
 
       - run: opam exec -- make clean
+        if: matrix.os != 'windows-latest'
 
-      - run: opam exec -- dune build @all
+      - run: opam exec -- make test
+        if: matrix.os != 'windows-latest'
 
       - run: opam exec -- ocaml check_stdlib.ml
+        if: matrix.os != 'windows-latest'
         continue-on-error: true
+
+      - run: opam exec -- make clean
+        if: matrix.os != 'windows-latest'
+
+      - run: opam exec -- dune build @all @runtest
