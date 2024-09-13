@@ -451,17 +451,6 @@ let mapi f = function
     loop r 1 t;
     inj r
 
-#if OCAML < 400
-let iteri f l =
-  let rec loop n = function
-    | [] -> ()
-    | h :: t ->
-      f n h;
-      loop (n+1) t
-  in
-  loop 0 l
-#endif
-
 let first = hd
 
 let rec last = function

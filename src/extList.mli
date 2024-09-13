@@ -263,11 +263,9 @@ module List :
   val fast_sort : ('a -> 'a -> int) -> 'a list -> 'a list
   val merge : ('a -> 'a -> int) -> 'a list -> 'a list -> 'a list
 
-#if OCAML >= 402
   val sort_uniq : ('a -> 'a -> int) -> 'a list -> 'a list
   (** Same as {!List.sort}, but also remove duplicates.
       @since 4.02.0 *)
-#endif
 
 #if OCAML >= 407
   (** [*_seq] functions were introduced in OCaml 4.07.0, and are _not_ implemented in extlib for older OCaml versions *)

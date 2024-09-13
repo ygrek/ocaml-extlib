@@ -206,14 +206,8 @@ let map2 f a1 a2 =
      Array.init (Array.length a1) (fun i -> f a1.(i) a2.(i))
 #endif
 
-#if OCAML >= 403
-#else
-#if OCAML >= 402
+#if OCAML < 403
 let create_float = make_float
-#else
-let make_float n = make n 0.
-let create_float = make_float
-#endif
 #endif
 
 #if OCAML >= 500
