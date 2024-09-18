@@ -1,6 +1,6 @@
 
 VERSION:=$(shell git --git-dir=.git describe --always --long)
-RELEASE:=1.7.9
+RELEASE:=1.8.0
 
 ifndef VERSION
 VERSION:=$(RELEASE)
@@ -71,5 +71,7 @@ $(foreach version,\
 	4.12.0\
 	4.13.1\
 	4.14.0\
-	5.0.0~alpha1\
+	5.0.0\
+	5.1.1\
+	5.2.0\
 ,$(eval $(call gen_sw,$(version))))
