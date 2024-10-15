@@ -1,7 +1,7 @@
-(* 
+(*
  * ExtHashtbl, extra functions over hashtables.
  * Copyright (C) 2003 Nicolas Cannasse
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -17,7 +17,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
- 
+
 
 module Hashtbl =
   struct
@@ -94,7 +94,7 @@ module Hashtbl =
       | Cons (k,v,next) -> Cons (k,f v,loop next)
     in
     h_make { (h_conv h) with
-      data = Array.map loop (h_conv h).data; 
+      data = Array.map loop (h_conv h).data;
     }
 
   (* copied from stdlib :( *)

@@ -19,7 +19,7 @@
  *)
 
 (* NOTE The IO module test case was contributed by Robert Atkey on
-   ocaml-lib-devel@lists.sourceforge.net on Nov 26, 2007.  
+   ocaml-lib-devel@lists.sourceforge.net on Nov 26, 2007.
    Thanks Rob! *)
 
 let fail fmt = Printf.ksprintf failwith fmt

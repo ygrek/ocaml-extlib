@@ -1,6 +1,6 @@
 (*
  * ExtLib Testing Suite
- * Copyright (C) 2004 John Skaller 
+ * Copyright (C) 2004 John Skaller
  * Copyright (C) 2004 Janne Hellsten
  *
  * This library is free software; you can redistribute it and/or
@@ -36,7 +36,7 @@ let test_triv () =
 
 (* Failure reported by Jeff Henrikson.  Should be fixed in CVS
    already? JH 2005/Mar/01 *)
-let test_regr_1 () = 
+let test_regr_1 () =
   for i = 0 to 30 do
     ignore (DynArray.of_array [||])
   done
@@ -63,7 +63,7 @@ let test_dynarray2 () =
   for i = 1 to 2817131 do
     DynArray.add a i
   done
- 
+
 let register () =
   Util.register "DynArray" [
     "triv", test_triv;

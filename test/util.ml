@@ -20,14 +20,14 @@
 
 module P = Printf
 
-let log s = 
+let log s =
   P.printf "%s\n" s;
   flush stdout
 
-let random_char () = 
+let random_char () =
   char_of_int (Random.int 256)
 
-let random_string () = 
+let random_string () =
   let len = Random.int 256 in
   let str = Bytes.create len in
   if len > 0 then
@@ -37,7 +37,7 @@ let random_string () =
   Bytes.unsafe_to_string str
 
 
-let random_string_len len = 
+let random_string_len len =
   let len = len in
   let str = Bytes.create len in
   if len > 0 then
@@ -47,22 +47,22 @@ let random_string_len len =
   Bytes.unsafe_to_string str
 
 (* For  counting the success ratio *)
-let test_run_count = ref 0 
-let test_success_count = ref 0 
-let g_test_run_count = ref 0 
-let g_test_success_count = ref 0 
+let test_run_count = ref 0
+let test_success_count = ref 0
+let g_test_run_count = ref 0
+let g_test_success_count = ref 0
 
-let test_module name f = 
+let test_module name f =
   P.printf "%s\n" name;
   flush stdout;
   test_run_count := 0;
   test_success_count := 0;
   f ();
   if !test_run_count <> 0 then
-    P.printf "  %i/%i tests succeeded.\n" 
+    P.printf "  %i/%i tests succeeded.\n"
       !test_success_count !test_run_count
 
-let run_test ~test_name f = 
+let run_test ~test_name f =
   try
     incr g_test_run_count;
     incr test_run_count;
@@ -72,7 +72,7 @@ let run_test ~test_name f =
     incr g_test_success_count;
     incr test_success_count;
     P.printf " - OK\n"
-  with 
+  with
     Assert_failure (file,line,column) ->
       P.printf " - FAILED\n    reason: ";
       P.printf " %s:%i:%i\n" file line column;
@@ -103,6 +103,6 @@ let run_all filter =
     end
   end all_tests;
   if !g_test_run_count <> 0 then
-    P.printf "\nOverall %i/%i tests succeeded.\n" 
+    P.printf "\nOverall %i/%i tests succeeded.\n"
       !g_test_success_count !g_test_run_count;
   !g_test_run_count = !g_test_success_count

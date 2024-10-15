@@ -18,9 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
-let in_range c a b = 
-  let i = int_of_char c 
-  and ai = int_of_char a 
+let in_range c a b =
+  let i = int_of_char c
+  and ai = int_of_char a
   and bi = int_of_char b in
   (i >= ai && i <= bi)
 
@@ -39,7 +39,7 @@ let check_chars s =
 
 let () =
   Util.register1 "Base64" "random"
-    (fun () -> 
+    (fun () ->
        for i = 0 to 64 do
          let s = Util.random_string () in
          let enc = Base64.encode_string s in

@@ -1,7 +1,7 @@
 (*
  * ExtString - Additional functions for string manipulations.
  * Copyright (C) 2003 Nicolas Cannasse
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -29,7 +29,7 @@ let empty = ""
 #endif
 
 let starts_with str ~prefix:p =
-  if length str < length p then 
+  if length str < length p then
     false
   else
     let rec loop str p i =
@@ -150,7 +150,7 @@ let to_float s =
 let enum s =
   let l = length s in
   let rec make i =
-    Enum.make 
+    Enum.make
     ~next:(fun () ->
       if !i = l then
         raise Enum.No_more_elements
@@ -210,7 +210,7 @@ let replace_chars f s =
   let rec loop i acc =
     if i = len then
       acc
-    else 
+    else
       let s = f (unsafe_get s i) in
       tlen := !tlen + length s;
       loop (i+1) (s :: acc)
@@ -233,7 +233,7 @@ let replace_chars f s =
 let replace ~str ~sub ~by =
   try
     let i = find str sub in
-    (true, (slice ~last:i str) ^ by ^ 
+    (true, (slice ~last:i str) ^ by ^
                    (slice ~first:(i+(String.length sub)) str))
         with
     Invalid_string -> (false, String.sub str 0 (String.length str))

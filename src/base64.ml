@@ -51,7 +51,7 @@ let encode ?(tbl=chars) ch =
     if !count > 0 then begin
       let d = (!data lsl (6 - !count)) land 63 in
       IO.write ch (Array.unsafe_get tbl d);
-    end;    
+    end;
   in
   let write c =
     let c = int_of_char c in

@@ -1,7 +1,7 @@
-(* 
+(*
  * ExtHashtbl - extra functions over hashtables.
  * Copyright (C) 2003 Nicolas Cannasse
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -17,7 +17,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
- 
+
 (** Extra functions over hashtables. *)
 
 module Hashtbl :
@@ -67,7 +67,7 @@ module Hashtbl :
     all the values *)
 
   val length : ('a,'b) t -> int
-  (** Return the number of elements inserted into the Hashtbl 
+  (** Return the number of elements inserted into the Hashtbl
     (including duplicates) *)
 
   val reset : ('a,'b) t -> unit

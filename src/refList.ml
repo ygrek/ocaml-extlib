@@ -59,7 +59,7 @@ let rfind f rl = List.rfind f !rl
 
 let first = hd
 
-let last rl = 
+let last rl =
   let rec loop = function
     | x :: [] -> x
     | x :: l -> loop l
@@ -88,7 +88,7 @@ let pop rl =
   | [] -> raise Empty_list
   | e::l -> rl := l; e
 
-let npop rl n =    
+let npop rl n =
   let rec pop_aux l n =
     if n = 0 then begin
       rl := l;
@@ -108,7 +108,7 @@ module Index = struct
 
   let remove_at rl pos =
     let p = ref (-1) in
-    let rec del_aux = function      
+    let rec del_aux = function
       | x::l -> incr p; if !p = pos then l else x::(del_aux l)
       | [] -> raise (Invalid_index pos)
     in

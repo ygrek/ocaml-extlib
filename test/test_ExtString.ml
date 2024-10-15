@@ -23,7 +23,7 @@ open ExtString
 
 module S = String
 
-let t_starts_with () = 
+let t_starts_with () =
   let s0 = "foo" in
   assert (S.starts_with s0 ~prefix:s0);
   assert (S.starts_with s0 ~prefix:"f");
@@ -32,7 +32,7 @@ let t_starts_with () =
   assert (S.starts_with s0 ~prefix:"");
   assert (S.starts_with "" ~prefix:"")
 
-let t_ends_with () = 
+let t_ends_with () =
   let s0 = "foo" in
   assert (S.ends_with s0 ~suffix:"foo");
   assert (S.ends_with s0 ~suffix:"oo");
@@ -68,10 +68,10 @@ let t_rchop () =
     done;
   done
 
-let t_split () = 
+let t_split () =
   for i = 0 to 64 do
     let s = Util.random_string () in
-    let s' = String.replace_chars 
+    let s' = String.replace_chars
                (fun c -> if c = '|' then "_" else String.of_char c) s in
     let len = String.length s' in
     if len > 0 then
@@ -106,7 +106,7 @@ let t_replace1 () =
   assert (String.replace s "" "karhu" = (true, "karhu"^s));
   assert (String.replace "" "" "karhu" = (true, "karhu"))
 
-let t_strip () = 
+let t_strip () =
   let s = "1234abcd5678" in
   assert (S.strip ~chars:"" s = s);
   assert (S.strip ~chars:"1" s = String.sub s 1 (String.length s-1));

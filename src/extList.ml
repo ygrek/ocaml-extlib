@@ -3,7 +3,7 @@
  * Copyright (C) 2003 Brian Hurt
  * Copyright (C) 2003 Nicolas Cannasse
  * Copyright (C) 2008 Red Hat Inc.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -302,7 +302,7 @@ let exists2 p l1 l2 =
   in
   loop l1 l2
 
-let remove_assoc x lst = 
+let remove_assoc x lst =
   let rec loop dst = function
     | [] -> ()
     | (a, _ as pair) :: t ->
@@ -317,7 +317,7 @@ let remove_assoc x lst =
   loop dummy lst;
   dummy.tl
 
-let remove_assq x lst = 
+let remove_assq x lst =
   let rec loop dst = function
     | [] -> ()
     | (a, _ as pair) :: t ->
@@ -334,10 +334,10 @@ let remove_assq x lst =
 
 let rfind p l = find p (rev l)
 
-let find_all p l = 
+let find_all p l =
   let rec findnext dst = function
     | [] -> ()
-    | h :: t -> 
+    | h :: t ->
       if p h then
         let r = { hd = h; tl = [] } in
         dst.tl <- inj r;
@@ -359,7 +359,7 @@ let rec findi p l =
 
 let filter = find_all
 
-let partition p lst = 
+let partition p lst =
   let rec loop yesdst nodst = function
     | [] -> ()
     | h :: t ->
@@ -384,8 +384,8 @@ let partition p lst =
 let split lst =
   let rec loop adst bdst = function
     | [] -> ()
-    | (a, b) :: t -> 
-      let x = { hd = a; tl = [] } 
+    | (a, b) :: t ->
+      let x = { hd = a; tl = [] }
       and y = { hd = b; tl = [] } in
       adst.tl <- inj x;
       bdst.tl <- inj y;
@@ -401,7 +401,7 @@ let combine l1 l2 =
   let rec loop dst l1 l2 =
     match l1, l2 with
     | [], [] -> ()
-    | h1 :: t1, h2 :: t2 -> 
+    | h1 :: t1, h2 :: t2 ->
       let r = { hd = h1, h2; tl = [] } in
       dst.tl <- inj r;
       loop r t1 t2
@@ -471,7 +471,7 @@ let split_nth index = function
         | h :: t ->
           let r = { hd =  h; tl = [] } in
           dst.tl <- inj r;
-          loop (n-1) r t 
+          loop (n-1) r t
       in
       let r = { hd = h; tl = [] } in
       inj r, loop (index-1) r t
@@ -486,7 +486,7 @@ let remove l x =
   let rec loop dst = function
     | [] -> ()
     | h :: t ->
-      if x = h then 
+      if x = h then
         dst.tl <- t
       else
         let r = { hd = h; tl = [] } in

@@ -115,7 +115,7 @@ let rec dump r =
     let rec get_list r =
     if Obj.is_int r then
       []
-    else 
+    else
       let h = Obj.field r 0 and t = get_list (Obj.field r 1) in
       h :: t
     in
@@ -127,7 +127,7 @@ let rec dump r =
     in
     let s = Obj.size r and t = Obj.tag r in
     (* From the tag, determine the type of block. *)
-  match t with 
+  match t with
   | _ when is_list r ->
     let fields = get_list r in
     "[" ^ String.concat "; " (List.map dump fields) ^ "]"
@@ -145,7 +145,7 @@ let rec dump r =
     let fields = get_fields [] s in
     let clasz, id, slots =
       match fields with
-      | h::h'::t -> h, h', t 
+      | h::h'::t -> h, h', t
       | _ -> assert false
     in
     (* No information on decoding the class (first field).  So just print
