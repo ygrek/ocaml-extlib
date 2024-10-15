@@ -19,7 +19,7 @@
  *)
 
 (* test_unzip_bug1 test case was contributed by Robert Atkey on
-   ocaml-lib-devel@lists.sourceforge.net on Nov 26, 2007.  
+   ocaml-lib-devel@lists.sourceforge.net on Nov 26, 2007.
    Thanks Rob! *)
 
 let test_unzip_bug1 () =
@@ -40,7 +40,7 @@ let test_unzip_bug1 () =
    extlib-test/util/zlib-test/gen_ml.sh for more info.  This is not
    very exhaustive but is still better than nothing.  The generation
    script should be pretty easy to extend to cover longer strings. *)
-let inputs = 
+let inputs =
   [("a", "\x78\x01\x4b\x04\x00\x00\x62\x00\x62");
    ("a", "\x78\x5e\x4b\x04\x00\x00\x62\x00\x62");
    ("a", "\x78\x9c\x4b\x04\x00\x00\x62\x00\x62");
@@ -102,7 +102,7 @@ let test_unzip_gen_inputs () =
        test orig compressed)
     inputs
 
-let () = 
+let () =
   Util.register "Unzip" [
     "bug1", test_unzip_bug1;
     "gen_inputs", test_unzip_gen_inputs;

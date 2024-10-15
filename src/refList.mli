@@ -31,7 +31,7 @@ type 'a t
 
 val empty : unit -> 'a t
 (** Returns a new empty ref list *)
-  
+
 val is_empty : 'a t -> bool
 (** Return [true] if a ref list is empty *)
 

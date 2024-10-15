@@ -174,7 +174,7 @@ let window_create size = {
     wcrc = adler32_create()
   }
 
-let window_slide w = 
+let window_slide w =
   adler32_update w.wcrc w.wbuffer 0 window_size;
   let b = Bytes.create buffer_size in
   w.wpos <- w.wpos - window_size;
@@ -354,7 +354,7 @@ let rec inflate_loop z =
       let lengths = Array.make (hlit + hdist) 0 in
       inflate_lengths z lengths (hlit + hdist);
       z.zhuffdist <- Some (make_huffman lengths hlit hdist 16);
-      z.zhuffman <- make_huffman lengths 0 hlit 16;      
+      z.zhuffman <- make_huffman lengths 0 hlit 16;
       z.zstate <- CData;
       inflate_loop z
     | _ ->
@@ -413,7 +413,7 @@ let inflate_data z s pos len =
   with
     IO.No_more_input -> error Truncated_data
 
-let inflate_init ?(header=true) ch = 
+let inflate_init ?(header=true) ch =
   {
     zfinal = false;
     zhuffman = fixed_huffman;

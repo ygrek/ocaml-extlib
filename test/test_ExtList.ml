@@ -27,15 +27,15 @@ open ExtList
 
 exception Test_Exception
 
-let check_empty_list_exn f = 
+let check_empty_list_exn f =
   try f (); false with List.Empty_list -> true
 
 (** Random length list with [0;1;2;..n] contents. *)
-let rnd_list () = 
-  let len = Random.int 3 in 
+let rnd_list () =
+  let len = Random.int 3 in
   List.init len Std.identity
 
-let test_iteri () = 
+let test_iteri () =
   for i = 0 to 15 do
     List.iteri (fun i e -> assert (i = e)) (rnd_list ());
   done
@@ -44,12 +44,12 @@ let test_mapi () =
   for i = 0 to 15 do
     let rnd_list = rnd_list () in
     let lst = List.mapi (fun n e -> (e,"foo")) rnd_list in
-    let lst' = 
+    let lst' =
       List.mapi (fun n (e,s) -> assert (s = "foo"); assert (n = e); n) lst in
     List.iteri (fun i e -> assert (i = e)) lst'
   done
 
-let test_exceptions () = 
+let test_exceptions () =
   assert (check_empty_list_exn (fun () -> List.hd []));
   assert (check_empty_list_exn (fun () -> List.first []));
   assert (check_empty_list_exn (fun () -> List.last []))
@@ -57,19 +57,19 @@ let test_exceptions () =
 let test_find_exc () =
   let check_exn f = try f (); false with Test_Exception -> true | _ -> false in
   assert (check_exn (fun () -> (List.find_exc (fun _ -> true) Test_Exception [])));
-  try 
+  try
     for i = 0 to 15 do
       let rnd_lst = rnd_list () in
-      begin 
+      begin
         match rnd_lst with
           [] -> ()
-        | lst -> 
+        | lst ->
             let rnd_elem = Random.int (List.length lst) in
-            assert (check_exn 
-                      (fun () -> 
+            assert (check_exn
+                      (fun () ->
                          ignore (List.find_exc (fun e -> e = List.length lst) Test_Exception lst)));
-            assert (not (check_exn 
-                           (fun () -> 
+            assert (not (check_exn
+                           (fun () ->
                               ignore (List.find_exc (fun e -> e = rnd_elem) Test_Exception lst))))
       end
     done
@@ -77,25 +77,25 @@ let test_find_exc () =
 
 let test_findi () =
   let check_fn f = try (let e,i = f () in e<>i) with Not_found -> true in
-  try 
+  try
     for i = 0 to 15 do
       let rnd_lst = rnd_list () in
-      begin 
+      begin
         match rnd_lst with
           [] -> ()
-        | lst -> 
+        | lst ->
             let rnd_elem = Random.int (List.length lst) in
-            assert (check_fn 
-                      (fun () -> 
+            assert (check_fn
+                      (fun () ->
                          List.findi (fun i e -> e = List.length lst) lst));
-            assert (not (check_fn 
-                           (fun () -> 
+            assert (not (check_fn
+                           (fun () ->
                               List.findi (fun i e -> e = rnd_elem) lst)))
       end
     done
   with _ -> assert false
 
-let test_fold_right () = 
+let test_fold_right () =
   let maxlen = 2000 in
   (* NOTE assuming we will not blow the stack with 2000 elements *)
   let lst = List.init maxlen Std.identity in
@@ -103,7 +103,7 @@ let test_fold_right () =
   let b = List.fold_right (fun e a -> e::a) lst [] in
   assert (a = b)
 
-let test_fold_right2 () = 
+let test_fold_right2 () =
   let len = 2000 in
   let cnt = ref 0 in
   let lst = List.init len Std.identity in
@@ -114,7 +114,7 @@ let test_fold_right2 () =
   assert (cnt_std = len);
   assert (!cnt = cnt_std)
 
-let test_map () = 
+let test_map () =
   for i = 0 to 10 do
     let f = ( * ) 2 in
     let lst = rnd_list () in

@@ -22,12 +22,12 @@ open ExtList
 
 module B = BitSet
 
-let biased_rnd_28 () = 
+let biased_rnd_28 () =
   let n_bits = [| 4; 8; 16; 28 |] in
   let n = n_bits.(Random.int (Array.length n_bits)) in
   Random.int (1 lsl n)
 
-let popcount n = 
+let popcount n =
   let p = ref 0 in
   for i = 0 to 29 do
     if n land (1 lsl i) <> 0 then
@@ -35,20 +35,20 @@ let popcount n =
   done;
   !p
 
-let set_bitset s n = 
+let set_bitset s n =
   for i = 0 to 29 do
     if (n land (1 lsl i)) <> 0 then
       B.set s i
   done;
   assert (popcount n = B.count s)
 
-let bitset_of_int n = 
+let bitset_of_int n =
   assert (n <= (1 lsl 29));
   let s = B.create 30 in
   set_bitset s n;
   s
 
-let int_of_bitset s = 
+let int_of_bitset s =
   let n = ref 0 in
   for i = 0 to 29 do
     if B.is_set s i then
@@ -56,7 +56,7 @@ let int_of_bitset s =
   done;
   !n
 
-let bitset_of_int_scale n scl = 
+let bitset_of_int_scale n scl =
   assert (n <= (1 lsl 29));
   let s = B.create 30 in
   for i = 0 to 29 do
@@ -66,7 +66,7 @@ let bitset_of_int_scale n scl =
   assert (popcount n = B.count s);
   s
 
-let int_of_bitset_scale s scl = 
+let int_of_bitset_scale s scl =
   let n = ref 0 in
   for i = 0 to 29 do
     if B.is_set s (i*scl) then
@@ -88,14 +88,14 @@ let test_rnd_creation () =
     assert (B.count c = 0);
   done
 
-let test_intersect () = 
+let test_intersect () =
   for i = 0 to 255 do
     let s = bitset_of_int (biased_rnd_28 ()) in
     B.intersect s (B.empty ());
     assert (B.count s = 0)
   done
 
-let test_diff () = 
+let test_diff () =
   for i = 0 to 255 do
     let r = biased_rnd_28 () in
     let s = bitset_of_int r in
@@ -123,7 +123,7 @@ let test_compare () =
   for i = 0 to 255 do
     let r1 = biased_rnd_28 () in
     let r2 = biased_rnd_28 () in
-    let s1 = bitset_of_int r1 
+    let s1 = bitset_of_int r1
     and s2 = bitset_of_int r2 in
     let sr = B.compare s1 s2
     and ir = compare r1 r2 in
@@ -154,16 +154,16 @@ let test_compare () =
 
 module BSSet = Set.Make (struct type t = BitSet.t let compare = B.compare end)
 
-let test_compare_2 () = 
+let test_compare_2 () =
   let nums = List.init 256 Std.identity in
-  let num_set = 
+  let num_set =
     List.fold_left (fun acc e -> BSSet.add (bitset_of_int e) acc) BSSet.empty nums in
   List.iter
-    (fun e -> 
+    (fun e ->
        let bs = bitset_of_int e in
        assert (BSSet.mem bs num_set)) nums
 
-let test_compare_3 () = 
+let test_compare_3 () =
   for i = 0 to 63 do
     for j = 0 to 63 do
       let b1 = B.create ((Random.int 128)+32) in
@@ -174,22 +174,22 @@ let test_compare_3 () =
     done
   done
 
-let test_empty () = 
+let test_empty () =
   for len = 0 to 63 do
     let s = B.empty () in
-    for i = 0 to len do 
+    for i = 0 to len do
       assert (not (B.is_set s i));
       B.set s i
     done;
     assert (not (B.is_set s (len+1)));
-    for i = 0 to len do 
+    for i = 0 to len do
       assert (B.is_set s i)
     done
   done
 
-let test_exceptions () = 
+let test_exceptions () =
   let expect_exn f =
-    try 
+    try
       f ();
       false (* Should've raised an exception! *)
     with B.Negative_index _ -> true in
@@ -197,28 +197,28 @@ let test_exceptions () =
   assert (expect_exn (fun () -> B.set s (-15)));
   assert (expect_exn (fun () -> B.unset s (-15)));
   assert (expect_exn (fun () -> B.toggle s (-15)));
-  assert (expect_exn 
+  assert (expect_exn
             (fun () ->
                let s = B.create 8 in
                ignore (B.is_set s (-19))))
 
 module IS = Set.Make (struct type t = int let compare = compare end)
 
-let set_of_int n = 
+let set_of_int n =
   let rec loop accu i =
     if i < 30 then
       if ((1 lsl i) land n) <> 0 then
         loop (IS.add i accu) (i+1)
-      else 
+      else
         loop accu (i+1)
     else accu in
   loop IS.empty 0
 
-let int_of_set s = 
+let int_of_set s =
   IS.fold (fun i acc -> (1 lsl i) lor acc) s 0
 
-let test_set_opers () = 
-  let rnd_oper () = 
+let test_set_opers () =
+  let rnd_oper () =
     match Random.int 3 with
       0 -> (IS.inter, B.inter)
     | 1 -> (IS.diff, B.diff)
@@ -229,14 +229,14 @@ let test_set_opers () =
     let r2 = biased_rnd_28 () in
     let s1 = set_of_int r1
     and s2 = set_of_int r2
-    and bs1 = bitset_of_int r1 
+    and bs1 = bitset_of_int r1
     and bs2 = bitset_of_int r2 in
     assert (int_of_set s1 = r1);
     assert (int_of_set s2 = r2);
     assert (int_of_bitset bs1 = r1);
     assert (int_of_bitset bs2 = r2);
     let (isop,bsop) = rnd_oper () in
-    let is = isop s1 s2 
+    let is = isop s1 s2
     and bs = bsop bs1 bs2 in
     let is_int = int_of_set is in
     let bs_int = int_of_bitset bs in
@@ -264,7 +264,7 @@ let test_intersect_2 () =
     assert (B.count c = 0);
   done
 
-let test_differentiate () = 
+let test_differentiate () =
   for i = 0 to 255 do
     let r1 = biased_rnd_28 () in
     let s = bitset_of_int r1 in
@@ -283,7 +283,7 @@ let test_differentiate () =
   done
 
 (* TODO *)
-let test_differentiate_sym () = 
+let test_differentiate_sym () =
   for i = 0 to 255 do
     let r1 = biased_rnd_28 () in
     let r2 = biased_rnd_28 () in
@@ -301,14 +301,14 @@ let test_differentiate_sym () =
     B.differentiate_sym d s;
     assert (B.count d = 0);
 
-    let s1 = bitset_of_int r1 
+    let s1 = bitset_of_int r1
     and s2 = bitset_of_int r2 in
     let d1 = B.copy s1 in
     B.differentiate_sym d1 s2;
     assert (r1 lxor r2 = int_of_bitset d1);
   done
 
-let test_bs_1 () = 
+let test_bs_1 () =
   let b = BitSet.empty () in
   BitSet.set b 8;
   BitSet.set b 9;
@@ -318,7 +318,7 @@ let test_bs_1 () =
   assert (not (BitSet.is_set b 10));
   ()
 
-let test_enum_1 () = 
+let test_enum_1 () =
   let b = BitSet.empty () in
   BitSet.set b 0;
   BitSet.set b 1;
@@ -329,7 +329,7 @@ let test_enum_1 () =
   assert (Option.get b = 1);
   ()
 
-let test_enum_2 () = 
+let test_enum_2 () =
   let n = 13 in
   let b = BitSet.empty () in
   for i = 0 to n do
@@ -345,7 +345,7 @@ let test_enum_2 () =
   assert (Enum.get e = None);
   ()
 
-let test_enum_3 () = 
+let test_enum_3 () =
   let b = BitSet.empty () in
   BitSet.set b 9;
   BitSet.set b 10;
@@ -355,9 +355,9 @@ let test_enum_3 () =
   assert (Option.get i = 9);
   begin
     match j with
-      Some v -> 
+      Some v ->
         assert (v = 10);
-    | None -> 
+    | None ->
         assert false (* Should NOT come here! *)
   end;
   assert (Enum.get e = None);
@@ -365,7 +365,7 @@ let test_enum_3 () =
 
 (* Bug reported by Pascal Zimmer on Feb 27, 2007.  The latter assert
    returned None when it should've returned Some 9. *)
-let test_enum_regr_pz () = 
+let test_enum_regr_pz () =
   let b = BitSet.empty () in
   BitSet.set b 8;
   BitSet.set b 9;
@@ -375,9 +375,9 @@ let test_enum_regr_pz () =
   assert (Option.get i = 8);
   begin
     match j with
-      Some v -> 
+      Some v ->
         assert (v = 9);
-    | None -> 
+    | None ->
         assert false (* Should NOT come here! *)
   end;
   ()

@@ -89,7 +89,7 @@ val rev_drop : 'a node_t -> 'a node_t
     separate the nodes between [n1] and [n2] from the rest of the list. In this
     case, those nodes become a discrete list by themselves.  This is an O(1)
     operation.
-*)   
+*)
 val splice : 'a node_t -> 'a node_t -> unit
 
 (** Given a node, get the data associated with that node.  This is an
@@ -102,17 +102,17 @@ val get : 'a node_t -> 'a
 *)
 val set : 'a node_t -> 'a -> unit
 
-(** Given a node, get the next element in the list after the node.  
+(** Given a node, get the next element in the list after the node.
 
-    The list is circular, so the last node of the list returns the first 
+    The list is circular, so the last node of the list returns the first
     node of the list as it's next node.
-    
+
     This is an O(1) operation.
 *)
 val next : 'a node_t -> 'a node_t
 
 (** Given a node, get the previous element in the list before the node.
- 
+
     The list is circular, so the first node of the list returns the
     last element of the list as it's previous node.
 
@@ -131,7 +131,7 @@ val skip : 'a node_t -> int -> 'a node_t
 *)
 val iter : ('a -> unit) -> 'a node_t -> unit
 
-(** Accumulate a value over the entire list.  
+(** Accumulate a value over the entire list.
     This works like List.fold_left. This is an O(N) operation.
 *)
 val fold_left : ('a -> 'b -> 'a) -> 'a -> 'b node_t -> 'a

@@ -1,7 +1,7 @@
 (*
  * Std - Additional functions
  * Copyright (C) 2003 Nicolas Cannasse
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -64,6 +64,6 @@ val print : 'a -> unit
 (** print the representation of a runtime value on stdout.
   See remarks for [dump]. *)
 
-val finally : (unit -> unit) -> ('a -> 'b) -> 'a -> 'b 
+val finally : (unit -> unit) -> ('a -> 'b) -> 'a -> 'b
 (** [finally fend f x] calls [f x] and then [fend()] even if [f x] raised
   an exception. *)

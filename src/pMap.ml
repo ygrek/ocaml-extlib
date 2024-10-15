@@ -80,7 +80,7 @@ let merge t1 t2 =
 let create cmp = { cmp = cmp; map = Empty }
 let empty = { cmp = compare; map = Empty }
 
-let is_empty x = 
+let is_empty x =
   x.map = Empty
 
 let add x d { cmp = cmp; map = map } =
@@ -135,7 +135,7 @@ let iter f { map = map } =
 let map f { cmp = cmp; map = map } =
   let rec loop = function
     | Empty -> Empty
-    | Node (l, k, v, r, h) -> 
+    | Node (l, k, v, r, h) ->
     let l = loop l in
     let r = loop r in
     Node (l, k, f v, r, h) in

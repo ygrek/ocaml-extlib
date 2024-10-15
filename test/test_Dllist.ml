@@ -18,30 +18,30 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *)
 
-let test_simple () = 
+let test_simple () =
   for i = 1 to 5 do
-    let rec make_lst accu n = 
+    let rec make_lst accu n =
       if n < i then make_lst (i::accu) (n+1)
       else accu in
     let lst = make_lst [] 0 in
     let dlst = Dllist.of_list lst in
     assert (List.length lst = Dllist.length dlst);
-    List.iter 
-      (fun e -> 
+    List.iter
+      (fun e ->
          let dl_elem = Dllist.get dlst in
          assert (e = dl_elem);
          Dllist.remove dlst) lst;
   done
 
 (* Failure case reported by Christopher Wedman on extlib mailing list 2005/Feb/12.  *)
-let test_regression_1 () = 
+let test_regression_1 () =
   let lst = Dllist.create 1 in
   ignore (Dllist.append lst 2);
   ignore (Dllist.demote lst);
   ignore (Dllist.length lst) (* <-- hangs here *)
 
 (* Failure case reported by Christopher Wedman on extlib mailing list 2005/Feb/12.  *)
-let test_regression_2 () = 
+let test_regression_2 () =
   let lst = Dllist.create 1 in
   ignore (Dllist.append lst 2);
   ignore (Dllist.promote lst);

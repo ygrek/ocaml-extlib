@@ -22,7 +22,7 @@
 
   8-bit characters are encoded into 6-bit ones using ASCII lookup tables.
   Default tables maps 0..63 values on characters A-Z, a-z, 0-9, '+' and '/'
-  (in that order). 
+  (in that order).
 *)
 
 (** This exception is raised when reading an invalid character
