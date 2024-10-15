@@ -36,19 +36,18 @@ module List :
     = [] | (::) of 'a * 'a list
 #endif
 
-  (** {6 New functions} *)
+  (** {1 New functions} *)
 
   val init : int -> (int -> 'a) -> 'a list
   (** Similar to [Array.init], [init n f] returns the list containing
-   the results of (f 0),(f 1).... (f (n-1)).
-   Raise [Invalid_arg "ExtList.init"] if n < 0.
-   Uses stdlib implementation in OCaml 4.06.0 and newer.
+   the results of [(f 0); (f 1); ...; (f (n-1))].
+   Raise [Invalid_arg "ExtList.init"] if [n < 0].
+   Uses {!Stdlib.List.init} implementation since OCaml 4.06.
   *)
 
   val make : int -> 'a -> 'a list
-    (** Similar to [String.make], [make n x] returns a
-      * list containing [n] elements [x].
-          *)
+  (** Similar to [String.make], [make n x] returns a list containing
+   [n] elements [x]. *)
 
   val first : 'a list -> 'a
   (** Returns the first element of the list, or raise [Empty_list] if
@@ -59,21 +58,21 @@ module List :
    the list is empty. This function takes linear time. *)
 
   val iteri : (int -> 'a -> unit) -> 'a list -> unit
-  (** [iteri f l] will call [(f 0 a0);(f 1 a1) ... (f n an)] where
+  (** [iteri f l] calls [(f 0 a0); (f 1 a1); ...; (f n an)] where
    [a0..an] are the elements of the list [l]. *)
 
   val mapi : (int -> 'a -> 'b) -> 'a list -> 'b list
-  (** [mapi f l] will build the list containing
-   [(f 0 a0);(f 1 a1) ... (f n an)] where [a0..an] are the elements of
+  (** [mapi f l] builds the list containing
+   [(f 0 a0); (f 1 a1) ... (f n an)] where [a0..an] are the elements of
    the list [l]. *)
 
   val rfind : ('a -> bool) -> 'a list -> 'a
   (** [rfind p l] returns the last element [x] of [l] such as [p x] returns
-   [true] or raises [Not_found] if such element as not been found. *)
+   [true] or raises [Not_found] if such element has not been found. *)
 
   val find_exc : ('a -> bool) -> exn -> 'a list -> 'a
   (** [find_exc p e l] returns the first element of [l] such as [p x]
-   returns [true] or raises [e] if such element as not been found. *)
+   returns [true] or raises [e] if such element has not been found. *)
 
   val findi : (int -> 'a -> bool) -> 'a list -> (int * 'a)
   (** [findi p e l] returns the first element [ai] of [l] along with its
@@ -82,10 +81,10 @@ module List :
 
   val unique : ?cmp:('a -> 'a -> bool) -> 'a list -> 'a list
   (** [unique cmp l] returns the list [l] without any duplicate element.
-   Default comparator ( = ) is used if no comparison function specified. *)
+   Default comparator [( = )] is used if no comparison function specified. *)
 
   val filter_map : ('a -> 'b option) -> 'a list -> 'b list
-  (** [filter_map f l] call [(f a0) (f a1).... (f an)] where [a0..an] are
+  (** [filter_map f l] calls [(f a0); (f a1); ...; (f an)] where [a0..an] are
    the elements of [l]. It returns the list of elements [bi] such as
    [f ai = Some bi] (when [f] returns [None], the corresponding element of
    [l] is discarded). *)
@@ -100,10 +99,10 @@ module List :
   *)
 
   val find_map_opt : ('a -> 'b option) -> 'a list -> 'b option
-  (** same as find_map_exn but returning option *)
+  (** same as {!find_map_exn} but returning [option] *)
 
   val find_map : ('a -> 'b option) -> 'a list -> 'b option
-  (** same as find_map_opt *)
+  (** same as {!find_map_opt} *)
 
   val split_nth : int -> 'a list -> 'a list * 'a list
   (** [split_nth n l] returns two lists [l1] and [l2], [l1] containing the
@@ -149,7 +148,7 @@ module List :
     (** [dropwhile f xs] returns the list [xs] with the first
         elements satisfying the predicate [f] dropped. *)
 
-  (** {6 Enum functions} *)
+  (** {1 Enum functions} *)
 
   (** Enumerations are important in ExtLib, they are a good way to work with
    abstract enumeration of elements, regardless if they are located in a list,
@@ -161,7 +160,7 @@ module List :
   val of_enum : 'a Enum.t -> 'a list
   (** Build a list from an enumeration. *)
 
-  (** {6 Compatibility functions} *)
+  (** {1 Compatibility functions} *)
 
   val cons : 'a -> 'a list -> 'a list
 
@@ -174,7 +173,7 @@ module List :
   val compare_lengths : 'a list -> 'b list -> int
   val compare_length_with : 'a list -> int -> int
 
-  (** {6 Modified functions} *)
+  (** {1 Modified functions} *)
 
   (** Some minor modifications have been made to the specification of some
    functions, especially concerning exceptions raised. *)
@@ -209,7 +208,7 @@ module List :
   val combine : 'a list -> 'b list -> ('a * 'b) list
 
 
-  (** {6 Improved functions} *)
+  (** {1 Improved functions} *)
 
   (** The following functions have the same behavior as the [List]
     module ones but are tail-recursive. That means they will not
@@ -235,10 +234,10 @@ module List :
   val find_all : ('a -> bool) -> 'a list -> 'a list
   val partition : ('a -> bool) -> 'a list -> 'a list * 'a list
 
-  (** {6 Older functions} *)
+  (** {1 Older functions} *)
 
-  (** These functions are already part of the Ocaml standard library
-    and have not been modified. Please refer to the Ocaml Manual for
+  (** These functions are already part of the OCaml standard library
+    and have not been modified. Please refer to the OCaml Manual for
     documentation. *)
 
   val length : 'a list -> int
@@ -318,7 +317,7 @@ val compare : ('a -> 'a -> int) -> 'a list -> 'a list -> int
     different lengths.
 *)
 
-  (** {6 Exceptions} *)
+  (** {1 Exceptions} *)
 
   exception Empty_list
   (** [Empty_list] is raised when an operation applied on an empty list
@@ -336,4 +335,4 @@ val compare : ('a -> 'a -> int) -> 'a list -> 'a list -> int
 end
 
 val ( @ ) : 'a list -> 'a list -> 'a list
-(** the new implementation for ( @ ) operator, see [List.append]. *)
+(** the new implementation for [( @ )] operator, see {!List.append}. *)

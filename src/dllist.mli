@@ -29,7 +29,7 @@ type 'a node_t (* abstract *)
 
 exception Empty
 
-(** {6 node functions } *)
+(** {1 node functions } *)
 
 (** Creates a node.  This is an O(1) operation. *)
 val create : 'a -> 'a node_t
@@ -105,7 +105,7 @@ val set : 'a node_t -> 'a -> unit
 (** Given a node, get the next element in the list after the node.  
 
     The list is circular, so the last node of the list returns the first 
-    node of the list as it's next node.
+    node of the list as its next node.
     
     This is an O(1) operation.
 *)
@@ -114,7 +114,7 @@ val next : 'a node_t -> 'a node_t
 (** Given a node, get the previous element in the list before the node.
  
     The list is circular, so the first node of the list returns the
-    last element of the list as it's previous node.
+    last element of the list as its previous node.
 
     This is an O(1) operation.
 *)
@@ -150,7 +150,7 @@ val fold_right : ('a -> 'b -> 'b) -> 'a node_t -> 'b -> 'b
 val map : ('a -> 'b) -> 'a node_t -> 'b node_t
 
 
-(** {6 list conversion } *)
+(** {1 list conversion } *)
 
 (** Converts a dllist to a normal list.  This is an O(N) operation. *)
 val to_list : 'a node_t -> 'a list
@@ -161,7 +161,7 @@ val to_list : 'a node_t -> 'a list
 val of_list : 'a list -> 'a node_t
 
 
-(** {6 enums } *)
+(** {1 enums } *)
 
 (** Create an enum of the list.
     Note that modifying the list while the enum exists will have undefined

@@ -30,7 +30,7 @@ sig
 
   type 'a t = 'a array
 
-  (** {6 New functions} *)
+  (** {1 New functions} *)
   val rev : 'a array -> 'a array
     (** Array reversal. *)
 
@@ -100,7 +100,7 @@ sig
   elements of [a] that do not satisfy [p].
   The order of the elements in the input array is preserved. *)
 
-  (** {6 Enumerations} *)
+  (** {1 Enumerations} *)
 
   val enum : 'a array -> 'a Enum.t
     (** Returns an enumeration of the elements of an array. *)
@@ -108,7 +108,7 @@ sig
   val of_enum : 'a Enum.t -> 'a array
     (** Build an array from an enumeration. *)
 
-  (** {6 Compatibility functions} *)
+  (** {1 Compatibility functions} *)
 
   (** These functions are reimplemented in extlib when they are missing from the stdlib *)
 
@@ -142,10 +142,10 @@ sig
   (** Same as {!Array.exists}, but for a two-argument predicate.
      @raise Invalid_argument if the two arrays have different lengths. *)
 
-  (** {6 Old functions} *)
+  (** {1 Old functions} *)
 
-  (** These functions are already part of the Ocaml standard library
-      and have not been modified. Please refer to the Ocaml Manual for
+  (** These functions are already part of the OCaml standard library
+      and have not been modified. Please refer to the OCaml Manual for
       documentation. *)
 
   external length : 'a array -> int = "%array_length"

@@ -3,7 +3,7 @@
  * Copyright (C) 2004 Bardur Arantsson
  *
  * Heavily influenced by the optparse.py module from the Python
- * standard library, but with lots of adaptation to the 'Ocaml Way'
+ * standard library, but with lots of adaptation to the 'OCaml Way'
  *
  *
  * This library is free software; you can redistribute it and/or
@@ -30,7 +30,7 @@
 module Opt :
   sig
 
-    (** {6 Exceptions} *)
+    (** {1 Exceptions} *)
 
     exception No_value
     (** [No_value] gets raised by {!OptParse.Opt.get} when an option
@@ -52,7 +52,7 @@ module Opt :
       attempt to catch it. *)
 
 
-    (** {6 Types} *)
+    (** {1 Types} *)
 
     type 'a t = {
       option_set : string -> string list -> unit;
@@ -93,7 +93,7 @@ module Opt :
     *)
 
 
-    (** {6 Option value retrieval} *)
+    (** {1 Option value retrieval} *)
 
     val get : 'a t -> 'a
     (** Get the value of an option.
@@ -126,7 +126,7 @@ module Opt :
 
 
 
-    (** {6 Option creation} *)
+    (** {1 Option creation} *)
 
     val value_option :
       string -> 'a option -> (string -> 'a) -> (exn -> string -> string) ->
@@ -171,7 +171,7 @@ module Opt :
 module StdOpt :
   sig
 
-    (** {6 Flag options} *)
+    (** {1 Flag options} *)
 
     val store_const : ?default: 'a -> 'a -> 'a Opt.t
     (** [store_const ?default const] returns a flag option which
@@ -208,7 +208,7 @@ module StdOpt :
     (** Exactly identical to [count_option ~dest:dest ~increment:(-1) ()]. *)
 
 
-    (** {6 Value options} *)
+    (** {1 Value options} *)
 
     val int_option : ?default: int -> ?metavar: string -> unit -> int Opt.t
     (** [int_option ?default ?metavar ()] returns an option which takes
@@ -225,7 +225,7 @@ module StdOpt :
     (** See {!OptParse.StdOpt.int_option}. *)
 
 
-    (** {6 Callback options} *)
+    (** {1 Callback options} *)
 
     val int_callback : ?metavar: string -> (int -> unit) -> unit Opt.t
     (** [int_callback ?metavar f] returns an option which takes a single
@@ -239,7 +239,7 @@ module StdOpt :
     (** See {!OptParse.StdOpt.int_callback}. *)
 
 
-    (** {6 Special options} *)
+    (** {1 Special options} *)
 
     val help_option : unit -> 'a Opt.t
     (** [help_option ()] returns the standard help option which
@@ -276,7 +276,7 @@ module Formatter :
       string supplied by the user.  *)
 
 
-    (** {6 Standard formatters} *)
+    (** {1 Standard formatters} *)
 
 
     val indented_formatter :
@@ -310,7 +310,7 @@ module Formatter :
       the options. *)
 
 
-    (** {6 Low-level formatting} *)
+    (** {1 Low-level formatting} *)
 
 
     val wrap : ?initial_indent: int -> ?subsequent_indent: int ->
@@ -342,7 +342,7 @@ module Formatter :
 module OptParser :
   sig
 
-    (** {6 Exceptions} *)
+    (** {1 Exceptions} *)
 
 
     exception Option_conflict of string
@@ -353,7 +353,7 @@ module OptParser :
       conflicting option names. *)
 
 
-    (** {6 Types} *)
+    (** {1 Types} *)
 
 
     type t
@@ -363,7 +363,7 @@ module OptParser :
     (** The type of an option group. *)
 
 
-    (** {6 Option parser creation} *)
+    (** {1 Option parser creation} *)
 
     val make : ?usage: string -> ?status: int -> ?description: string -> ?version: string ->
       ?suppress_usage: bool -> ?suppress_help: bool -> ?prog: string ->
@@ -390,7 +390,7 @@ module OptParser :
       causes [version] to be printed to the standard output and the
       program to exit.
 
-      @param description: description of the main purpose of the
+      @param description description of the main purpose of the
       program.
 
       @return the new option parser.
@@ -441,7 +441,7 @@ module OptParser :
 
     *)
 
-    (** {6 Output and error handling} *)
+    (** {1 Output and error handling} *)
 
     val error : t -> ?chn: out_channel -> ?status: int -> string -> 'a
     (** Display an error message and exit the program. The error
@@ -454,7 +454,7 @@ module OptParser :
       [Pervasives.stdout]) and return. *)
 
 
-    (** {6 Option parsing} *)
+    (** {1 Option parsing} *)
 
     val parse : t -> ?first: int -> ?last: int -> string array -> string list
     (** Parse arguments as if the arguments [args.(first)],

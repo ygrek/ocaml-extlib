@@ -100,7 +100,7 @@ val tl : 'a t -> 'a t
 val rev : 'a t -> unit
 (** Reverses the ref list - O(n) *)
 
-(** {6 Functional Operations} *)
+(** {1 Functional Operations} *)
 
 val iter : ('a -> unit) -> 'a t -> unit
 (** Apply the given function to all elements of the
