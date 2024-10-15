@@ -28,7 +28,7 @@ module String :
   val empty: string
   (** The empty string. *)
 
-  (** {6 New Functions} *)
+  (** {1 New Functions} *)
 
   val init : int -> (int -> char) -> string
   (** [init l f] returns the string of length [l] with the chars
@@ -165,7 +165,7 @@ module String :
       (Note that it is different from {!strip} defaults). *)
 
 
-  (** {6 Compatibility Functions} *)
+  (** {1 Compatibility Functions} *)
 
   val uppercase_ascii : string -> string
   val lowercase_ascii : string -> string
@@ -175,7 +175,7 @@ module String :
   val split_on_char : char -> string -> string list
 
 
-  (** {6 Older Functions} *)
+  (** {1 Older Functions} *)
 
   (** Please refer to the OCaml Manual for documentation of these
       functions. *)

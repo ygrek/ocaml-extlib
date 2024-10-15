@@ -30,7 +30,7 @@
 
 type 'a t
 
-(** {6 Final functions}
+(** {1 Final functions}
 
  These functions consume the enumeration until
  it ends or an exception is raised by the first
@@ -66,7 +66,7 @@ val foldi : (int -> 'a -> 'b -> 'b) -> 'b -> 'a t -> 'b
 
 val fold2i : (int -> 'a -> 'b -> 'c -> 'c) -> 'c -> 'a t -> 'b t -> 'c
 
-(** {6 Useful functions} *)
+(** {1 Useful functions} *)
 
 val find : ('a -> bool) -> 'a t -> 'a
 (** [find f e] returns the first element [x] of [e] such that [f x] returns
@@ -110,7 +110,7 @@ val force : 'a t -> unit
   of enumerated elements is constructed and [e] will now enumerate over
   that data structure. *)
 
-(** {6 Lazy constructors}
+(** {1 Lazy constructors}
 
  These functions are lazy which means that they will create a new modified
  enumeration without actually enumerating any element until they are asked
@@ -143,7 +143,7 @@ val concat : 'a t t -> 'a t
 (** [concat e] returns an enumeration over all elements of all enumerations
  of [e]. *)
 
-(** {6 Constructors}
+(** {1 Constructors}
 
  In this section the word {i shall} denotes a semantic
  requirement. The correct operation
@@ -188,7 +188,7 @@ val init : int -> (int -> 'a) -> 'a t
 (** [init n f] creates a new enumeration over elements
   [f 0, f 1, ..., f (n-1)] *)
 
-(** {6 Counting} *)
+(** {1 Counting} *)
 
 val count : 'a t -> int
 (** [count e] returns the number of remaining elements in [e] without

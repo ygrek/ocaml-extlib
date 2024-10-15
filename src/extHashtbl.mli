@@ -27,7 +27,7 @@ module Hashtbl :
   type ('a,'b) t = ('a,'b) Hashtbl.t
   (** The type of a hashtable. *)
 
-  (** {6 New Functions} *)
+  (** {1 New Functions} *)
 
   val exists : ('a,'b) t -> 'a -> bool
   (** [exists h k] returns true is at least one item with key [k] is
@@ -90,9 +90,9 @@ module Hashtbl :
   val filter_map_inplace : ('a -> 'b -> 'b option) -> ('a, 'b) t -> unit
 #endif
 
-  (** {6 Older Functions} *)
+  (** {1 Older Functions} *)
 
-  (** Please refer to the Ocaml Manual for documentation of these
+  (** Please refer to the OCaml Manual for documentation of these
     functions. *)
 
   val create : ?random:bool -> int -> ('a, 'b) t

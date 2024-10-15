@@ -1,5 +1,5 @@
 (*
- * DynArray - Resizeable Ocaml arrays
+ * DynArray - Resizeable OCaml arrays
  * Copyright (C) 2003 Brian Hurt
  * Copyright (C) 2003 Nicolas Cannasse
  *
@@ -35,7 +35,7 @@ exception Invalid_arg of int * string * string
   contains the parameter name that made the operation fail.
 *)
 
-(** {6 Array creation} *)
+(** {1 Array creation} *)
 
 val create : unit -> 'a t
 (** [create()] returns a new empty dynamic array. *)
@@ -48,7 +48,7 @@ val init : int -> (int -> 'a) -> 'a t
 (** [init n f] returns an array of [n] elements filled with values
   returned by [f 0 , f 1, ... f (n-1)]. *)
 
-(** {6 Array manipulation functions} *)
+(** {1 Array manipulation functions} *)
 
 val empty : 'a t -> bool
 (** Return true if the number of elements in the array is 0. *)
@@ -104,7 +104,7 @@ val blit : 'a t -> int -> 'a t -> int -> int -> unit
 val compact : 'a t -> unit
 (** [compact darr] ensures that the space allocated by the array is minimal.*)
 
-(** {6 Array copy and conversion} *)
+(** {1 Array copy and conversion} *)
 
 val to_list : 'a t -> 'a list
 (** [to_list darr] returns the elements of [darr] in order as a list. *)
@@ -135,7 +135,7 @@ val sub : 'a t -> int -> int -> 'a t
 (** [sub darr start len] returns an array holding the subset of [len]
   elements from [darr] starting with the element at index [idx]. *)
 
-(** {6 Array functional support} *)
+(** {1 Array functional support} *)
 
 val iter : ('a -> unit) -> 'a t -> unit
 (** [iter f darr] calls the function [f] on every element of [darr].  It
@@ -172,7 +172,7 @@ val index_of : ('a -> bool) -> 'a t -> int
 
 val filter : ('a -> bool) -> 'a t -> unit
 
-(** {6 Array resizers} *)
+(** {1 Array resizers} *)
 
 type resizer_t = currslots:int -> oldlength:int -> newlength:int -> int
 (** The type of a resizer function.
@@ -260,11 +260,11 @@ val step_resizer : int -> resizer_t
 
   The resizer returned by [step_resizer step] returns the smallest
   multiple of [step] larger than [newlength] if [currslots] is less
-  then [newlength]-[step] or greater than [newlength].
+  then [newlength-step] or greater than [newlength].
 
   For example, to make an darray with a step of 10, a length
   of len, and a null of null, you would do:
-  [make] ~resizer:([step_resizer] 10) len null
+  [make ~resizer:(step_resizer 10) len null]
 *)
 
 val conservative_exponential_resizer : resizer_t
@@ -275,7 +275,7 @@ val conservative_exponential_resizer : resizer_t
   than that, it acts like [exponential_resizer].
 *)
 
-(** {6 Unsafe operations} **)
+(** {1 Unsafe operations} *)
 
 val unsafe_get : 'a t -> int -> 'a
 val unsafe_set : 'a t -> int -> 'a -> unit

@@ -3,7 +3,7 @@
  * Copyright (C) 2004 Bardur Arantsson
  *
  * Heavily influenced by the optparse.py module from the Python
- * standard library, but with lots of adaptation to the 'Ocaml Way'
+ * standard library, but with lots of adaptation to the 'OCaml Way'
  *
  *
  * This library is free software; you can redistribute it and/or
