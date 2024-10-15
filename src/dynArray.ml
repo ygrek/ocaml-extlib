@@ -1,5 +1,5 @@
 (*
- * DynArray - Resizeable Ocaml arrays
+ * DynArray - Resizeable OCaml arrays
  * Copyright (C) 2003 Brian Hurt
  * Copyright (C) 2003 Nicolas Cannasse
  *

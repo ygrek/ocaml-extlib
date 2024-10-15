@@ -23,7 +23,7 @@
   
   Since ExtLib is provided for namespace convenience for
   users who wants to keep the usage of the original
-  Ocaml Standard Library, no MLI CMI nor documentation will
+  OCaml Standard Library, no MLI CMI nor documentation will
   be provided for this module.
 
   Users can simply do an "open ExtLib" to import all Ext*
