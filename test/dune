@@ -1,9 +1,5 @@
-(executable
-  (name runner)
-  (flags :standard -w -3-6-35-27)
-  (modules :standard \ test_Unzip test_UTF8 test_Base64)
-  (libraries extlib))
-
-(alias
- (name runtest)
- (action (run ./runner.exe)))
+(test
+ (name runner)
+ (flags :standard -w -3-6-35-27)
+ (modules :standard \ test_Unzip test_UTF8 test_Base64)
+ (libraries extlib))
