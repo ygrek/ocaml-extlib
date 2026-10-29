@@ -22,10 +22,55 @@
 module Stdlib = Pervasives
 #endif
 
+exception No_more_input
+exception Input_closed
+exception Output_closed
+
+module Buf_in =struct
+  type t = {
+    mutable buf: bytes;
+    mutable pos: int;
+    mutable len: int;
+    mutable refill : unit -> unit;
+  }
+
+  let[@inline] consume i n =
+    if n > i.len then invalid_arg "Buf_in.consume";
+    i.pos <- i.pos + n;
+    i.len <- i.len - n
+
+  let[@inline] refill_if_empty i =
+    if i.len = 0 then i.refill()
+
+  let create buf ~fill : t =
+    let eof = ref false in
+    let bufin = {
+      buf;
+      pos=0;
+      len=0;
+      refill=(fun () -> raise No_more_input);
+    } in
+    bufin.refill <- begin fun () ->
+      if bufin.len = 0 then begin
+        if !eof then raise No_more_input;
+        let n =
+          try fill bufin.buf
+          with No_more_input -> eof := true; raise No_more_input
+        in
+        if n = 0 then (eof := true; raise No_more_input)
+        else if n < 0 || n > Bytes.length bufin.buf then failwith "Buf_in: fill returned an invalid slice";
+        bufin.pos <- 0;
+        bufin.len <- n;
+      end
+    end;
+    bufin
+end
+
 type input = {
   mutable in_read : unit -> char;
   mutable in_input : Bytes.t -> int -> int -> int;
   mutable in_close : unit -> unit;
+  mutable as_buffered: unit -> Buf_in.t option;
 }
 
 type 'a output = {
@@ -35,21 +80,20 @@ type 'a output = {
   mutable out_flush : unit -> unit;
 }
 
-exception No_more_input
-exception Input_closed
-exception Output_closed
-
 (* -------------------------------------------------------------- *)
 (* API *)
 
 let default_close = (fun () -> ())
 
-let create_in ~read ~input ~close =
+let create_in_full ~read ~input ~close ?(as_buffered=fun () -> None) () =
   {
     in_read = read;
     in_input = input;
     in_close = close;
+    as_buffered;
   }
+
+let create_in ~read ~input ~close : input = create_in_full ~read ~input ~close ()
 
 let create_out ~write ~output ~flush ~close =
   {
@@ -139,7 +183,8 @@ let close_in i =
   i.in_close();
   i.in_read <- f;
   i.in_input <- f;
-  i.in_close <- f
+  i.in_close <- f;
+  i.as_buffered <- (fun () -> None)
 
 let write o x = o.out_write x
 
@@ -215,7 +260,8 @@ let pos_in i =
       p := !p + n;
       n
     );
-    in_close = i.in_close
+    in_close = i.in_close;
+    as_buffered = (fun () -> None);
   } , (fun () -> !p)
 
 let pos_out o =
@@ -238,23 +284,27 @@ let pos_out o =
 (* Standard IO *)
 
 let input_bytes s =
-  let pos = ref 0 in
-  let len = Bytes.length s in
+  let buf_in = {
+    Buf_in.buf=s; pos=0; len=Bytes.length s; refill=(fun () ->
+      raise No_more_input)
+  } in
   {
     in_read = (fun () ->
-      if !pos >= len then raise No_more_input;
-      let c = Bytes.unsafe_get s !pos in
-      incr pos;
+      if buf_in.len = 0 then raise No_more_input;
+      let c = Bytes.unsafe_get s buf_in.pos in
+      buf_in.pos <- buf_in.pos + 1;
+      buf_in.len <- buf_in.len - 1;
       c
     );
     in_input = (fun sout p l ->
-      if !pos >= len then raise No_more_input;
-      let n = (if !pos + l > len then len - !pos else l) in
-      Bytes.unsafe_blit s !pos sout p n;
-      pos := !pos + n;
+      if buf_in.len = 0 then raise No_more_input;
+      let n = min buf_in.len l in
+      Bytes.unsafe_blit s buf_in.pos sout p n;
+      Buf_in.consume buf_in n;
       n
     );
     in_close = (fun () -> ());
+    as_buffered = (fun () -> Some buf_in);
   }
 
 let input_string s =
@@ -317,6 +367,7 @@ let input_channel ch =
       n
     );
     in_close = (fun () -> Stdlib.close_in ch);
+    as_buffered = (fun () -> None);
   }
 
 let output_channel ch =
@@ -353,6 +404,7 @@ let input_enum e =
       l - k
     );
     in_close = (fun () -> ());
+    as_buffered = (fun () -> None);
   }
 
 let output_enum() =
@@ -406,6 +458,7 @@ let pipe() =
     in_read = read;
     in_input = input;
     in_close = (fun () -> ());
+    as_buffered = (fun () -> None);
   } in
   let output = {
     out_write = write;
@@ -451,7 +504,7 @@ let read_bytes i =
   Buffer.to_bytes
     (read_string_into_buffer i)
 
-let read_line i =
+let read_line_unbuf i =
   let b = Buffer.create 8 in
   let cr = ref false in
   let rec loop() =
@@ -460,6 +513,7 @@ let read_line i =
     | '\n' ->
       ()
     | '\r' ->
+      if !cr then Buffer.add_char b '\r';
       cr := true;
       loop()
     | _ when !cr ->
@@ -481,6 +535,58 @@ let read_line i =
         Buffer.contents b
       else
         raise No_more_input
+
+(** Find first position of [c] in [i], or return [-1] *)
+let find_char_in_buf (input:Buf_in.t) (c:char) : int =
+  let i = ref input.pos in
+  let last = input.pos + input.len in
+  let found = ref false in
+  while not !found && !i < last do
+    if Bytes.unsafe_get input.buf !i = c then found := true else incr i
+  done;
+  if !found then !i else -1
+
+let read_line_buf (input:Buf_in.t) : string =
+  let cr = ref false in (* last char is ['\r'] *)
+  let[@inline] skip_last_if_cr len = if !cr && len>0 then len-1 else len in
+  let[@inline] ends_in_cr (input:Buf_in.t) len : bool =
+    len > 0 && Bytes.unsafe_get input.buf (input.pos + len - 1) = '\r'
+  in
+  let rec loop buf = match find_char_in_buf input '\n' with
+    | -1 ->
+      if !cr then Buffer.add_char buf '\r';
+      cr := ends_in_cr input input.len;
+      Buffer.add_subbytes buf input.buf input.pos (skip_last_if_cr input.len);
+      Buf_in.consume input input.len;
+      begin match input.refill() with
+      | () -> loop buf
+      | exception No_more_input ->
+          if !cr then Buffer.add_char buf '\r';
+          if Buffer.length buf > 0 then Buffer.contents buf else raise No_more_input
+      end
+    | i ->
+      let len = i - input.pos in
+      if !cr && len>0 then Buffer.add_char buf '\r';
+      cr := ends_in_cr input len;
+      Buffer.add_subbytes buf input.buf input.pos (skip_last_if_cr len);
+      Buf_in.consume input (len+1);
+      Buffer.contents buf
+  in
+
+  Buf_in.refill_if_empty input;
+  match find_char_in_buf input '\n' with
+  | -1 -> loop (Buffer.create 8)
+  | i ->
+    (* fast path *)
+    let len = i - input.pos in
+    cr := ends_in_cr input len;
+    let s = Bytes.sub_string input.buf input.pos (skip_last_if_cr len) in
+    Buf_in.consume input (len+1);
+    s
+
+let read_line i = match i.as_buffered () with
+| None -> read_line_unbuf i
+| Some b -> read_line_buf b
 
 let read_ui16 i =
   let ch1 = read_byte i in

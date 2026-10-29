@@ -149,6 +149,71 @@ val create_in :
   input:(Bytes.t -> int -> int -> int) -> close:(unit -> unit) -> input
 (** Fully create an input by giving all the needed functions. *)
 
+
+(** @since 1.9 *)
+module Buf_in : sig
+  type t = {
+    mutable buf: bytes;
+    mutable pos: int;
+    mutable len: int;
+    mutable refill : unit -> unit;
+      (** When len=0, refill buffer or raise {!No_more_input}. Writes
+          into [buf], sets [pos<-0], and [len<-num_of_bytes_refilled].
+          When len>0 it may do nothing, or read more data. *)
+  }
+  (** View of {!input} with exposed buffer, only for some streams. Providing
+      [as_buffered] may accelerate some operations such as {!read_line}.
+
+      Invariants (for implementors of [refill] and of the stream that owns
+      the view):
+      - the unread data is exactly [buf[pos .. pos+len)], so
+        [Bytes.sub i.buf i.pos i.len] is a valid operation. Bytes outside
+        this slice are meaningless.
+      - consuming [n] characters means adding [n] to [pos] {b and}
+        subtracting [n] from [len]; use {!consume}. The buffer is empty iff
+        [len=0].
+      - [refill] must act only if [len=0]: it then either makes [len>0]
+        (setting [pos] and [len] together), or raises {!No_more_input}, and
+        once it has raised it must keep raising (EOF is sticky). If [len>0]
+        it is allowed to do nothing (or to read more data, as long as the
+        slice invariant above still holds).
+      - [buf] is mutable: do not cache it (or [pos]) across a call to
+        [refill].
+      - the view is shared with the owning {!input}: [read]/[input] on that
+        input and operations on the view consume from the same data.
+
+      Use {!create} rather than building the record by hand, as it
+      maintains these invariants for you. *)
+
+  val create : bytes -> fill:(bytes -> int) -> t
+  (** [create buf ~fill] is an initially empty view over [buf].
+
+      This is an easier way to respect the invariants of {!t}.
+      When [fill buf] is called it must try to write at least 1 byte and at
+      most [Bytes.length buf] into [buf], starting at offset 0, and return
+      how many bytes were written. Returning 0 or raising {!No_more_input}
+      signify that the end of stream was reached. [fill] is only called
+      when the view is empty.
+      @raise Failure (from [refill]) if [fill] returns a count that is
+      negative or larger than [Bytes.length buf]. *)
+
+  val consume : t -> int -> unit
+  (** [consume buf n] consumes [n] bytes from the slice.
+      Precondition: [buf.len >= n] *)
+
+  val refill_if_empty : t -> unit
+  (** Refill if buffer is empty, does nothing otherwise.
+      @raise No_more_input if refilling fails for lack of input *)
+end
+
+val create_in_full :
+  read:(unit -> char) ->
+  input:(Bytes.t -> int -> int -> int) -> close:(unit -> unit) ->
+  ?as_buffered:(unit -> Buf_in.t option) ->
+  unit -> input
+(** @param as_buffered offers a view of the internal buffer, if available.
+    @since 1.9 *)
+
 val create_out :
   write:(char -> unit) ->
   output:(Bytes.t -> int -> int -> int) ->
