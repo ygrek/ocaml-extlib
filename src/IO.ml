@@ -292,8 +292,7 @@ let input_bytes s =
     in_read = (fun () ->
       if buf_in.len = 0 then raise No_more_input;
       let c = Bytes.unsafe_get s buf_in.pos in
-      buf_in.pos <- buf_in.pos + 1;
-      buf_in.len <- buf_in.len - 1;
+      Buf_in.consume buf_in 1;
       c
     );
     in_input = (fun sout p l ->
